@@ -1,0 +1,9 @@
+{"p_radMin": 8,
+"p_radMax": 28,
+"p_genChanceMin": 0.3,
+"p_genChanceMax": 0.7,
+"p_genNoiseMin": 0.04,
+"p_genNoiseMax": 0.7,
+"p_baseColMin": 100,
+"p_baseColMax": 255,
+"p_angularVelMultiplier": 6000.0}
