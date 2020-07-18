@@ -1,6 +1,7 @@
 #include "star.h"
 
 #include <jsoncpp/json/json.h>
+#include <iostream>
 #include "generation.h"
 #include "planet.h"
 
@@ -17,6 +18,19 @@ Star::Star(int x, int y) {
     this->planets = new Planet[this->num];
     for (int i = 0; i < this->num; i++) {
         this->planets[i] = Planet(rand() % 200 + this->radius * 6 + 20);
+    }
+}
+
+Star::Star(Json::Value root) {
+	x = root["x"].asInt();
+    y = root["y"].asInt();
+    num = root["num"].asInt();
+    int col = root["colour"].asInt();
+    colour = Pixel(col >> 16, (col >> 8) & 0xFF, col & 0xFF);
+    radius = root["radius"].asInt();
+	this->planets = new Planet[this->num];
+    for (int i = 0; i < num; i++) {
+        planets[i] = Planet(root["planets"][i]);
     }
 }
 

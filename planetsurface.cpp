@@ -55,6 +55,7 @@ int PlanetSurface::getInitialTileType(int x, int y, Planet * p) {
 		case 2:
 			return 2;
 	}
+	return -1;
 }
 
 void PlanetSurface::generate(Planet * p) {

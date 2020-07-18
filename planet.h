@@ -24,6 +24,7 @@ public:
 
     Planet();
     Planet(int posFromStar);
+	Planet(Json::Value res);
     Json::Value asJson();
     PlanetSurface * getSurface();
 };

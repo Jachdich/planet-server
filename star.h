@@ -15,6 +15,7 @@ public:
     int num = 0;
     Star();
     Star(int x, int y);
+	Star(Json::Value root);
     Json::Value asJson();
     
 };

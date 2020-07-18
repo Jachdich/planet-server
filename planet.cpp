@@ -30,6 +30,32 @@ Planet::Planet(int posFromStar) {
     this->surface = new PlanetSurface();
 }
 
+Planet::Planet(Json::Value res) {
+    mass = res["mass"].asDouble();
+    radius = res["radius"].asInt();
+    numColours = res["numColours"].asInt();
+    int col = res["baseColour"].asInt();
+    baseColour = Pixel(col >> 16, (col >> 8) & 0xFF, col & 0xFF);
+    posFromStar = res["posFromStar"].asInt();
+    theta = res["theta"].asDouble();
+    angularVelocity = res["angularVelocity"].asDouble();
+    
+    this->generationChances = new double[this->numColours];
+    this->generationColours = new Pixel[this->numColours];
+    this->generationZValues = new int[this->numColours];
+    this->generationNoise   = new double[this->numColours];
+    
+    for (int i = 0; i < numColours; i++) {
+        int col = res["generationColours"][i].asInt();
+        generationColours[i] = Pixel(col >> 16, (col >> 8) & 0xFF, col & 0xFF);
+        
+        generationChances[i] = res["generationChances"][i].asDouble();
+        generationZValues[i] = res["generationZValues"][i].asInt();
+        generationNoise[i]   = res["generationNoise"][i].asDouble();
+    }
+    surface = new PlanetSurface();
+}
+
 PlanetSurface * Planet::getSurface() {
     if (!surface->generated) {
         surface->generate(this);

@@ -74,6 +74,7 @@ void handleClient(tcp::socket sock) {
                 int x = requestJson.get("x", 0).asInt();
                 int y = requestJson.get("y", 0).asInt();
                 Sector * sector = map.getSectorAt(x, y);
+				//sector->save("testsave");
                 Json::Value sec = sector->asJson();
                 
                 Json::Value result;

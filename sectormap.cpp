@@ -1,6 +1,7 @@
 #include "sectormap.h"
 
 #include <mutex>
+#include <iostream>
 #include "sector.h"
 #include "server.h"
 
@@ -25,7 +26,15 @@ Sector * SectorMap::getSectorAt(int x, int y) {
     }
     if (needToGenerate || !this->cache[y][x].generated) {
         Sector a(x, y, 256);
-        a.generate();
+		
+		if (a.existsInSave("testsave")) {
+			std::cout << "loading\n";
+			a.generate("testsave");
+		} else {
+			std::cout << "generating\n";
+			a.generate();
+			a.save("testsave");
+		}
 
         cache[y][x] = a;
     }
