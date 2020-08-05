@@ -30,6 +30,27 @@ Logger logger;
 SectorMap map;
 FastNoise noiseGen;
 
+PlanetSurface * getSurfaceFromJson(Json::Value root) {
+	int secX, secY, starPos, planetPos;
+	secX = root.get("secX", 0).asInt();
+	secY = root.get("secY", 0).asInt();
+	starPos = root.get("starPos", 0).asInt();
+	planetPos = root.get("planetPos", 0).asInt();
+	Sector * sec = map.getSectorAt(secX, secY);
+	if (starPos < sec->numStars) {
+		Star * s = &sec->stars[starPos];
+		if (planetPos < s->num) {
+			Planet * p = &s->planets[planetPos];
+			PlanetSurface * surf = p->getSurface();
+			return surf;
+		} else {
+			return nullptr;
+		}
+	} else {
+		return nullptr;
+	}
+}
+
 void handleClient(tcp::socket sock) {
     while (true) {
         asio::error_code error;
@@ -83,26 +104,36 @@ void handleClient(tcp::socket sock) {
                 totalJson["results"].append(result);
                 
             } else if (req == "getSurface") {
-                int secX, secY, starPos, planetPos;
-                secX = requestJson.get("secX", 0).asInt();
-                secY = requestJson.get("secY", 0).asInt();
-                starPos = requestJson.get("starPos", 0).asInt();
-                planetPos = requestJson.get("planetPos", 0).asInt();
                 Json::Value result;
-                Sector * sec = map.getSectorAt(secX, secY);
-                if (starPos < sec->numStars) {
-                    Star * s = &sec->stars[starPos];
-                    if (planetPos < s->num) {
-                        Planet * p = &s->planets[planetPos];
-                        PlanetSurface * surf = p->getSurface();
-                        result["result"] = surf->asJson();
-                        result["status"] = 0;
-                    } else {
-                        result["status"] = -3;
-                    }
-                } else {
-                    result["status"] = -3;
-                }
+                PlanetSurface * surf = getSurfaceFromJson(requestJson);
+				
+				if (surf != nullptr) {
+					result["result"] = surf->asJson();
+					result["status"] = 0;
+				} else {
+					result["status"] = -3;
+				}
+				
+                totalJson["results"].append(result);
+				
+			} else if (req == "changeTile") {
+                Json::Value result;
+                PlanetSurface * surf = getSurfaceFromJson(requestJson);
+				
+				if (surf != nullptr) {
+					int x, y;
+					x = requestJson.get("x", -1).asInt();
+					y = requestJson.get("y", -1).asInt();
+					if (x < 0 || y < 0) {
+						result["status"] = -3;
+					} else {
+						surf->tiles[y * surf->rad * 2 + x] = requestJson.get("to", 0).asInt();
+						result["status"] = 0;
+					}
+				} else {
+					result["status"] = -3;
+				}
+				
                 totalJson["results"].append(result);
                 
             } else {
