@@ -26,12 +26,10 @@ Sector * SectorMap::getSectorAt(int x, int y) {
     }
     if (needToGenerate || !this->cache[y][x].generated) {
         Sector a(x, y, 256);
-		
+
 		if (a.existsInSave("testsave")) {
-			std::cout << "loading\n";
 			a.generate("testsave");
 		} else {
-			std::cout << "generating\n";
 			a.generate();
 			a.save("testsave");
 		}

@@ -62,7 +62,7 @@ void PlanetSurface::generate(Planet * p) {
     generated = true;
     for (int i = 0; i < p->radius * 2; i++) {
         for (int j = 0; j < p->radius * 2; j++) {
-            tiles.push_back(getInitialTileType(j, i, p));
+            tiles.push_back(getInitialTileType(i, j, p));
         }
     }
     this->rad = p->radius;

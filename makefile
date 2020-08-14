@@ -1,15 +1,15 @@
-SOURCES = $(wildcard *.cpp)
-HEADERS = $(SOURCES:.cpp=.h)
-OBJECTS = $(SOURCES:.cpp=.o)
+SOURCES := $(shell find src -type f -name *.cpp)
+HEADERS := $(shell find include -type f -name *.h)
+OBJECTS := $(patsubst src/%,obj/%,$(SOURCES:.cpp=.o))
 
 server: $(OBJECTS)
 	g++ $(OBJECTS) -o $@ -lpthread -ljsoncpp
 
-%.o: %.cpp $(HEADERS)
-	g++ -c -o $@ $< -Wall -g
+obj/%.o: src/%.cpp $(HEADERS)
+	g++ -c -o $@ $< -Wall -g -Iinclude
 
-FastNoise.o: FastNoise.cpp
-	g++ -c -o $@ $< -Wall -O3
+obj/FastNoise.o: src/FastNoise.cpp
+	g++ -c -o $@ $< -Wall -g -O3 -Iinclude
 
 debug: server
 	gdb server
@@ -18,5 +18,7 @@ run: server
 	./server
 
 clean:
-	rm *.o
-	rm server
+	rm obj/*.o
+	rm client
+
+.PHONY: clean
