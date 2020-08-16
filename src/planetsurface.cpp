@@ -3,6 +3,7 @@
 #include "server.h"
 
 #include <jsoncpp/json/json.h>
+#include <iostream>
 
 PlanetSurface::PlanetSurface() {
     generated = false;
@@ -14,7 +15,7 @@ int PlanetSurface::getType(int r, int g, int b) {
 	}
 	if (b > r * 2 && b * 1.2 > g) {
 		return 2; //water
-	} 
+	}
 	return 0; //default land tile
 }
 
@@ -59,13 +60,48 @@ int PlanetSurface::getInitialTileType(int x, int y, Planet * p) {
 }
 
 void PlanetSurface::generate(Planet * p) {
-    generated = true;
+    int pos = -1;
+    for (int i = 0; i < p->numColours; i++) {
+        Pixel c = p->generationColours[i];
+        if (c.b > c.r * 2 && c.b * 1.2 > c.g) {
+            pos = i;
+            break;
+        }
+    }
+
+    double genNoise;
+    int genZVal;
+    double genChance;
+    if (pos != -1) {
+        genNoise  = p->generationNoise[pos];
+        genZVal   = p->generationZValues[pos];
+        genChance = p->generationChances[pos];
+    } else {
+        genNoise  = p->generationNoise[0];
+        genZVal   = p->generationZValues[0];
+        genChance = p->generationChances[0];
+    }
+
     for (int i = 0; i < p->radius * 2; i++) {
         for (int j = 0; j < p->radius * 2; j++) {
-            tiles.push_back(getInitialTileType(i, j, p));
+            int z;
+            int type = getInitialTileType(i, j, p);
+			if (type != 2) {
+				int xb = i - p->radius;
+				int yb = j - p->radius;
+				float az = (1 - (noiseGen.GetNoise(xb / genNoise, yb / genNoise, genZVal) + 1) / 2) - (1 - genChance);
+				z = az * 30;
+				if (z < 0) {
+					z = -z;
+				}
+			} else {
+				z = -1;
+			}
+            tiles.push_back(((uint64_t)z << 32) | type);
         }
     }
     this->rad = p->radius;
+    generated = true;
 }
 
 Json::Value PlanetSurface::asJson() {

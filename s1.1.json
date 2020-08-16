@@ -1,0 +1,824 @@
+{
+	"numStars" : 7,
+	"r" : 256,
+	"stars" : 
+	[
+		{
+			"colour" : 14410975,
+			"num" : 1,
+			"planets" : 
+			[
+				{
+					"angularVelocity" : 0.7245501750996256,
+					"baseColour" : 13333649,
+					"mass" : 0.0,
+					"numColours" : 0,
+					"posFromStar" : 91,
+					"radius" : 12,
+					"theta" : 6.1086523819801535
+				}
+			],
+			"radius" : 5,
+			"x" : 207,
+			"y" : 233
+		},
+		{
+			"colour" : 15586991,
+			"num" : 5,
+			"planets" : 
+			[
+				{
+					"angularVelocity" : 0.12979989183342347,
+					"baseColour" : 13017262,
+					"mass" : 0.0,
+					"numColours" : 0,
+					"posFromStar" : 215,
+					"radius" : 12,
+					"theta" : 5.4628805587422518
+				},
+				{
+					"angularVelocity" : 0.1872600730314285,
+					"baseColour" : 11495555,
+					"generationChances" : 
+					[
+						0.64474765003879908,
+						0.65585202051133473
+					],
+					"generationColours" : 
+					[
+						1284943,
+						7314421
+					],
+					"generationNoise" : 
+					[
+						0.13557322438600158,
+						0.46571753006694711
+					],
+					"generationZValues" : 
+					[
+						798218,
+						64273
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 179,
+					"radius" : 27,
+					"theta" : 1.1693705988362009
+				},
+				{
+					"angularVelocity" : 0.10161052685058171,
+					"baseColour" : 16607939,
+					"generationChances" : 
+					[
+						0.60934358737866567,
+						0.44246060109811858
+					],
+					"generationColours" : 
+					[
+						8405049,
+						11239079
+					],
+					"generationNoise" : 
+					[
+						0.36809633820694693,
+						0.34363677784038549
+					],
+					"generationZValues" : 
+					[
+						136083,
+						493882
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 243,
+					"radius" : 23,
+					"theta" : 5.1661745859032155
+				},
+				{
+					"angularVelocity" : 0.15304560759106214,
+					"baseColour" : 7498455,
+					"generationChances" : 
+					[
+						0.67323250434046256,
+						0.46399928190000317
+					],
+					"generationColours" : 
+					[
+						15999525,
+						13953550
+					],
+					"generationNoise" : 
+					[
+						0.67751699102926854,
+						0.041694795173450747
+					],
+					"generationZValues" : 
+					[
+						926577,
+						507036
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 198,
+					"radius" : 26,
+					"theta" : 4.6251225177849733
+				},
+				{
+					"angularVelocity" : 0.092272202998846614,
+					"baseColour" : 13276593,
+					"generationChances" : 
+					[
+						0.52055185112196567,
+						0.48033648774974813
+					],
+					"generationColours" : 
+					[
+						11129986,
+						12285512
+					],
+					"generationNoise" : 
+					[
+						0.062693265826764169,
+						0.34270515224091008
+					],
+					"generationZValues" : 
+					[
+						667427,
+						87548
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 255,
+					"radius" : 21,
+					"theta" : 3.8222710618675815
+				}
+			],
+			"radius" : 10,
+			"x" : 176,
+			"y" : 76
+		},
+		{
+			"colour" : 14589122,
+			"num" : 5,
+			"planets" : 
+			[
+				{
+					"angularVelocity" : 0.077080201950129101,
+					"baseColour" : 15658153,
+					"generationChances" : 
+					[
+						0.34616546521250413
+					],
+					"generationColours" : 
+					[
+						8930789
+					],
+					"generationNoise" : 
+					[
+						0.45669950844566309
+					],
+					"generationZValues" : 
+					[
+						977667
+					],
+					"mass" : 0.0,
+					"numColours" : 1,
+					"posFromStar" : 279,
+					"radius" : 17,
+					"theta" : 0.85521133347722134
+				},
+				{
+					"angularVelocity" : 0.26314635323012148,
+					"baseColour" : 15435422,
+					"generationChances" : 
+					[
+						0.36507358777573029
+					],
+					"generationColours" : 
+					[
+						7209744
+					],
+					"generationNoise" : 
+					[
+						0.076318080730884363
+					],
+					"generationZValues" : 
+					[
+						773203
+					],
+					"mass" : 0.0,
+					"numColours" : 1,
+					"posFromStar" : 151,
+					"radius" : 13,
+					"theta" : 1.1344640137963142
+				},
+				{
+					"angularVelocity" : 0.38400000000000001,
+					"baseColour" : 15238076,
+					"generationChances" : 
+					[
+						0.52435983150469123
+					],
+					"generationColours" : 
+					[
+						9687784
+					],
+					"generationNoise" : 
+					[
+						0.60962212588154807
+					],
+					"generationZValues" : 
+					[
+						957387
+					],
+					"mass" : 0.0,
+					"numColours" : 1,
+					"posFromStar" : 125,
+					"radius" : 20,
+					"theta" : 4.5902159327450862
+				},
+				{
+					"angularVelocity" : 0.61218243036424858,
+					"baseColour" : 8550578,
+					"mass" : 0.0,
+					"numColours" : 0,
+					"posFromStar" : 99,
+					"radius" : 10,
+					"theta" : 6.1086523819801535
+				},
+				{
+					"angularVelocity" : 0.096000000000000002,
+					"baseColour" : 13869271,
+					"generationChances" : 
+					[
+						0.44385554759942714
+					],
+					"generationColours" : 
+					[
+						16492125
+					],
+					"generationNoise" : 
+					[
+						0.50411014842992186
+					],
+					"generationZValues" : 
+					[
+						989209
+					],
+					"mass" : 0.0,
+					"numColours" : 1,
+					"posFromStar" : 250,
+					"radius" : 14,
+					"theta" : 4.5727626402251431
+				}
+			],
+			"radius" : 11,
+			"x" : 170,
+			"y" : 203
+		},
+		{
+			"colour" : 10807545,
+			"num" : 7,
+			"planets" : 
+			[
+				{
+					"angularVelocity" : 0.24973985431841833,
+					"baseColour" : 7652303,
+					"generationChances" : 
+					[
+						0.42090553740081632,
+						0.36435082799957635
+					],
+					"generationColours" : 
+					[
+						1114477,
+						12069828
+					],
+					"generationNoise" : 
+					[
+						0.28879977667182671,
+						0.66155472783444202
+					],
+					"generationZValues" : 
+					[
+						61879,
+						87819
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 155,
+					"radius" : 24,
+					"theta" : 5.5152404363020811
+				},
+				{
+					"angularVelocity" : 0.085439658241367039,
+					"baseColour" : 13341623,
+					"mass" : 0.0,
+					"numColours" : 0,
+					"posFromStar" : 265,
+					"radius" : 8,
+					"theta" : 3.7524578917878082
+				},
+				{
+					"angularVelocity" : 0.69372181755116191,
+					"baseColour" : 16422130,
+					"generationChances" : 
+					[
+						0.42105140244637212
+					],
+					"generationColours" : 
+					[
+						14301438
+					],
+					"generationNoise" : 
+					[
+						0.089913207855966501
+					],
+					"generationZValues" : 
+					[
+						91832
+					],
+					"mass" : 0.0,
+					"numColours" : 1,
+					"posFromStar" : 93,
+					"radius" : 16,
+					"theta" : 3.1066860685499065
+				},
+				{
+					"angularVelocity" : 0.55473372781065089,
+					"baseColour" : 15854817,
+					"mass" : 0.0,
+					"numColours" : 0,
+					"posFromStar" : 104,
+					"radius" : 11,
+					"theta" : 5.5676003138619112
+				},
+				{
+					"angularVelocity" : 0.22582709172343707,
+					"baseColour" : 10849153,
+					"generationChances" : 
+					[
+						0.45037091195134954,
+						0.66095848156183878
+					],
+					"generationColours" : 
+					[
+						7299153,
+						12247392
+					],
+					"generationNoise" : 
+					[
+						0.68149437001975921,
+						0.44430154192461702
+					],
+					"generationZValues" : 
+					[
+						604970,
+						442541
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 163,
+					"radius" : 27,
+					"theta" : 1.9198621771937625
+				},
+				{
+					"angularVelocity" : 0.11244167088322933,
+					"baseColour" : 7630533,
+					"generationChances" : 
+					[
+						0.56217630461891011,
+						0.60233951765221527
+					],
+					"generationColours" : 
+					[
+						1704243,
+						6659982
+					],
+					"generationNoise" : 
+					[
+						0.4997130563388173,
+						0.35247195548027371
+					],
+					"generationZValues" : 
+					[
+						974825,
+						491241
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 231,
+					"radius" : 24,
+					"theta" : 3.8222710618675815
+				},
+				{
+					"angularVelocity" : 0.59999999999999998,
+					"baseColour" : 8840957,
+					"generationChances" : 
+					[
+						0.54684032362272972,
+						0.53237158126773854
+					],
+					"generationColours" : 
+					[
+						1246751,
+						4146257
+					],
+					"generationNoise" : 
+					[
+						0.10338655199081942,
+						0.60501618791605161
+					],
+					"generationZValues" : 
+					[
+						272291,
+						220931
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 100,
+					"radius" : 23,
+					"theta" : 0.54105206811824214
+				}
+			],
+			"radius" : 8,
+			"x" : 189,
+			"y" : 63
+		},
+		{
+			"colour" : 10350550,
+			"num" : 6,
+			"planets" : 
+			[
+				{
+					"angularVelocity" : 0.075448921080428555,
+					"baseColour" : 6749096,
+					"generationChances" : 
+					[
+						0.42461758485278933,
+						0.52951376523334237
+					],
+					"generationColours" : 
+					[
+						14004039,
+						4948131
+					],
+					"generationNoise" : 
+					[
+						0.49195708295887192,
+						0.23903366249940991
+					],
+					"generationZValues" : 
+					[
+						76841,
+						105358
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 282,
+					"radius" : 21,
+					"theta" : 3.8048177693476379
+				},
+				{
+					"angularVelocity" : 0.087407493735796288,
+					"baseColour" : 16162963,
+					"generationChances" : 
+					[
+						0.50875248229538661
+					],
+					"generationColours" : 
+					[
+						5584025
+					],
+					"generationNoise" : 
+					[
+						0.66828148092528872
+					],
+					"generationZValues" : 
+					[
+						838244
+					],
+					"mass" : 0.0,
+					"numColours" : 1,
+					"posFromStar" : 262,
+					"radius" : 17,
+					"theta" : 2.9496064358704168
+				},
+				{
+					"angularVelocity" : 0.088078566080944207,
+					"baseColour" : 7631744,
+					"generationChances" : 
+					[
+						0.53236404146643546
+					],
+					"generationColours" : 
+					[
+						2448444
+					],
+					"generationNoise" : 
+					[
+						0.31151362604997751
+					],
+					"generationZValues" : 
+					[
+						266415
+					],
+					"mass" : 0.0,
+					"numColours" : 1,
+					"posFromStar" : 261,
+					"radius" : 15,
+					"theta" : 4.5902159327450862
+				},
+				{
+					"angularVelocity" : 0.098346145650641717,
+					"baseColour" : 10464446,
+					"mass" : 0.0,
+					"numColours" : 0,
+					"posFromStar" : 247,
+					"radius" : 12,
+					"theta" : 2.1816615649929116
+				},
+				{
+					"angularVelocity" : 0.51440329218106995,
+					"baseColour" : 8314224,
+					"mass" : 0.0,
+					"numColours" : 0,
+					"posFromStar" : 108,
+					"radius" : 8,
+					"theta" : 5.4628805587422518
+				},
+				{
+					"angularVelocity" : 0.20281233098972418,
+					"baseColour" : 15191403,
+					"generationChances" : 
+					[
+						0.37440785657354064,
+						0.46732530564410857
+					],
+					"generationColours" : 
+					[
+						10631810,
+						15410021
+					],
+					"generationNoise" : 
+					[
+						0.54556016055194667,
+						0.444160779064596
+					],
+					"generationZValues" : 
+					[
+						807737,
+						607202
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 172,
+					"radius" : 26,
+					"theta" : 0.85521133347722134
+				}
+			],
+			"radius" : 11,
+			"x" : 146,
+			"y" : 224
+		},
+		{
+			"colour" : 12909734,
+			"num" : 7,
+			"planets" : 
+			[
+				{
+					"angularVelocity" : 0.22038567493112948,
+					"baseColour" : 11166836,
+					"generationChances" : 
+					[
+						0.6804979393167877,
+						0.44853699754389792
+					],
+					"generationColours" : 
+					[
+						8727099,
+						15676797
+					],
+					"generationNoise" : 
+					[
+						0.25825341392227141,
+						0.52139802964469317
+					],
+					"generationZValues" : 
+					[
+						374512,
+						125163
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 165,
+					"radius" : 21,
+					"theta" : 2.8274333882308138
+				},
+				{
+					"angularVelocity" : 0.090138813773210744,
+					"baseColour" : 13479406,
+					"mass" : 0.0,
+					"numColours" : 0,
+					"posFromStar" : 258,
+					"radius" : 12,
+					"theta" : 1.4486232791552935
+				},
+				{
+					"angularVelocity" : 0.11643928661530401,
+					"baseColour" : 6913133,
+					"generationChances" : 
+					[
+						0.51998217674902736,
+						0.60235489565057443
+					],
+					"generationColours" : 
+					[
+						6754129,
+						3108082
+					],
+					"generationNoise" : 
+					[
+						0.30266887979706225,
+						0.68448287462093071
+					],
+					"generationZValues" : 
+					[
+						379313,
+						656216
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 227,
+					"radius" : 26,
+					"theta" : 4.9741883681838388
+				},
+				{
+					"angularVelocity" : 0.30612244897959184,
+					"baseColour" : 16632976,
+					"generationChances" : 
+					[
+						0.64370221343995171,
+						0.44083348519207605
+					],
+					"generationColours" : 
+					[
+						7025197,
+						4117880
+					],
+					"generationNoise" : 
+					[
+						0.059658928140839063,
+						0.050828390051996519
+					],
+					"generationZValues" : 
+					[
+						913247,
+						961766
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 140,
+					"radius" : 27,
+					"theta" : 4.2236967898262776
+				},
+				{
+					"angularVelocity" : 0.10416666666666667,
+					"baseColour" : 12227447,
+					"generationChances" : 
+					[
+						0.35069423860436966,
+						0.33656254263434676
+					],
+					"generationColours" : 
+					[
+						5452369,
+						3408692
+					],
+					"generationNoise" : 
+					[
+						0.51536656718485352,
+						0.3588991415868043
+					],
+					"generationZValues" : 
+					[
+						504737,
+						886708
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 240,
+					"radius" : 26,
+					"theta" : 5.1661745859032155
+				},
+				{
+					"angularVelocity" : 0.16446917573531428,
+					"baseColour" : 10184924,
+					"generationChances" : 
+					[
+						0.30418259911433915,
+						0.49924306748399649
+					],
+					"generationColours" : 
+					[
+						7333704,
+						5775377
+					],
+					"generationNoise" : 
+					[
+						0.25958653402495502,
+						0.60991207938171554
+					],
+					"generationZValues" : 
+					[
+						973863,
+						759708
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 191,
+					"radius" : 24,
+					"theta" : 5.9166661642607767
+				},
+				{
+					"angularVelocity" : 0.79270709472849787,
+					"baseColour" : 10267018,
+					"generationChances" : 
+					[
+						0.66366477700120985,
+						0.62538617305708399
+					],
+					"generationColours" : 
+					[
+						10156005,
+						8027678
+					],
+					"generationNoise" : 
+					[
+						0.30567815481018185,
+						0.34968841417212426
+					],
+					"generationZValues" : 
+					[
+						637076,
+						202311
+					],
+					"mass" : 0.0,
+					"numColours" : 2,
+					"posFromStar" : 87,
+					"radius" : 25,
+					"theta" : 1.3264502315156905
+				}
+			],
+			"radius" : 10,
+			"x" : 26,
+			"y" : 47
+		},
+		{
+			"colour" : 15520206,
+			"num" : 2,
+			"planets" : 
+			[
+				{
+					"angularVelocity" : 0.52406323696392698,
+					"baseColour" : 7250869,
+					"generationChances" : 
+					[
+						0.63277971611021999
+					],
+					"generationColours" : 
+					[
+						2055670
+					],
+					"generationNoise" : 
+					[
+						0.43939004053333303
+					],
+					"generationZValues" : 
+					[
+						991184
+					],
+					"mass" : 0.0,
+					"numColours" : 1,
+					"posFromStar" : 107,
+					"radius" : 16,
+					"theta" : 5.4803338512621949
+				},
+				{
+					"angularVelocity" : 0.25969529085872578,
+					"baseColour" : 12281327,
+					"mass" : 0.0,
+					"numColours" : 0,
+					"posFromStar" : 152,
+					"radius" : 11,
+					"theta" : 0.41887902047863906
+				}
+			],
+			"radius" : 11,
+			"x" : 190,
+			"y" : 127
+		}
+	],
+	"x" : 1,
+	"y" : 1
+}
