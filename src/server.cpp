@@ -23,6 +23,13 @@
 // -2: invalid request
 // -3: out of bounds
 
+enum class ErrorMessage {
+	GOOD           =  0,
+	MALFORMED_JSON = -1,
+	INVALID_REQUEST= -2,
+	OUT_OF_BOUNDS  = -3,
+};
+
 using asio::ip::tcp;
 
 std::mutex m;
@@ -111,7 +118,7 @@ void handleClient(tcp::socket sock) {
 			uQ.unlock();
             return;
         }
-        
+
         Json::CharReaderBuilder builder;
         Json::CharReader* reader = builder.newCharReader();
 
@@ -132,41 +139,41 @@ void handleClient(tcp::socket sock) {
             asio::write(sock, asio::buffer("{\"status\": -1}\n"), ign_error);
             continue;
         }
-        
+
         Json::Value totalJson;
-        
+
         for (Json::Value requestJson: root["requests"]) {
             std::string req = requestJson.get("request", "NULL").asString();
-            
+
             if (req == "getSector") {
                 int x = requestJson.get("x", 0).asInt();
                 int y = requestJson.get("y", 0).asInt();
                 Sector * sector = map.getSectorAt(x, y);
 				//sector->save("testsave");
                 Json::Value sec = sector->asJson();
-                
+
                 Json::Value result;
-                result["status"] = 0;
+                result["status"] = (int)ErrorMessage::GOOD;
                 result["result"] = sec;
                 totalJson["results"].append(result);
-                
+
             } else if (req == "getSurface") {
                 Json::Value result;
                 PlanetSurface * surf = getSurfaceFromJson(requestJson);
-				
+
 				if (surf != nullptr) {
 					result["result"] = surf->asJson();
-					result["status"] = 0;
+					result["status"] = (int)ErrorMessage::GOOD;
 				} else {
-					result["status"] = -3;
+					result["status"] = (int)ErrorMessage::OUT_OF_BOUNDS;
 				}
-				
+
                 totalJson["results"].append(result);
-				
+
 			} else if (req == "changeTile") {
                 Json::Value result;
                 PlanetSurface * surf = getSurfaceFromJson(requestJson);
-				
+
 				if (surf != nullptr) {
 					int x, y;
 					x = requestJson.get("x", -1).asInt();
@@ -175,34 +182,34 @@ void handleClient(tcp::socket sock) {
 						result["status"] = -3;
 					} else {
 						surf->tiles[y * surf->rad * 2 + x] = requestJson.get("to", 0).asInt();
-						
+
 						Json::Value updateJson;
 						getJsonFromSurfaceLocator(getSurfaceLocatorFromJson(requestJson), updateJson);
 						updateJson["x"] = x;
 						updateJson["y"] = y;
 						updateJson["to"] = requestJson.get("to", 0).asInt();
-						
+
 						uQ.lock();
 						updates.push_back(Update(updateJson, id));
 						uQ.unlock();
-						result["status"] = 0;
+						result["status"] = (int)ErrorMessage::GOOD;
 					}
 				} else {
-					result["status"] = -3;
+					result["status"] = (int)ErrorMessage::OUT_OF_BOUNDS;
 				}
-				
+
                 totalJson["results"].append(result);
 			} else if (req == "keepAlive") {
 				//do nothing. Just so `else` doesnt fire
-                
+
             } else {
                 logger.warn("Client sent invalid request: " + root.get("request", "NULL").asString());
                 Json::Value result;
-                result["status"] = -2;
+                result["status"] = (int)ErrorMessage::INVALID_REQUEST;
                 totalJson["results"].append(result);
             }
         }
-		
+
 		uQ.lock();
 		for (int i = 0; i < updates.size(); i++) {
 			if (std::find(updates[i].readBy.begin(), updates[i].readBy.end(), id) != updates[i].readBy.end()) {
@@ -215,9 +222,9 @@ void handleClient(tcp::socket sock) {
 		updates.erase(std::remove_if(updates.begin(), updates.end(), [](const Update &u) {
 			return u.numRead == numConnectedClients;
 			}), updates.end());
-			
+
 		uQ.unlock();
-		
+
         asio::error_code err;
         Json::StreamWriterBuilder writeBuilder;
         writeBuilder["indentation"] = "";
@@ -234,7 +241,7 @@ int main() {
     noiseGen.SetNoiseType(FastNoise::Simplex);
     srand(LEVEL_SEED);
     loadConfig();
-    
+
     asio::io_context io_context;
     tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), 5555));
     while (true) {

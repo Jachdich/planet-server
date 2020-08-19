@@ -107,7 +107,7 @@ void PlanetSurface::generate(Planet * p) {
 Json::Value PlanetSurface::asJson() {
     Json::Value res;
     for (int i = 0; i < tiles.size(); i++) {
-        res["tiles"].append(tiles[i]);
+        res["tiles"].append((Json::Value::UInt64)tiles[i]);
     }
     res["rad"] = rad;
     return res;

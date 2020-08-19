@@ -1,7 +1,7 @@
 #ifndef __SECTOR_H
 #define __SECTOR_H
 #include <jsoncpp/json/json.h>
-#include <filesystem>
+//#include <filesystem>
 
 #include "star.h"
 
