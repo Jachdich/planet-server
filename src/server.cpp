@@ -23,11 +23,11 @@
 // -2: invalid request
 // -3: out of bounds
 
-enum class ErrorMessage {
-	GOOD           =  0,
+enum class ErrorCode {
+	OK = 0,
 	MALFORMED_JSON = -1,
-	INVALID_REQUEST= -2,
-	OUT_OF_BOUNDS  = -3,
+	INVALID_REQUEST = -2,
+	OUT_OF_BOUNDS = -3,
 };
 
 using asio::ip::tcp;
