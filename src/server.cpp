@@ -17,18 +17,12 @@
 #include "sector.h"
 #include "sectormap.h"
 #include "FastNoise.h"
+#include "common/enums.h"
 
 //return codes
 // -1: malformed JSON
 // -2: invalid request
 // -3: out of bounds
-
-enum class ErrorCode {
-	OK = 0,
-	MALFORMED_JSON = -1,
-	INVALID_REQUEST = -2,
-	OUT_OF_BOUNDS = -3,
-};
 
 using asio::ip::tcp;
 
@@ -153,7 +147,7 @@ void handleClient(tcp::socket sock) {
                 Json::Value sec = sector->asJson();
 
                 Json::Value result;
-                result["status"] = (int)ErrorMessage::GOOD;
+                result["status"] = (int)ErrorCode::OK;
                 result["result"] = sec;
                 totalJson["results"].append(result);
 
@@ -163,9 +157,9 @@ void handleClient(tcp::socket sock) {
 
 				if (surf != nullptr) {
 					result["result"] = surf->asJson();
-					result["status"] = (int)ErrorMessage::GOOD;
+					result["status"] = (int)ErrorCode::OK;
 				} else {
-					result["status"] = (int)ErrorMessage::OUT_OF_BOUNDS;
+					result["status"] = (int)ErrorCode::OUT_OF_BOUNDS;
 				}
 
                 totalJson["results"].append(result);
@@ -192,10 +186,10 @@ void handleClient(tcp::socket sock) {
 						uQ.lock();
 						updates.push_back(Update(updateJson, id));
 						uQ.unlock();
-						result["status"] = (int)ErrorMessage::GOOD;
+						result["status"] = (int)ErrorCode::OK;
 					}
 				} else {
-					result["status"] = (int)ErrorMessage::OUT_OF_BOUNDS;
+					result["status"] = (int)ErrorCode::OUT_OF_BOUNDS;
 				}
 
                 totalJson["results"].append(result);
@@ -205,7 +199,7 @@ void handleClient(tcp::socket sock) {
             } else {
                 logger.warn("Client sent invalid request: " + root.get("request", "NULL").asString());
                 Json::Value result;
-                result["status"] = (int)ErrorMessage::INVALID_REQUEST;
+                result["status"] = (int)ErrorCode::INVALID_REQUEST;
                 totalJson["results"].append(result);
             }
         }

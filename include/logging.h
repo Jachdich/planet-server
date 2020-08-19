@@ -7,6 +7,8 @@ public:
     Logger();
     void warn(std::string msg);
     void error(std::string msg);
+    void info(std::string msg);
+    void debug(std::string msg);
 };
 
 #endif
