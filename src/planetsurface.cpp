@@ -9,17 +9,24 @@ PlanetSurface::PlanetSurface() {
     generated = false;
 }
 
-int PlanetSurface::getType(int r, int g, int b) {
-	if (g > r && g > b * 1.5) { //foliage
-		return 1;
+TileType PlanetSurface::getType(int r, int g, int b) {
+	if (g > r && g > b * 1.5) {
+        if (rand() % 8 == 0) return TileType::ROCK;
+		int rnd = rand() % 4;
+        switch(rnd) {
+            case 0: return TileType::TREE;
+            case 1: return TileType::BUSH;
+            case 2: return TileType::PINE;
+            default:return TileType::GRASS;
+        }
 	}
 	if (b > r * 2 && b * 1.2 > g) {
-		return 2; //water
+		return TileType::WATER;
 	}
-	return 0; //default land tile
+	return TileType::GRASS;
 }
 
-int PlanetSurface::getInitialTileType(int x, int y, Planet * p) {
+TileType PlanetSurface::getInitialTileType(int x, int y, Planet * p) {
 	int xb = x - p->radius;
 	int yb = y - p->radius;
 
@@ -44,19 +51,7 @@ int PlanetSurface::getInitialTileType(int x, int y, Planet * p) {
 		g /= total;
 		b /= total;
 	}
-	int tileType = getType(r, g, b);
-	switch (tileType) {
-		case 0:
-			return (rand() % 6 == 0) ? 3 : 0; //random chance of having a rock
-		case 1:
-			if (rand() % 2 == 0) {
-				return (rand() % 6 == 0) ? 3 : 0; //random chance of having a rock
-			}
-			return 1; //just tree
-		case 2:
-			return 2;
-	}
-	return -1;
+	return getType(r, g, b);
 }
 
 void PlanetSurface::generate(Planet * p) {
@@ -85,8 +80,8 @@ void PlanetSurface::generate(Planet * p) {
     for (int i = 0; i < p->radius * 2; i++) {
         for (int j = 0; j < p->radius * 2; j++) {
             int z;
-            int type = getInitialTileType(i, j, p);
-			if (type != 2) {
+            TileType type = getInitialTileType(i, j, p);
+			if (type != TileType::WATER) {
 				int xb = i - p->radius;
 				int yb = j - p->radius;
 				float az = (1 - (noiseGen.GetNoise(xb / genNoise, yb / genNoise, genZVal) + 1) / 2) - (1 - genChance);
@@ -97,7 +92,7 @@ void PlanetSurface::generate(Planet * p) {
 			} else {
 				z = -1;
 			}
-            tiles.push_back(((uint64_t)z << 32) | type);
+            tiles.push_back(((uint64_t)z << 32) | (uint32_t)type);
         }
     }
     this->rad = p->radius;

@@ -3,6 +3,7 @@
 #include <jsoncpp/json/json.h>
 #include <vector>
 #include <cstdint>
+#include "common/enums.h"
 class Planet;
 
 class PlanetSurface {
@@ -13,8 +14,8 @@ public:
 
     PlanetSurface();
     void generate(Planet * p);
-	int getType(int r, int g, int b);
-    int getInitialTileType(int x, int y, Planet * p);
+	TileType getType(int r, int g, int b);
+    TileType getInitialTileType(int x, int y, Planet * p);
     Json::Value asJson();
 };
 

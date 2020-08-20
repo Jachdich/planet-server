@@ -14,11 +14,11 @@ void Logger::error(std::string msg) {
     std::cerr << "[ERROR] " << msg << "\n";
 }
 
-void logger::info(std::string msg) {
+void Logger::info(std::string msg) {
     std::cout << "[INFO ] " << msg << "\n";
 }
 
-void logger::debug(std::string msg) {
+void Logger::debug(std::string msg) {
     if (LOGGING_DEBUG) {
         std::cout << "[DEBUG] " << msg << "\n";
     }
