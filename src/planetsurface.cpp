@@ -9,16 +9,15 @@ PlanetSurface::PlanetSurface() {
     generated = false;
 }
 
-TileType PlanetSurface::getType(int r, int g, int b) {
+TileType PlanetSurface::getType(int r, int g, int b, int x, int y) {
 	if (g > r && g > b * 1.5) {
         if (rand() % 8 == 0) return TileType::ROCK;
-		int rnd = rand() % 4;
-        switch(rnd) {
-            case 0: return TileType::TREE;
-            case 1: return TileType::BUSH;
-            case 2: return TileType::PINE;
-            default:return TileType::GRASS;
-        }
+        if (rand() % 6 == 0) return TileType::GRASS;
+        double noise = (noiseGen.GetNoise(x / 0.1f, y / 0.1f, noiseZ) + 1) / 2;
+        if (noise < 0.4) return TileType::TREE;
+        if (noise < 0.6) return TileType::BUSH;
+        if (noise < 0.9) return TileType::PINE;
+        if (noise < 1.0) return TileType::GRASS;
 	}
 	if (b > r * 2 && b * 1.2 > g) {
 		return TileType::WATER;
@@ -51,7 +50,7 @@ TileType PlanetSurface::getInitialTileType(int x, int y, Planet * p) {
 		g /= total;
 		b /= total;
 	}
-	return getType(r, g, b);
+	return getType(r, g, b, x, y);
 }
 
 void PlanetSurface::generate(Planet * p) {
@@ -76,6 +75,7 @@ void PlanetSurface::generate(Planet * p) {
         genZVal   = p->generationZValues[0];
         genChance = p->generationChances[0];
     }
+    this->noiseZ = genZVal;
 
     for (int i = 0; i < p->radius * 2; i++) {
         for (int j = 0; j < p->radius * 2; j++) {
@@ -101,7 +101,7 @@ void PlanetSurface::generate(Planet * p) {
 
 Json::Value PlanetSurface::asJson() {
     Json::Value res;
-    for (int i = 0; i < tiles.size(); i++) {
+    for (unsigned int i = 0; i < tiles.size(); i++) {
         res["tiles"].append((Json::Value::UInt64)tiles[i]);
     }
     res["rad"] = rad;

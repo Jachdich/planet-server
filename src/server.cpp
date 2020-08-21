@@ -18,6 +18,7 @@
 #include "sectormap.h"
 #include "FastNoise.h"
 #include "common/enums.h"
+#include "common/surfacelocator.h"
 
 //return codes
 // -1: malformed JSON
@@ -37,14 +38,6 @@ Logger logger;
 SectorMap map;
 FastNoise noiseGen;
 
-//commonlib?
-struct SurfaceLocator {
-	char planetPos;
-	char starPos;
-	int sectorX;
-	int sectorY;
-};
-
 struct Update {
 	Json::Value value;
 	std::vector<int> readBy;
@@ -55,32 +48,13 @@ struct Update {
 	}
 };
 
-std::vector<Update> updates;
-
-SurfaceLocator getSurfaceLocatorFromJson(Json::Value root) {
-	int secX, secY;
-    char starPos, planetPos;
-	secX = root.get("secX", 0).asInt();
-	secY = root.get("secY", 0).asInt();
-	starPos = root.get("starPos", 0).asInt();
-	planetPos = root.get("planetPos", 0).asInt();
-	return {planetPos, starPos, secX, secY};
-}
-
-void getJsonFromSurfaceLocator(SurfaceLocator loc, Json::Value& root) {
-	root["secX"] = loc.sectorX;
-	root["secY"] = loc.sectorY;
-	root["starPos"] = loc.starPos;
-	root["planetPos"] = loc.planetPos;
-}
-
 PlanetSurface * getSurfaceFromJson(Json::Value root) {
 	SurfaceLocator loc = getSurfaceLocatorFromJson(root);
 	Sector * sec = map.getSectorAt(loc.sectorX, loc.sectorY);
 	if (loc.starPos < sec->numStars) {
 		Star * s = &sec->stars[loc.starPos];
 		if (loc.planetPos < s->num) {
-			Planet * p = &s->planets[loc.planetPos];
+			Planet * p = &s->planets[static_cast<int>(loc.planetPos)];
 			PlanetSurface * surf = p->getSurface();
 			return surf;
 		} else {
@@ -91,6 +65,8 @@ PlanetSurface * getSurfaceFromJson(Json::Value root) {
 	}
 }
 
+std::vector<Update> updates;
+
 void handleClient(tcp::socket sock) {
 	std::unique_lock<std::mutex> uQ(updateQueue);
 	int id = lastID++;
@@ -99,7 +75,7 @@ void handleClient(tcp::socket sock) {
     while (true) {
         asio::error_code error;
         asio::streambuf buf;
-        size_t len = asio::read_until(sock, buf, "\n", error);
+        /*size_t len = */asio::read_until(sock, buf, "\n", error);
         std::istream is(&buf);
         std::string request;
         std::getline(is, request);
@@ -205,7 +181,7 @@ void handleClient(tcp::socket sock) {
         }
 
 		uQ.lock();
-		for (int i = 0; i < updates.size(); i++) {
+		for (unsigned int i = 0; i < updates.size(); i++) {
 			if (std::find(updates[i].readBy.begin(), updates[i].readBy.end(), id) != updates[i].readBy.end()) {
 				continue;
 			}

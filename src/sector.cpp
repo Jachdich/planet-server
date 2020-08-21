@@ -45,7 +45,7 @@ void Sector::generate() {
 void Sector::generate(std::string dir) {
 	std::ifstream afile;
 	afile.open(dir + "/" + "s" + std::to_string(x) + "." + std::to_string(y) + ".json");
-	
+
 	std::string content((std::istreambuf_iterator<char>(afile)), (std::istreambuf_iterator<char>()));
 
     Json::CharReaderBuilder builder;
@@ -62,8 +62,12 @@ void Sector::generate(std::string dir) {
     );
     delete reader;
 
+    if (!parsingSuccessful) {
+        std::cerr << "Error: could not parse JSON in sector file\n";
+    }
+
 	afile.close();
-	
+
 	this->x = root["x"].asInt();
     this->y = root["y"].asInt();
     this->r = root["r"].asInt();
@@ -72,7 +76,7 @@ void Sector::generate(std::string dir) {
     for (int i = 0; i < numStars; i++) {
         stars[i] = Star(root["stars"][i]);
     }
-	
+
 	this->generated = true;
 }
 

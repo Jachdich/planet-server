@@ -11,10 +11,11 @@ public:
     std::vector<uint64_t> tiles;
     bool generated = false;
     int rad = 0;
+    int noiseZ;
 
     PlanetSurface();
     void generate(Planet * p);
-	TileType getType(int r, int g, int b);
+	TileType getType(int r, int g, int b, int x, int y);
     TileType getInitialTileType(int x, int y, Planet * p);
     Json::Value asJson();
 };
