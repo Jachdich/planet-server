@@ -16,7 +16,8 @@ TileType PlanetSurface::getType(int r, int g, int b, int x, int y) {
         double noise = (noiseGen.GetNoise(x / 0.1f, y / 0.1f, noiseZ) + 1) / 2;
         if (noise < 0.4) return TileType::TREE;
         if (noise < 0.6) return TileType::BUSH;
-        if (noise < 0.9) return TileType::PINE;
+        if (noise < 0.8) return TileType::PINE;
+        if (noise < 0.9) return TileType::PINEFOREST;
         if (noise < 1.0) return TileType::GRASS;
 	}
 	if (b > r * 2 && b * 1.2 > g) {
