@@ -148,6 +148,7 @@ void handleClient(tcp::socket sock) {
 					int x, y;
 					x = requestJson.get("x", -1).asInt();
 					y = requestJson.get("y", -1).asInt();
+					std::cout << "Change Tile " << x << " " << y << "\n";
 					if (x < 0 || y < 0) {
 						result["status"] = -3;
 					} else {
@@ -171,6 +172,16 @@ void handleClient(tcp::socket sock) {
                 totalJson["results"].append(result);
 			} else if (req == "keepAlive") {
 				//do nothing. Just so `else` doesnt fire
+			} else if (req == "userAction") {
+				Json::Value result;
+				//PlanetSurface * surf = getSurfaceFromJson(requestJson);
+
+				//json["action"] = (int)task;
+				//json["x"] = target->x;
+				//json["y"] = target->y;
+				result["status"] = (int)ErrorCode::OK; //TODO
+				result["time"] = getTimeForTask((TaskType)requestJson["action"].asInt());
+				totalJson["results"].append(result);
 
             } else {
                 logger.warn("Client sent invalid request: " + root.get("request", "NULL").asString());

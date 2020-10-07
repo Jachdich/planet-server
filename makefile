@@ -5,10 +5,13 @@ OBJECTS := $(patsubst src/%,obj/%,$(SOURCES:.cpp=.o))
 server: $(OBJECTS)
 	g++ $(OBJECTS) common.a -o $@ -lpthread -ljsoncpp
 
-obj/%.o: src/%.cpp $(HEADERS)
-	g++ -c -o $@ $< -Wall -Werror -g -std=c++11 -Iinclude
+#obj:
+#	mkdir -p obj
 
-obj/FastNoise.o: src/FastNoise.cpp
+obj/%.o: src/%.cpp $(HEADERS)# obj
+	g++ -std=c++17 -c -o $@ $< -Wall -Werror -g -std=c++11 -Iinclude
+
+obj/FastNoise.o: src/FastNoise.cpp# obj
 	g++ -c -o $@ $< -Wall -g -O3 -std=c++11 -Iinclude
 
 debug: server
