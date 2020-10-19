@@ -19,6 +19,7 @@
 #include "FastNoise.h"
 #include "common/enums.h"
 #include "common/surfacelocator.h"
+#include "random_helper.h"
 
 //return codes
 // -1: malformed JSON
@@ -218,7 +219,16 @@ void handleClient(tcp::socket sock) {
 #include <sys/resource.h>
 
 int main() {
-    const unsigned int LEVEL_SEED = 12345;
+
+    const uint32_t LEVEL_SEED = 12345;
+/*
+    int x = 36;
+    int y = 391;
+
+    std::cout << mix(x, y) << ", " << hash(x) << ", " << hash(y) << "\n";
+
+    return 0;*/
+
     noiseGen.SetNoiseType(FastNoise::Simplex);
     srand(LEVEL_SEED);
     loadConfig();
