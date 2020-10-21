@@ -48,6 +48,19 @@ struct Update {
 	}
 };
 
+struct Task {
+	TaskType type;
+	Tile * target;
+	double timeLeft;
+};
+
+std::vector<Task> tasks;
+
+void dispachTask(TaskType type, Tile * target) {
+	double time = getTimeForTask(type);
+	tasks.push_back({type, target, time});
+}
+
 PlanetSurface * getSurfaceFromJson(Json::Value root) {
 	SurfaceLocator loc = getSurfaceLocatorFromJson(root);
 	Sector * sec = map.getSectorAt(loc.sectorX, loc.sectorY);
@@ -174,13 +187,20 @@ void handleClient(tcp::socket sock) {
 				//do nothing. Just so `else` doesnt fire
 			} else if (req == "userAction") {
 				Json::Value result;
-				//PlanetSurface * surf = getSurfaceFromJson(requestJson);
+				PlanetSurface * surf = getSurfaceFromJson(requestJson);
+				Tile * target = surf->tiles[json["y"].asInt() * surf->radius + json["x"].asInt()];
 
-				//json["action"] = (int)task;
-				//json["x"] = target->x;
-				//json["y"] = target->y;
-				result["status"] = (int)ErrorCode::OK; //TODO
-				result["time"] = getTimeForTask((TaskType)requestJson["action"].asInt());
+				if (surf->stats.peopleIdle > 0) {
+					surf->stats.peopleIdle--;
+					int time = getTimeForTask((TaskType)requestJson["action"].asInt());
+					dispachTask((TaskType)requestJson["action"].asInt(), target);
+					result["status"] = (int)ErrorCode::OK;
+					result["time"] = time;
+				} else {
+					result["status"] = (int)ErrorCode::NO_PEOPLE_AVAILABLE;
+					result["time"] = -1;
+				}
+
 				totalJson["results"].append(result);
 
             } else {
