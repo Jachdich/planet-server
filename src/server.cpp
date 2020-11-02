@@ -34,6 +34,8 @@ std::mutex updateQueue;
 int lastID;
 int numConnectedClients;
 
+class Tile;
+
 Logger logger;
 
 SectorMap map;
@@ -188,6 +190,7 @@ void handleClient(tcp::socket sock) {
 				//do nothing. Just so `else` doesnt fire
 			} else if (req == "userAction") {
 				Json::Value result;
+				/*
 				PlanetSurface * surf = getSurfaceFromJson(requestJson);
 				Tile * target = surf->tiles[json["y"].asInt() * surf->radius + json["x"].asInt()];
 
@@ -200,7 +203,7 @@ void handleClient(tcp::socket sock) {
 				} else {
 					result["status"] = (int)ErrorCode::NO_PEOPLE_AVAILABLE;
 					result["time"] = -1;
-				}
+				}*/
 
 				totalJson["results"].append(result);
 
