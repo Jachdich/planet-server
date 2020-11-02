@@ -26,18 +26,9 @@
 // -2: invalid request
 // -3: out of bounds
 
+//TODO possible race condition with tasks
+
 using asio::ip::tcp;
-
-std::mutex m;
-std::mutex updateQueue;
-
-int lastID;
-int numConnectedClients;
-
-Logger logger;
-
-SectorMap map;
-FastNoise noiseGen;
 
 struct Update {
 	Json::Value value;
@@ -51,20 +42,31 @@ struct Update {
 
 struct Task {
 	TaskType type;
-	Tile * target;
+	uint64_t target;
+	SurfaceLocator surface;
 	double timeLeft;
 };
 
+std::mutex m;
+std::mutex updateQueue;
+std::vector<Update> updates;
 std::vector<Task> tasks;
 
-void dispachTask(TaskType type, Tile * target) {
+int lastID;
+int numConnectedClients;
+
+Logger logger;
+
+SectorMap map;
+FastNoise noiseGen;
+
+void dispachTask(TaskType type, uint64_t target, SurfaceLocator loc) {
 	double time = getTimeForTask(type);
-	tasks.push_back({type, target, time});
+	tasks.push_back({type, target, loc, time});
 }
 
-PlanetSurface * getSurfaceFromJson(Json::Value root) {
-	SurfaceLocator loc = getSurfaceLocatorFromJson(root);
-	Sector * sec = map.getSectorAt(loc.sectorX, loc.sectorY);
+PlanetSurface * getSurfaceFromLocator(SurfaceLocator loc) {
+    Sector * sec = map.getSectorAt(loc.sectorX, loc.sectorY);
 	if (loc.starPos < sec->numStars) {
 		Star * s = &sec->stars[loc.starPos];
 		if (loc.planetPos < s->num) {
@@ -79,7 +81,10 @@ PlanetSurface * getSurfaceFromJson(Json::Value root) {
 	}
 }
 
-std::vector<Update> updates;
+PlanetSurface * getSurfaceFromJson(Json::Value root) {
+	SurfaceLocator loc = getSurfaceLocatorFromJson(root);
+	return getSurfaceFromLocator(loc);
+}
 
 void handleClient(tcp::socket sock) {
 	std::unique_lock<std::mutex> uQ(updateQueue);
@@ -154,7 +159,7 @@ void handleClient(tcp::socket sock) {
 
                 totalJson["results"].append(result);
 
-			} else if (req == "changeTile") {
+			} else if (req == "change") {
                 Json::Value result;
                 PlanetSurface * surf = getSurfaceFromJson(requestJson);
 
@@ -189,12 +194,13 @@ void handleClient(tcp::socket sock) {
 			} else if (req == "userAction") {
 				Json::Value result;
 				PlanetSurface * surf = getSurfaceFromJson(requestJson);
-				Tile * target = surf->tiles[json["y"].asInt() * surf->radius + json["x"].asInt()];
+				SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
+				uint64_t target = surf->tiles[requestJson["y"].asInt() * surf->rad + requestJ["x"].asInt()];
 
 				if (surf->stats.peopleIdle > 0) {
 					surf->stats.peopleIdle--;
 					int time = getTimeForTask((TaskType)requestJson["action"].asInt());
-					dispachTask((TaskType)requestJson["action"].asInt(), target);
+					dispachTask((TaskType)requestJson["action"].asInt(), target, loc);
 					result["status"] = (int)ErrorCode::OK;
 					result["time"] = time;
 				} else {
@@ -235,6 +241,57 @@ void handleClient(tcp::socket sock) {
     }
 }
 
+void taskFinished(Task &t) {
+    switch (t.type) {
+        case TaskType::FELL_TREE:
+        case TaskType::GATHER_MINERALS:
+        case TaskType::CLEAR:
+            PlanetSurface * surf = getSurfaceFromLocator(t.surface);
+            
+	    case TaskType::PLANT_TREE:
+    }
+}
+
+long lastTime;
+
+void tick() {
+    long ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+    		std::chrono::system_clock::now().time_since_epoch()).count();
+    double delta = (ms - lastTime) / 1000;
+
+    for (Task &t : tasks) {
+        t.timeLeft -= delta;
+        if (t.timeLeft <= 0) {
+            taskFinished(t);
+        }
+    }
+
+    tasks.erase(std::remove_if(tasks.begin(), tasks.end(),
+	[](Task& t) {
+		return t.timeLeft <= 0;
+	}), tasks.end());
+}
+
+
+bool threadStopped = false;
+
+void handleTasks() {
+     long ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+    		std::chrono::system_clock::now().time_since_epoch()).count();
+    lastTime = ms;
+	while (!threadStopped) {
+		unsigned long long startns = std::chrono::duration_cast< std::chrono::microseconds >(
+	    	std::chrono::system_clock::now().time_since_epoch()).count();
+	    
+		tick();
+
+		unsigned long long endns = std::chrono::duration_cast< std::chrono::microseconds >(
+	    	std::chrono::system_clock::now().time_since_epoch()).count();
+
+		std::this_thread::sleep_for(std::chrono::microseconds(100000 - (endns - startns)));
+	}
+}
+
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -255,7 +312,10 @@ int main() {
 
     asio::io_context io_context;
     tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), 5555));
+    std::thread taskThread(handleTasks);
     while (true) {
         std::thread(handleClient, a.accept()).detach();
     }
+    threadStopped = true;
+    taskThread.join();
 }

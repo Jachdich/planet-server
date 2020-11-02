@@ -9,6 +9,7 @@ server: $(OBJECTS)
 #	mkdir -p obj
 
 obj/%.o: src/%.cpp $(HEADERS)# obj
+	@mkdir -p obj
 	g++ -std=c++17 -c -o $@ $< -Wall -Werror -g -std=c++11 -Iinclude
 
 obj/FastNoise.o: src/FastNoise.cpp# obj
