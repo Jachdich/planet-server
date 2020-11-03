@@ -10,8 +10,11 @@ PlanetSurface::PlanetSurface() {
 }
 
 TileType PlanetSurface::getType(int r, int g, int b, int x, int y) {
+	if (b > r * 2 && b * 1.2 > g) {
+		return TileType::WATER;
+	}
+	if (rand() % 8 == 0) return TileType::ROCK;
 	if (g > r && g > b * 1.5) {
-        if (rand() % 8 == 0) return TileType::ROCK;
         if (rand() % 6 == 0) return TileType::GRASS;
         double noise = (noiseGen.GetNoise(x / 0.1f, y / 0.1f, noiseZ) + 1) / 2;
         if (noise < 0.4) return TileType::TREE;
@@ -19,9 +22,6 @@ TileType PlanetSurface::getType(int r, int g, int b, int x, int y) {
         if (noise < 0.8) return TileType::PINE;
         if (noise < 0.9) return TileType::PINEFOREST;
         if (noise < 1.0) return TileType::GRASS;
-	}
-	if (b > r * 2 && b * 1.2 > g) {
-		return TileType::WATER;
 	}
 	return TileType::GRASS;
 }

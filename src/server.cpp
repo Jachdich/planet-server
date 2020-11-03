@@ -42,9 +42,10 @@ struct Update {
 
 struct Task {
 	TaskType type;
-	uint64_t target;
+	uint32_t target;
 	SurfaceLocator surface;
 	double timeLeft;
+	uint32_t caller;
 };
 
 std::mutex m;
@@ -60,9 +61,9 @@ Logger logger;
 SectorMap map;
 FastNoise noiseGen;
 
-void dispachTask(TaskType type, uint64_t target, SurfaceLocator loc) {
+void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, uint32_t id) {
 	double time = getTimeForTask(type);
-	tasks.push_back({type, target, loc, time});
+	tasks.push_back({type, target, loc, time, id});
 }
 
 PlanetSurface * getSurfaceFromLocator(SurfaceLocator loc) {
@@ -88,7 +89,7 @@ PlanetSurface * getSurfaceFromJson(Json::Value root) {
 
 void handleClient(tcp::socket sock) {
 	std::unique_lock<std::mutex> uQ(updateQueue);
-	int id = lastID++;
+	uint32_t id = lastID++;
 	numConnectedClients++;
 	uQ.unlock();
     while (true) {
@@ -195,12 +196,12 @@ void handleClient(tcp::socket sock) {
 				Json::Value result;
 				PlanetSurface * surf = getSurfaceFromJson(requestJson);
 				SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
-				uint64_t target = surf->tiles[requestJson["y"].asInt() * surf->rad + requestJson["x"].asInt()];
+				uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
 
 				if (surf->stats.peopleIdle > 0) {
 					surf->stats.peopleIdle--;
 					int time = getTimeForTask((TaskType)requestJson["action"].asInt());
-					dispachTask((TaskType)requestJson["action"].asInt(), target, loc);
+					dispachTask((TaskType)requestJson["action"].asInt(), target, loc, id);
 					result["status"] = (int)ErrorCode::OK;
 					result["time"] = time;
 				} else {
@@ -242,15 +243,17 @@ void handleClient(tcp::socket sock) {
 }
 
 void taskFinished(Task &t) {
+    PlanetSurface * surf = getSurfaceFromLocator(t.surface);
     switch (t.type) {
         case TaskType::FELL_TREE:
-        case TaskType::GATHER_MINERALS:
-        case TaskType::CLEAR: {
-            //PlanetSurface * surf = getSurfaceFromLocator(t.surface);
-            break;
-        }
+            surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
             
-	    case TaskType::PLANT_TREE: break;
+        case TaskType::GATHER_MINERALS:
+            break;
+        case TaskType::CLEAR:
+            break;
+	    case TaskType::PLANT_TREE:
+	        break;
     }
 }
 
@@ -259,7 +262,7 @@ long lastTime;
 void tick() {
     long ms = std::chrono::duration_cast<std::chrono::milliseconds>(
     		std::chrono::system_clock::now().time_since_epoch()).count();
-    double delta = (ms - lastTime) / 1000;
+    double delta = (ms - lastTime) / 1000.0;
 
     for (Task &t : tasks) {
         t.timeLeft -= delta;
@@ -272,6 +275,9 @@ void tick() {
 	[](Task& t) {
 		return t.timeLeft <= 0;
 	}), tasks.end());
+
+	lastTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+	    		std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 
