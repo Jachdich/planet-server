@@ -195,7 +195,7 @@ void handleClient(tcp::socket sock) {
 				Json::Value result;
 				PlanetSurface * surf = getSurfaceFromJson(requestJson);
 				SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
-				uint64_t target = surf->tiles[requestJson["y"].asInt() * surf->rad + requestJ["x"].asInt()];
+				uint64_t target = surf->tiles[requestJson["y"].asInt() * surf->rad + requestJson["x"].asInt()];
 
 				if (surf->stats.peopleIdle > 0) {
 					surf->stats.peopleIdle--;
@@ -245,10 +245,12 @@ void taskFinished(Task &t) {
     switch (t.type) {
         case TaskType::FELL_TREE:
         case TaskType::GATHER_MINERALS:
-        case TaskType::CLEAR:
-            PlanetSurface * surf = getSurfaceFromLocator(t.surface);
+        case TaskType::CLEAR: {
+            //PlanetSurface * surf = getSurfaceFromLocator(t.surface);
+            break;
+        }
             
-	    case TaskType::PLANT_TREE:
+	    case TaskType::PLANT_TREE: break;
     }
 }
 
