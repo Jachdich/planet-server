@@ -27,6 +27,17 @@
 // -3: out of bounds
 
 //TODO possible race condition with tasks
+using asio::ip::tcp;
+
+std::mutex m;
+std::mutex updateQueue;
+
+int lastID;
+int numConnectedClients;
+
+class Tile;
+
+Logger logger;
 
 using asio::ip::tcp;
 
@@ -48,15 +59,15 @@ struct Task {
 	uint32_t caller;
 };
 
-std::mutex m;
-std::mutex updateQueue;
+//std::mutex m;
+//std::mutex updateQueue;
 std::vector<Update> updates;
 std::vector<Task> tasks;
 
-int lastID;
-int numConnectedClients;
+//int lastID;
+//int numConnectedClients;
 
-Logger logger;
+//Logger logger;
 
 SectorMap map;
 FastNoise noiseGen;
@@ -194,6 +205,7 @@ void handleClient(tcp::socket sock) {
 				//do nothing. Just so `else` doesnt fire
 			} else if (req == "userAction") {
 				Json::Value result;
+				/*
 				PlanetSurface * surf = getSurfaceFromJson(requestJson);
 				SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
 				uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
@@ -207,7 +219,7 @@ void handleClient(tcp::socket sock) {
 				} else {
 					result["status"] = (int)ErrorCode::NO_PEOPLE_AVAILABLE;
 					result["time"] = -1;
-				}
+				}*/
 
 				totalJson["results"].append(result);
 
