@@ -72,7 +72,14 @@ std::vector<Task> tasks;
 SectorMap map;
 FastNoise noiseGen;
 
-void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, uint32_t id) {
+void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, uint32_t id) {
+    switch (type) {
+        case TaskType::BUILD_HOUSE:
+            surf->stats.wood -= 3;
+            surf->stats.stone -= 6;
+            break;
+        default: break;
+    }
 	double time = getTimeForTask(type);
 	tasks.push_back({type, target, loc, time, id});
 }
@@ -225,7 +232,7 @@ void handleClient(tcp::socket sock) {
 				if (surf->stats.peopleIdle > 0 && hasMaterialsFor(surf, task)) {
 					surf->stats.peopleIdle--;
 					int time = getTimeForTask(task);
-					dispachTask((TaskType)requestJson["action"].asInt(), target, loc, id);
+					dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, id);
 					result["status"] = (int)ErrorCode::OK;
 					result["time"] = time;
 				} else {
@@ -291,8 +298,7 @@ void taskFinished(Task &t) {
 	        
 	    case TaskType::BUILD_HOUSE:
 	        surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::HOUSE;
-	        surf->stats.wood -= 3;
-	        surf->stats.stone -= 6;
+	        surf->stats.houses += 1;
 	        break;
     }
 }

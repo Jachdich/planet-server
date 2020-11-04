@@ -9,6 +9,7 @@ class Planet;
 struct Stats {
 	uint32_t people;
 	uint32_t peopleIdle;
+	uint32_t houses;
 	uint32_t wood;
 	uint32_t stone;
 };
