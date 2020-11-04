@@ -20,6 +20,7 @@ public:
     Stats stats = {4, 4, 0, 0};
     int rad = 0;
     int noiseZ;
+    double noiseScl;
 
     PlanetSurface();
     void generate(Planet * p);

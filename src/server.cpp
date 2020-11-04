@@ -266,6 +266,8 @@ void taskFinished(Task &t) {
             break;
 	    case TaskType::PLANT_TREE:
 	        break;
+	    case TaskType::BUILD_HOUSE:
+	        break;
     }
 }
 

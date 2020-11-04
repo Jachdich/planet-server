@@ -4,6 +4,8 @@
 "p_genChanceMax": 0.7,
 "p_genNoiseMin": 0.04,
 "p_genNoiseMax": 0.7,
+"p_genNoisePlantsMax": 0.04,
+"p_genNoisePlantsMin": 0.3,
 "p_baseColMin": 100,
 "p_baseColMax": 255,
 "p_angularVelMultiplier": 6000.0}

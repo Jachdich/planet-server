@@ -1,6 +1,7 @@
 #include "planetsurface.h"
 #include "planet.h"
 #include "server.h"
+#include "generation.h"
 
 #include <jsoncpp/json/json.h>
 #include <iostream>
@@ -15,13 +16,14 @@ TileType PlanetSurface::getType(int r, int g, int b, int x, int y) {
 	}
 	if (rand() % 8 == 0) return TileType::ROCK;
 	if (g > r && g > b * 1.5) {
-        if (rand() % 6 == 0) return TileType::GRASS;
-        double noise = (noiseGen.GetNoise(x / 0.1f, y / 0.1f, noiseZ) + 1) / 2;
-        if (noise < 0.4) return TileType::TREE;
-        if (noise < 0.6) return TileType::BUSH;
+        if (rand() % 5 == 0) return TileType::GRASS;
+        double noise = (noiseGen.GetNoise((float)(x / this->noiseScl), (float)(y / this->noiseScl), noiseZ) + 1) / 2;
+        if (noise < 0.2) return TileType::GRASS;
+        if (noise < 0.3) return TileType::BUSH;
+        if (noise < 0.5) return TileType::TREE;
+        if (noise < 0.7) return TileType::FOREST;
         if (noise < 0.8) return TileType::PINE;
-        if (noise < 0.9) return TileType::PINEFOREST;
-        if (noise < 1.0) return TileType::GRASS;
+        if (noise < 1.0) return TileType::PINEFOREST;
 	}
 	return TileType::GRASS;
 }
@@ -77,6 +79,8 @@ void PlanetSurface::generate(Planet * p) {
         genChance = p->generationChances[0];
     }
     this->noiseZ = genZVal;
+    this->noiseScl = rndDouble(genConf["p_genNoisePlantsMin"].asDouble(), genConf["p_genNoisePlantsMax"].asDouble());
+    std::cout << this->noiseScl << "\n";
 
     for (int i = 0; i < p->radius * 2; i++) {
         for (int j = 0; j < p->radius * 2; j++) {
