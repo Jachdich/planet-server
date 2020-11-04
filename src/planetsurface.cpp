@@ -80,7 +80,6 @@ void PlanetSurface::generate(Planet * p) {
     }
     this->noiseZ = genZVal;
     this->noiseScl = rndDouble(genConf["p_genNoisePlantsMin"].asDouble(), genConf["p_genNoisePlantsMax"].asDouble());
-    std::cout << this->noiseScl << "\n";
 
     for (int i = 0; i < p->radius * 2; i++) {
         for (int j = 0; j < p->radius * 2; j++) {
@@ -110,5 +109,9 @@ Json::Value PlanetSurface::asJson() {
         res["tiles"].append((Json::Value::UInt64)tiles[i]);
     }
     res["rad"] = rad;
+
+    res["wood"] = stats.wood;
+    res["stone"] = stats.stone;
+    
     return res;
 }

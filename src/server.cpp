@@ -98,6 +98,17 @@ PlanetSurface * getSurfaceFromJson(Json::Value root) {
 	return getSurfaceFromLocator(loc);
 }
 
+bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
+    switch (type) {
+        case TaskType::BUILD_HOUSE:
+            if (surf->stats.wood >= 3 && surf->stats.stone >= 6) return true;
+            break;
+        default:
+            return true;
+    }
+    return false;
+}
+
 void handleClient(tcp::socket sock) {
 	std::unique_lock<std::mutex> uQ(updateQueue);
 	uint32_t id = lastID++;
@@ -205,21 +216,26 @@ void handleClient(tcp::socket sock) {
 				//do nothing. Just so `else` doesnt fire
 			} else if (req == "userAction") {
 				Json::Value result;
-				/*
+				
 				PlanetSurface * surf = getSurfaceFromJson(requestJson);
 				SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
 				uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
-
-				if (surf->stats.peopleIdle > 0) {
+				TaskType task = (TaskType)requestJson["action"].asInt();
+				
+				if (surf->stats.peopleIdle > 0 && hasMaterialsFor(surf, task)) {
 					surf->stats.peopleIdle--;
-					int time = getTimeForTask((TaskType)requestJson["action"].asInt());
+					int time = getTimeForTask(task);
 					dispachTask((TaskType)requestJson["action"].asInt(), target, loc, id);
 					result["status"] = (int)ErrorCode::OK;
 					result["time"] = time;
 				} else {
-					result["status"] = (int)ErrorCode::NO_PEOPLE_AVAILABLE;
+				    if (surf->stats.peopleIdle <= 0) {
+				        result["status"] = (int)ErrorCode::NO_PEOPLE_AVAILABLE;
+					} else {
+					    result["status"] = (int)ErrorCode::INSUFFICIENT_RESOURCES;
+					}
 					result["time"] = -1;
-				}*/
+				}
 
 				totalJson["results"].append(result);
 
@@ -256,17 +272,27 @@ void handleClient(tcp::socket sock) {
 
 void taskFinished(Task &t) {
     PlanetSurface * surf = getSurfaceFromLocator(t.surface);
+    surf->stats.peopleIdle++;
     switch (t.type) {
         case TaskType::FELL_TREE:
             surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
+            surf->stats.wood += 1;
             
         case TaskType::GATHER_MINERALS:
+            surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
+            surf->stats.stone += 1;
             break;
+            
         case TaskType::CLEAR:
             break;
+            
 	    case TaskType::PLANT_TREE:
 	        break;
+	        
 	    case TaskType::BUILD_HOUSE:
+	        surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::HOUSE;
+	        surf->stats.wood -= 3;
+	        surf->stats.stone -= 6;
 	        break;
     }
 }
