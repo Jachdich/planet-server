@@ -3,10 +3,12 @@
 #include <jsoncpp/json/json.h>
 #include <mutex>
 #include "logging.h"
+#include "network.h"
 #include "FastNoise.h"
 
 extern std::mutex m;
 extern Json::Value generation_config;
 extern Logger logger;
 extern FastNoise noiseGen;
+
 #endif
