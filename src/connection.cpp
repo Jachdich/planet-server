@@ -27,8 +27,8 @@ void Connection::handler(std::error_code ec, std::size_t bytes_transferred) {
 
         if (!parsingSuccessful) {
             logger.warn("Client sent malformed JSON request: " + request + ". Full error: " + errors);
-            //asio::error_code ign_error;
-            //asio::write(sock, asio::buffer("{\"status\": -1}\n"), ign_error);
+            asio::error_code ign_error;
+            asio::write(sock, asio::buffer("{\"status\": -1}\n"), ign_error);
 
         } else {
             this->handleRequest(root);

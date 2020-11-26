@@ -4,11 +4,11 @@ ServerInterface::ServerInterface(uint16_t port) : acceptor(ctx, asio::ip::tcp::e
     try {
         waitForClientConnection();
         //threadCtx = std::thread([this]() {ctx.run(); });
+        std::cout << "[SERVER] Started\n";
         ctx.run();
     } catch (std::exception& e) {
         std::cerr << "[SERVER] Exception: " << e.what() << "\n";
     }
-    std::cout << "[SERVER] Started\n";
 }
 
 ServerInterface::~ServerInterface() {

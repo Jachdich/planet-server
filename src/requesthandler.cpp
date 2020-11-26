@@ -162,6 +162,7 @@ void Connection::handleRequest(Json::Value& root) {
 	 uQ.unlock();
 
         Json::Value totalJson;
+        totalJson["requests"] = root["requests"];
 
         for (Json::Value requestJson: root["requests"]) {
             std::string req = requestJson.get("request", "NULL").asString();
