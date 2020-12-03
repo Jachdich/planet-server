@@ -26,11 +26,9 @@ struct Task {
 
 //std::mutex m;
 //std::mutex updateQueue;
-std::vector<Update> updates;
 std::vector<Task> tasks;
 
 std::mutex m;
-std::mutex updateQueue;
 
 int lastID;
 int numConnectedClients;
@@ -156,125 +154,77 @@ void handleTasks() {
 }
 
 void Connection::handleRequest(Json::Value& root) {
-	 std::unique_lock<std::mutex> uQ(updateQueue);
-	 uint32_t id = lastID++;
-	 numConnectedClients++;
-	 uQ.unlock();
+	uint32_t id = lastID++;
+	numConnectedClients++;
 
-        Json::Value totalJson;
-        totalJson["requests"] = root["requests"];
+    Json::Value totalJson;
+    totalJson["requests"] = root["requests"];
 
-        for (Json::Value requestJson: root["requests"]) {
-            std::string req = requestJson.get("request", "NULL").asString();
+    for (Json::Value requestJson: root["requests"]) {
+        std::string req = requestJson.get("request", "NULL").asString();
 
-            if (req == "getSector") {
-                int x = requestJson.get("x", 0).asInt();
-                int y = requestJson.get("y", 0).asInt();
-                Sector * sector = map.getSectorAt(x, y);
-				//sector->save("testsave");
-                Json::Value sec = sector->asJson();
+        if (req == "getSector") {
+            int x = requestJson.get("x", 0).asInt();
+            int y = requestJson.get("y", 0).asInt();
+            Sector * sector = map.getSectorAt(x, y);
+            //sector->save("testsave");
+            Json::Value sec = sector->asJson();
 
-                Json::Value result;
-                result["status"] = (int)ErrorCode::OK;
-                result["result"] = sec;
-                totalJson["results"].append(result);
+            Json::Value result;
+            result["status"] = (int)ErrorCode::OK;
+            result["result"] = sec;
+            totalJson["results"].append(result);
 
-            } else if (req == "getSurface") {
-                Json::Value result;
-                PlanetSurface * surf = getSurfaceFromJson(requestJson);
+        } else if (req == "getSurface") {
+            Json::Value result;
+            PlanetSurface * surf = getSurfaceFromJson(requestJson);
 
-				if (surf != nullptr) {
-					result["result"] = surf->asJson();
-					result["status"] = (int)ErrorCode::OK;
-				} else {
-					result["status"] = (int)ErrorCode::OUT_OF_BOUNDS;
-				}
-
-                totalJson["results"].append(result);
-
-			} else if (req == "change") {
-                Json::Value result;
-                PlanetSurface * surf = getSurfaceFromJson(requestJson);
-
-				if (surf != nullptr) {
-					int x, y;
-					x = requestJson.get("x", -1).asInt();
-					y = requestJson.get("y", -1).asInt();
-					std::cout << "Change Tile " << x << " " << y << "\n";
-					if (x < 0 || y < 0) {
-						result["status"] = -3;
-					} else {
-						surf->tiles[y * surf->rad * 2 + x] = requestJson.get("to", 0).asInt();
-
-						Json::Value updateJson;
-						getJsonFromSurfaceLocator(getSurfaceLocatorFromJson(requestJson), updateJson);
-						updateJson["x"] = x;
-						updateJson["y"] = y;
-						updateJson["to"] = requestJson.get("to", 0).asInt();
-
-						uQ.lock();
-						updates.push_back(Update(updateJson, id));
-						uQ.unlock();
-						result["status"] = (int)ErrorCode::OK;
-					}
-				} else {
-					result["status"] = (int)ErrorCode::OUT_OF_BOUNDS;
-				}
-
-                totalJson["results"].append(result);
-			} else if (req == "keepAlive") {
-				//do nothing. Just so `else` doesnt fire
-			} else if (req == "userAction") {
-				Json::Value result;
-				
-				PlanetSurface * surf = getSurfaceFromJson(requestJson);
-				SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
-				uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
-				TaskType task = (TaskType)requestJson["action"].asInt();
-				
-				if (surf->stats.peopleIdle > 0 && hasMaterialsFor(surf, task)) {
-					surf->stats.peopleIdle--;
-					int time = getTimeForTask(task);
-					dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, id);
-					result["status"] = (int)ErrorCode::OK;
-					result["time"] = time;
-				} else {
-				    if (surf->stats.peopleIdle <= 0) {
-				        result["status"] = (int)ErrorCode::NO_PEOPLE_AVAILABLE;
-					} else {
-					    result["status"] = (int)ErrorCode::INSUFFICIENT_RESOURCES;
-					}
-					result["time"] = -1;
-				}
-
-				totalJson["results"].append(result);
-
+            if (surf != nullptr) {
+	            result["result"] = surf->asJson();
+	            result["status"] = (int)ErrorCode::OK;
             } else {
-                logger.warn("Client sent invalid request: " + root.get("request", "NULL").asString());
-                Json::Value result;
-                result["status"] = (int)ErrorCode::INVALID_REQUEST;
-                totalJson["results"].append(result);
+	            result["status"] = (int)ErrorCode::OUT_OF_BOUNDS;
             }
+
+            totalJson["results"].append(result);
+
+        } else if (req == "userAction") {
+            Json::Value result;
+
+            PlanetSurface * surf = getSurfaceFromJson(requestJson);
+            SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
+            uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
+            TaskType task = (TaskType)requestJson["action"].asInt();
+
+            if (surf->stats.peopleIdle > 0 && hasMaterialsFor(surf, task)) {
+            	surf->stats.peopleIdle--;
+            	int time = getTimeForTask(task);
+            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, id);
+            	result["status"] = (int)ErrorCode::OK;
+            	result["time"] = time;
+            	
+            } else {
+                if (surf->stats.peopleIdle <= 0) {
+                    result["status"] = (int)ErrorCode::NO_PEOPLE_AVAILABLE;
+            	} else {
+            	    result["status"] = (int)ErrorCode::INSUFFICIENT_RESOURCES;
+            	}
+            	result["time"] = -1;
+            }
+
+            totalJson["results"].append(result);
+
+        } else {
+            logger.warn("Client sent invalid request: " + root.get("request", "NULL").asString());
+            Json::Value result;
+            result["status"] = (int)ErrorCode::INVALID_REQUEST;
+            totalJson["results"].append(result);
         }
+    }
 
-		uQ.lock();
-		for (unsigned int i = 0; i < updates.size(); i++) {
-			if (std::find(updates[i].readBy.begin(), updates[i].readBy.end(), id) != updates[i].readBy.end()) {
-				continue;
-			}
-			totalJson["updates"].append(updates[i].value);
-			updates[i].readBy.push_back(id);
-			updates[i].numRead++;
-		}
-		updates.erase(std::remove_if(updates.begin(), updates.end(), [](const Update &u) {
-			return u.numRead == numConnectedClients;
-			}), updates.end());
-
-		uQ.unlock();
-
-        asio::error_code err;
-        Json::StreamWriterBuilder writeBuilder;
-        writeBuilder["indentation"] = "";
-        const std::string output = Json::writeString(writeBuilder, totalJson);
-        asio::write(sock, asio::buffer(output + "\n"), err);
+    asio::error_code err;
+    Json::StreamWriterBuilder writeBuilder;
+    writeBuilder["indentation"] = "";
+    const std::string output = Json::writeString(writeBuilder, totalJson);
+    asio::write(sock, asio::buffer(output + "\n"), err);
 }
