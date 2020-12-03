@@ -1,5 +1,6 @@
 #include "network.h"
 #include "server.h"
+#include <chrono>
 
 Connection::Connection(asio::io_context& ctx, asio::ip::tcp::socket socket) : sock(std::move(socket)) {
     readUntil();
@@ -8,8 +9,13 @@ Connection::Connection(asio::io_context& ctx, asio::ip::tcp::socket socket) : so
 void Connection::handler(std::error_code ec, std::size_t bytes_transferred) {
     std::cout << bytes_transferred << "\n";
     if (!ec) {
-        std::string request(buf.begin(), buf.begin() + bytes_transferred);
-        buf.clear();
+        std::string request{
+                buffers_begin(buf.data()),
+                buffers_begin(buf.data()) + bytes_transferred
+                  - 1 /*for the \n*/};
+        
+        buf.consume(bytes_transferred);
+        readUntil();
 
         Json::CharReaderBuilder builder;
         Json::CharReader* reader = builder.newCharReader();
@@ -35,12 +41,12 @@ void Connection::handler(std::error_code ec, std::size_t bytes_transferred) {
         }
     } else {
         std::cerr << "ERROR: " <<  ec.message() << "\n";
+        readUntil();
     }
-    readUntil();
 }
 
 void Connection::readUntil() {
-    asio::async_read_until(sock, asio::dynamic_buffer(buf), "\n", [this] (std::error_code ec, std::size_t bytes_transferred) {
+    asio::async_read_until(sock, buf, '\n', [this] (std::error_code ec, std::size_t bytes_transferred) {
         this->handler(ec, bytes_transferred);
     });
 }
