@@ -2,7 +2,8 @@
 #include "server.h"
 #include <chrono>
 
-Connection::Connection(asio::io_context& ctx, asio::ip::tcp::socket socket) : sock(std::move(socket)) {
+Connection::Connection(asio::io_context& ctx, asio::ip::tcp::socket socket, uint32_t id) : sock(std::move(socket)) {
+    this->id = id;
     readUntil();
 }
     

@@ -21,7 +21,7 @@ void ServerInterface::waitForClientConnection() {
         [this](std::error_code ec, asio::ip::tcp::socket socket) {
             if (!ec) {
                 std::cout << "[SERVER] New connection: " << socket.remote_endpoint() << "\n";
-                Conn newConn = std::make_shared<Connection>(ctx, std::move(socket));
+                Conn newConn = std::make_shared<Connection>(ctx, std::move(socket), IDCounter++);
                 connections.push_back(newConn);
             } else {
                 std::cerr << "[SERVER] New connection error: " << ec.message() << "\n";

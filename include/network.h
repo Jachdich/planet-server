@@ -7,10 +7,10 @@
 class Connection {
 private:
     asio::ip::tcp::socket sock;
-    //std::vector<uint8_t> buf;
     asio::streambuf buf;
 
 public:
+    uint32_t id;
     Connection(asio::io_context& ctx, asio::ip::tcp::socket socket);
 
     void handleRequest(Json::Value& request);
