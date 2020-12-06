@@ -40,17 +40,21 @@ int numConnectedClients;
 SectorMap map;
 FastNoise noiseGen;
 
-void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, uint32_t id) {
-    switch (type) {
-        case TaskType::BUILD_HOUSE:
-            surf->stats.wood -= 3;
-            surf->stats.stone -= 6;
-            break;
-        default: break;
-    }
-	double time = getTimeForTask(type);
-	tasks.push_back({type, target, loc, time, id});
-}
+/*
+
+client: {request: user action, type: build house}
+server: {status: 0, serverRequest: change these material values}
+server: {serverRequest: add timer on this tile}
+server: {serverRequest: set timer on this time to 5}
+server: {serverRequest: set timer on this time to 4}
+server: {serverRequest: set timer on this time to 3}
+server: {serverRequest: set timer on this time to 2}
+server: {serverRequest: set timer on this time to 1}
+server: {serverRequest: remove timer on this tile}
+server: {serverRequest: set this tile to house}
+
+*/
+
 
 PlanetSurface * getSurfaceFromLocator(SurfaceLocator loc) {
     Sector * sec = map.getSectorAt(loc.sectorX, loc.sectorY);
@@ -82,6 +86,19 @@ bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
             return true;
     }
     return false;
+}
+
+void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, uint32_t id) {
+    switch (type) {
+        case TaskType::BUILD_HOUSE:
+            surf->stats.wood -= 3;
+            surf->stats.stone -= 6;
+            break;
+        default: break;
+    }
+//    conn->sendStatsChangeRequest(surf->stats);
+	double time = getTimeForTask(type);
+	tasks.push_back({type, target, loc, time, id});
 }
 
 void taskFinished(Task &t) {
@@ -154,9 +171,6 @@ void handleTasks() {
 }
 
 void Connection::handleRequest(Json::Value& root) {
-	uint32_t id = lastID++;
-	numConnectedClients++;
-
     Json::Value totalJson;
     totalJson["requests"] = root["requests"];
 
@@ -199,7 +213,7 @@ void Connection::handleRequest(Json::Value& root) {
             if (surf->stats.peopleIdle > 0 && hasMaterialsFor(surf, task)) {
             	surf->stats.peopleIdle--;
             	int time = getTimeForTask(task);
-            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, id);
+            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, 0);
             	result["status"] = (int)ErrorCode::OK;
             	result["time"] = time;
             	

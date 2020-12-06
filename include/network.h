@@ -2,16 +2,18 @@
 #define __NETWORK_H
 
 #include <asio.hpp>
+#include <asio/ssl.hpp>
+
 #include <iostream>
 #include <jsoncpp/json/json.h>
 class Connection {
 private:
-    asio::ip::tcp::socket sock;
-    //std::vector<uint8_t> buf;
+    asio::ssl::stream<asio::ip::tcp::socket> sock;
     asio::streambuf buf;
 
 public:
-    Connection(asio::io_context& ctx, asio::ip::tcp::socket socket);
+    uint32_t id;
+    Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, uint32_t id);
 
     void handleRequest(Json::Value& request);
     
@@ -24,6 +26,8 @@ class ServerInterface {
 private:
 
     asio::io_context ctx;
+    asio::ssl::context sslCtx;
+    
     std::thread threadCtx;
     asio::ip::tcp::acceptor acceptor;
 
