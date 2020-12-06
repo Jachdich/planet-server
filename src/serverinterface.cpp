@@ -1,6 +1,11 @@
 #include "network.h"
 
-ServerInterface::ServerInterface(uint16_t port) : acceptor(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)) {
+ServerInterface::ServerInterface(uint16_t port) : sslCtx(asio::ssl::context::tls),
+                                                  acceptor(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)) {
+
+    sslCtx.use_private_key_file("server.key", asio::ssl::context::pem);
+    sslCtx.use_certificate_chain_file("server.crt");
+    sslCtx.use_tmp_dh_file("dh2048.pem");
     try {
         waitForClientConnection();
         //threadCtx = std::thread([this]() {ctx.run(); });
@@ -21,7 +26,8 @@ void ServerInterface::waitForClientConnection() {
         [this](std::error_code ec, asio::ip::tcp::socket socket) {
             if (!ec) {
                 std::cout << "[SERVER] New connection: " << socket.remote_endpoint() << "\n";
-                Conn newConn = std::make_shared<Connection>(ctx, std::move(socket), IDCounter++);
+                
+                Conn newConn = std::make_shared<Connection>(sslCtx, std::move(socket), IDCounter++);
                 connections.push_back(newConn);
             } else {
                 std::cerr << "[SERVER] New connection error: " << ec.message() << "\n";
@@ -31,7 +37,7 @@ void ServerInterface::waitForClientConnection() {
     );
 }
 
-void ServerInterface::messageClient(Conn client, const Json::Value& msg) {
+void ServerInterface::messageClient(Conn con, const Json::Value& msg) {
     
 }
 

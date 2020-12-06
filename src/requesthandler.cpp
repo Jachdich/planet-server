@@ -88,7 +88,7 @@ bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
     return false;
 }
 
-void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, uint32_t id, Connection * conn) {
+void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, uint32_t id) {
     switch (type) {
         case TaskType::BUILD_HOUSE:
             surf->stats.wood -= 3;
@@ -96,7 +96,7 @@ void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurfa
             break;
         default: break;
     }
-    conn->sendStatsChangeRequest(surf->stats);
+//    conn->sendStatsChangeRequest(surf->stats);
 	double time = getTimeForTask(type);
 	tasks.push_back({type, target, loc, time, id});
 }
@@ -171,9 +171,6 @@ void handleTasks() {
 }
 
 void Connection::handleRequest(Json::Value& root) {
-	uint32_t id = lastID++;
-	numConnectedClients++;
-
     Json::Value totalJson;
     totalJson["requests"] = root["requests"];
 
@@ -216,7 +213,7 @@ void Connection::handleRequest(Json::Value& root) {
             if (surf->stats.peopleIdle > 0 && hasMaterialsFor(surf, task)) {
             	surf->stats.peopleIdle--;
             	int time = getTimeForTask(task);
-            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, id);
+            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, 0);
             	result["status"] = (int)ErrorCode::OK;
             	result["time"] = time;
             	
