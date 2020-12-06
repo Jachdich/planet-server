@@ -2,15 +2,17 @@
 
 ServerInterface::ServerInterface(uint16_t port) : sslCtx(asio::ssl::context::tls),
                                                   acceptor(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)) {
+}
 
-    sslCtx.use_private_key_file("server.key", asio::ssl::context::pem);
+void ServerInterface::startServer() {
+	sslCtx.use_private_key_file("server.key", asio::ssl::context::pem);
     sslCtx.use_certificate_chain_file("server.crt");
     sslCtx.use_tmp_dh_file("dh2048.pem");
     try {
         waitForClientConnection();
-        //threadCtx = std::thread([this]() {ctx.run(); });
+        threadCtx = std::thread([this]() {ctx.run(); });
         std::cout << "[SERVER] Started\n";
-        ctx.run();
+        runServerLogic();
     } catch (std::exception& e) {
         std::cerr << "[SERVER] Exception: " << e.what() << "\n";
     }

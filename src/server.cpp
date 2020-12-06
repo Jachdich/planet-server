@@ -4,7 +4,7 @@
 //TODO possible race condition with tasks
 
 Logger logger;
-
+ServerInterface iface(5555);
 int main() {
 
     const uint32_t LEVEL_SEED = 12345;
@@ -13,5 +13,5 @@ int main() {
     srand(LEVEL_SEED);
     loadConfig();
 
-    ServerInterface iface(5555);
+    iface.startServer();
 }

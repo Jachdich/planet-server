@@ -40,9 +40,12 @@ public:
     ServerInterface(uint16_t port);
     ~ServerInterface();
 
+	void startServer();
     void waitForClientConnection();
     void messageClient(Conn client, const Json::Value& msg);
     void messageAll(const Json::Value& msg, Conn ignoreClient);
 };
+
+void runServerLogic();
 
 #endif

@@ -6,6 +6,7 @@
 #include "sector.h"
 #include "sectormap.h"
 #include "common/surfacelocator.h"
+
 struct Update {
 	Json::Value value;
 	std::vector<int> readBy;
@@ -88,6 +89,14 @@ bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
     return false;
 }
 
+void sendStatsChangeRequest(Stats stats, uint64_t id) {
+	Json::Value root;
+	root["wood"] = stats.wood;
+	root["stone"] = stats.stone;
+	root["serverRequest"] = "statsChange";
+	//iface.messageClient(root, id);
+}
+
 void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, uint32_t id) {
     switch (type) {
         case TaskType::BUILD_HOUSE:
@@ -96,7 +105,7 @@ void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurfa
             break;
         default: break;
     }
-//    conn->sendStatsChangeRequest(surf->stats);
+    sendStatsChangeRequest(surf->stats, id);
 	double time = getTimeForTask(type);
 	tasks.push_back({type, target, loc, time, id});
 }
@@ -125,6 +134,7 @@ void taskFinished(Task &t) {
 	        surf->stats.houses += 1;
 	        break;
     }
+    sendStatsChangeRequest(surf->stats, t.caller);
 }
 
 long lastTime;
@@ -150,14 +160,11 @@ void tick() {
 	    		std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-
-bool threadStopped = false;
-
-void handleTasks() {
+void runServerLogic() {
      long ms = std::chrono::duration_cast<std::chrono::milliseconds>(
     		std::chrono::system_clock::now().time_since_epoch()).count();
     lastTime = ms;
-	while (!threadStopped) {
+	while (true) {
 		unsigned long long startns = std::chrono::duration_cast< std::chrono::microseconds >(
 	    	std::chrono::system_clock::now().time_since_epoch()).count();
 	    
