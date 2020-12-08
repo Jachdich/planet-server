@@ -4,8 +4,14 @@
 
 Connection::Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, uint32_t id) : sock(std::move(socket), ctx) {
     this->id = id;
-    sock.handshake(asio::ssl::stream_base::server);
-    readUntil();
+    asio::error_code ec;
+    sock.handshake(asio::ssl::stream_base::server, ec);
+    if (ec) {
+        std::cout << "[CONNECTION] Handshake error: " << ec.message() << "\n";
+        //close connection?
+    } else {
+        readUntil();
+    }
 }
     
 void Connection::handler(std::error_code ec, std::size_t bytes_transferred) {
@@ -51,4 +57,8 @@ void Connection::readUntil() {
     asio::async_read_until(sock, buf, '\n', [this] (std::error_code ec, std::size_t bytes_transferred) {
         this->handler(ec, bytes_transferred);
     });
+}
+
+void Connection::sendMessage(Json::Value root) {
+    std::cout << root << "\n";
 }

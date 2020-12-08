@@ -22,7 +22,7 @@ struct Task {
 	uint32_t target;
 	SurfaceLocator surface;
 	double timeLeft;
-	uint32_t caller;
+	Connection * caller;
 };
 
 //std::mutex m;
@@ -89,15 +89,25 @@ bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
     return false;
 }
 
-void sendStatsChangeRequest(Stats stats, uint64_t id) {
+void sendStatsChangeRequest(Stats stats, Connection * conn) {
 	Json::Value root;
 	root["wood"] = stats.wood;
 	root["stone"] = stats.stone;
 	root["serverRequest"] = "statsChange";
-	//iface.messageClient(root, id);
+	conn->sendMessage(root);
 }
 
-void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, uint32_t id) {
+void sendSetTimerRequest(double time, uint32_t x, uint32_t y, SurfaceLocator loc, Connection * conn) {
+    Json::Value root;
+    root["serverRequest"] = "setTimer";
+    root["time"] = time;
+    root["tileX"] = x;
+    root["tileY"] = y;
+    getJsonFromSurfaceLocator(loc, root);
+    conn->sendMessage(root);
+}
+
+void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, Connection * caller) {
     switch (type) {
         case TaskType::BUILD_HOUSE:
             surf->stats.wood -= 3;
@@ -105,9 +115,13 @@ void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurfa
             break;
         default: break;
     }
-    sendStatsChangeRequest(surf->stats, id);
+    sendStatsChangeRequest(surf->stats, caller);
 	double time = getTimeForTask(type);
-	tasks.push_back({type, target, loc, time, id});
+	uint32_t x = target / (surf->rad * 2);
+	uint32_t y = target % (surf->rad * 2);
+	
+	sendSetTimerRequest(time, x, y, loc, caller);
+	tasks.push_back({type, target, loc, time, caller});
 }
 
 void taskFinished(Task &t) {

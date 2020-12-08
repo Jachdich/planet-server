@@ -8,6 +8,7 @@ void ServerInterface::startServer() {
 	sslCtx.use_private_key_file("server.key", asio::ssl::context::pem);
     sslCtx.use_certificate_chain_file("server.crt");
     sslCtx.use_tmp_dh_file("dh2048.pem");
+    //sslCtx.set_options(asio::ssl::context::default_workarounds);
     try {
         waitForClientConnection();
         threadCtx = std::thread([this]() {ctx.run(); });
