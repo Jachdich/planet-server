@@ -60,5 +60,12 @@ void Connection::readUntil() {
 }
 
 void Connection::sendMessage(Json::Value root) {
-    std::cout << root << "\n";
+    asio::error_code err;
+    Json::StreamWriterBuilder writeBuilder;
+    writeBuilder["indentation"] = "";
+    const std::string output = Json::writeString(writeBuilder, root);
+    asio::write(sock, asio::buffer(output + "\n"), err);
+    if (err) {
+    	std::cout << "[CONNECTION] Could not write request. Error: " << err.message() << "\n";
+    }
 }

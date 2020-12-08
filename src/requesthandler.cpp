@@ -45,13 +45,7 @@ FastNoise noiseGen;
 
 client: {request: user action, type: build house}
 server: {status: 0, serverRequest: change these material values}
-server: {serverRequest: add timer on this tile}
-server: {serverRequest: set timer on this time to 5}
-server: {serverRequest: set timer on this time to 4}
-server: {serverRequest: set timer on this time to 3}
-server: {serverRequest: set timer on this time to 2}
-server: {serverRequest: set timer on this time to 1}
-server: {serverRequest: remove timer on this tile}
+server: {serverRequest: add timer on this tile at 5 seconds}
 server: {serverRequest: set this tile to house}
 
 */
@@ -131,6 +125,7 @@ void taskFinished(Task &t) {
         case TaskType::FELL_TREE:
             surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
             surf->stats.wood += 1;
+            break;
             
         case TaskType::GATHER_MINERALS:
             surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
@@ -257,9 +252,6 @@ void Connection::handleRequest(Json::Value& root) {
         }
     }
 
-    asio::error_code err;
-    Json::StreamWriterBuilder writeBuilder;
-    writeBuilder["indentation"] = "";
-    const std::string output = Json::writeString(writeBuilder, totalJson);
-    asio::write(sock, asio::buffer(output + "\n"), err);
+   sendMessage(totalJson);
+   
 }
