@@ -83,20 +83,29 @@ bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
     return false;
 }
 
-void sendStatsChangeRequest(Stats stats, Connection * conn) {
+void sendStatsChangeRequest(Stats stats, SurfaceLocator loc, Connection * conn) {
 	Json::Value root;
 	root["wood"] = stats.wood;
 	root["stone"] = stats.stone;
 	root["serverRequest"] = "statsChange";
+	getJsonFromSurfaceLocator(loc, root);
 	conn->sendMessage(root);
 }
 
-void sendSetTimerRequest(double time, uint32_t x, uint32_t y, SurfaceLocator loc, Connection * conn) {
+void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc, Connection * conn) {
+    Json::Value root;
+    root["tilePos"] = pos;
+    root["type"] = (int)type;
+    root["serverRequest"] = "changeTile";
+    getJsonFromSurfaceLocator(loc, root);
+    conn->sendMessage(root);
+}
+
+void sendSetTimerRequest(double time, uint32_t target, SurfaceLocator loc, Connection * conn) {
     Json::Value root;
     root["serverRequest"] = "setTimer";
     root["time"] = time;
-    root["tileX"] = x;
-    root["tileY"] = y;
+    root["tile"] = target;
     getJsonFromSurfaceLocator(loc, root);
     conn->sendMessage(root);
 }
@@ -109,12 +118,10 @@ void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurfa
             break;
         default: break;
     }
-    sendStatsChangeRequest(surf->stats, caller);
+    sendStatsChangeRequest(surf->stats, loc, caller);
 	double time = getTimeForTask(type);
-	uint32_t x = target / (surf->rad * 2);
-	uint32_t y = target % (surf->rad * 2);
 	
-	sendSetTimerRequest(time, x, y, loc, caller);
+	sendSetTimerRequest(time, target, loc, caller);
 	tasks.push_back({type, target, loc, time, caller});
 }
 
@@ -124,11 +131,13 @@ void taskFinished(Task &t) {
     switch (t.type) {
         case TaskType::FELL_TREE:
             surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
+            sendTileChangeRequest(t.target, TileType::GRASS, t.surface, t.caller);
             surf->stats.wood += 1;
             break;
             
         case TaskType::GATHER_MINERALS:
             surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
+            sendTileChangeRequest(t.target, TileType::GRASS, t.surface, t.caller);
             surf->stats.stone += 1;
             break;
             
@@ -140,10 +149,11 @@ void taskFinished(Task &t) {
 	        
 	    case TaskType::BUILD_HOUSE:
 	        surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::HOUSE;
+	        sendTileChangeRequest(t.target, TileType::HOUSE, t.surface, t.caller);
 	        surf->stats.houses += 1;
 	        break;
     }
-    sendStatsChangeRequest(surf->stats, t.caller);
+    sendStatsChangeRequest(surf->stats, t.surface, t.caller);
 }
 
 long lastTime;
@@ -229,7 +239,7 @@ void Connection::handleRequest(Json::Value& root) {
             if (surf->stats.peopleIdle > 0 && hasMaterialsFor(surf, task)) {
             	surf->stats.peopleIdle--;
             	int time = getTimeForTask(task);
-            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, 0);
+            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, this);
             	result["status"] = (int)ErrorCode::OK;
             	result["time"] = time;
             	

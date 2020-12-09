@@ -4,21 +4,14 @@
 #include <vector>
 #include <cstdint>
 #include "common/enums.h"
+#include "common/stats.h"
 class Planet;
-
-struct Stats {
-	uint32_t people;
-	uint32_t peopleIdle;
-	uint32_t houses;
-	uint32_t wood;
-	uint32_t stone;
-};
 
 class PlanetSurface {
 public:
     std::vector<uint64_t> tiles;
     bool generated = false;
-    Stats stats = {4, 4, 0, 0};
+    Stats stats;
     int rad = 0;
     int noiseZ;
     double noiseScl;
