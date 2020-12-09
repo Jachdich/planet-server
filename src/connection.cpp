@@ -4,8 +4,14 @@
 
 Connection::Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, uint32_t id) : sock(std::move(socket), ctx) {
     this->id = id;
-    sock.handshake(asio::ssl::stream_base::server);
-    readUntil();
+    asio::error_code ec;
+    sock.handshake(asio::ssl::stream_base::server, ec);
+    if (ec) {
+        std::cout << "[CONNECTION] Handshake error: " << ec.message() << "\n";
+        //close connection?
+    } else {
+        readUntil();
+    }
 }
     
 void Connection::handler(std::error_code ec, std::size_t bytes_transferred) {
@@ -51,4 +57,15 @@ void Connection::readUntil() {
     asio::async_read_until(sock, buf, '\n', [this] (std::error_code ec, std::size_t bytes_transferred) {
         this->handler(ec, bytes_transferred);
     });
+}
+
+void Connection::sendMessage(Json::Value root) {
+    asio::error_code err;
+    Json::StreamWriterBuilder writeBuilder;
+    writeBuilder["indentation"] = "";
+    const std::string output = Json::writeString(writeBuilder, root);
+    asio::write(sock, asio::buffer(output + "\n"), err);
+    if (err) {
+    	std::cout << "[CONNECTION] Could not write request. Error: " << err.message() << "\n";
+    }
 }

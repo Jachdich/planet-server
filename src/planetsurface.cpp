@@ -57,6 +57,8 @@ TileType PlanetSurface::getInitialTileType(int x, int y, Planet * p) {
 }
 
 void PlanetSurface::generate(Planet * p) {
+    this->stats.people = 4;
+    this->stats.peopleIdle = 4;
     int pos = -1;
     for (int i = 0; i < p->numColours; i++) {
         Pixel c = p->generationColours[i];
@@ -110,8 +112,7 @@ Json::Value PlanetSurface::asJson() {
     }
     res["rad"] = rad;
 
-    res["wood"] = stats.wood;
-    res["stone"] = stats.stone;
+    res["stats"] = getJsonFromStats(stats);
     
     return res;
 }

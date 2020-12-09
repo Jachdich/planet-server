@@ -10,5 +10,6 @@ extern std::mutex m;
 extern Json::Value generation_config;
 extern Logger logger;
 extern FastNoise noiseGen;
+extern ServerInterface iface;
 
 #endif

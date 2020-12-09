@@ -6,6 +6,7 @@
 #include "sector.h"
 #include "sectormap.h"
 #include "common/surfacelocator.h"
+
 struct Update {
 	Json::Value value;
 	std::vector<int> readBy;
@@ -21,7 +22,7 @@ struct Task {
 	uint32_t target;
 	SurfaceLocator surface;
 	double timeLeft;
-	uint32_t caller;
+	Connection * caller;
 };
 
 //std::mutex m;
@@ -44,13 +45,7 @@ FastNoise noiseGen;
 
 client: {request: user action, type: build house}
 server: {status: 0, serverRequest: change these material values}
-server: {serverRequest: add timer on this tile}
-server: {serverRequest: set timer on this time to 5}
-server: {serverRequest: set timer on this time to 4}
-server: {serverRequest: set timer on this time to 3}
-server: {serverRequest: set timer on this time to 2}
-server: {serverRequest: set timer on this time to 1}
-server: {serverRequest: remove timer on this tile}
+server: {serverRequest: add timer on this tile at 5 seconds}
 server: {serverRequest: set this tile to house}
 
 */
@@ -88,7 +83,34 @@ bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
     return false;
 }
 
-void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, uint32_t id) {
+void sendStatsChangeRequest(Stats stats, SurfaceLocator loc, Connection * conn) {
+	Json::Value root;
+	root["wood"] = stats.wood;
+	root["stone"] = stats.stone;
+	root["serverRequest"] = "statsChange";
+	getJsonFromSurfaceLocator(loc, root);
+	conn->sendMessage(root);
+}
+
+void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc, Connection * conn) {
+    Json::Value root;
+    root["tilePos"] = pos;
+    root["type"] = (int)type;
+    root["serverRequest"] = "changeTile";
+    getJsonFromSurfaceLocator(loc, root);
+    conn->sendMessage(root);
+}
+
+void sendSetTimerRequest(double time, uint32_t target, SurfaceLocator loc, Connection * conn) {
+    Json::Value root;
+    root["serverRequest"] = "setTimer";
+    root["time"] = time;
+    root["tile"] = target;
+    getJsonFromSurfaceLocator(loc, root);
+    conn->sendMessage(root);
+}
+
+void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, Connection * caller) {
     switch (type) {
         case TaskType::BUILD_HOUSE:
             surf->stats.wood -= 3;
@@ -96,9 +118,11 @@ void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurfa
             break;
         default: break;
     }
-//    conn->sendStatsChangeRequest(surf->stats);
+    sendStatsChangeRequest(surf->stats, loc, caller);
 	double time = getTimeForTask(type);
-	tasks.push_back({type, target, loc, time, id});
+	
+	sendSetTimerRequest(time, target, loc, caller);
+	tasks.push_back({type, target, loc, time, caller});
 }
 
 void taskFinished(Task &t) {
@@ -107,10 +131,13 @@ void taskFinished(Task &t) {
     switch (t.type) {
         case TaskType::FELL_TREE:
             surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
+            sendTileChangeRequest(t.target, TileType::GRASS, t.surface, t.caller);
             surf->stats.wood += 1;
+            break;
             
         case TaskType::GATHER_MINERALS:
             surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
+            sendTileChangeRequest(t.target, TileType::GRASS, t.surface, t.caller);
             surf->stats.stone += 1;
             break;
             
@@ -122,9 +149,11 @@ void taskFinished(Task &t) {
 	        
 	    case TaskType::BUILD_HOUSE:
 	        surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::HOUSE;
+	        sendTileChangeRequest(t.target, TileType::HOUSE, t.surface, t.caller);
 	        surf->stats.houses += 1;
 	        break;
     }
+    sendStatsChangeRequest(surf->stats, t.surface, t.caller);
 }
 
 long lastTime;
@@ -150,14 +179,11 @@ void tick() {
 	    		std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-
-bool threadStopped = false;
-
-void handleTasks() {
+void runServerLogic() {
      long ms = std::chrono::duration_cast<std::chrono::milliseconds>(
     		std::chrono::system_clock::now().time_since_epoch()).count();
     lastTime = ms;
-	while (!threadStopped) {
+	while (true) {
 		unsigned long long startns = std::chrono::duration_cast< std::chrono::microseconds >(
 	    	std::chrono::system_clock::now().time_since_epoch()).count();
 	    
@@ -213,7 +239,7 @@ void Connection::handleRequest(Json::Value& root) {
             if (surf->stats.peopleIdle > 0 && hasMaterialsFor(surf, task)) {
             	surf->stats.peopleIdle--;
             	int time = getTimeForTask(task);
-            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, 0);
+            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, this);
             	result["status"] = (int)ErrorCode::OK;
             	result["time"] = time;
             	
@@ -236,9 +262,6 @@ void Connection::handleRequest(Json::Value& root) {
         }
     }
 
-    asio::error_code err;
-    Json::StreamWriterBuilder writeBuilder;
-    writeBuilder["indentation"] = "";
-    const std::string output = Json::writeString(writeBuilder, totalJson);
-    asio::write(sock, asio::buffer(output + "\n"), err);
+   sendMessage(totalJson);
+   
 }
