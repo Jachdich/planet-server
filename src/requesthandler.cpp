@@ -50,28 +50,6 @@ server: {serverRequest: set this tile to house}
 
 */
 
-
-PlanetSurface * getSurfaceFromLocator(SurfaceLocator loc) {
-    Sector * sec = map.getSectorAt(loc.sectorX, loc.sectorY);
-	if (loc.starPos < sec->numStars) {
-		Star * s = &sec->stars[loc.starPos];
-		if (loc.planetPos < s->num) {
-			Planet * p = &s->planets[static_cast<int>(loc.planetPos)];
-			PlanetSurface * surf = p->getSurface();
-			return surf;
-		} else {
-			return nullptr;
-		}
-	} else {
-		return nullptr;
-	}
-}
-
-PlanetSurface * getSurfaceFromJson(Json::Value root) {
-	SurfaceLocator loc = getSurfaceLocatorFromJson(root);
-	return getSurfaceFromLocator(loc);
-}
-
 bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
     switch (type) {
         case TaskType::BUILD_HOUSE:
@@ -110,7 +88,26 @@ void sendSetTimerRequest(double time, uint32_t target, SurfaceLocator loc, Conne
     conn->sendMessage(root);
 }
 
-void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, Connection * caller) {
+bool isTaskOnTile(uint32_t tile) {
+    for (Task &t : tasks) {
+        if (t.target == tile) {
+            return true;
+        }
+    }
+    return false;
+}
+
+ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, Connection * caller) {
+    if (surf->stats.peopleIdle <= 0) {
+        return ErrorCode::NO_PEOPLE_AVAILABLE;
+	}
+	if (!hasMaterialsFor(surf, type)) {
+	    return ErrorCode::INSUFFICIENT_RESOURCES;
+	}
+    if (isTaskOnTile(target)) {
+        return ErrorCode::TASK_ALREADY_STARTED;;
+    }
+    surf->stats.peopleIdle--;
     switch (type) {
         case TaskType::BUILD_HOUSE:
             surf->stats.wood -= 3;
@@ -123,6 +120,7 @@ void dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurfa
 	
 	sendSetTimerRequest(time, target, loc, caller);
 	tasks.push_back({type, target, loc, time, caller});
+	return ErrorCode::OK;
 }
 
 void taskFinished(Task &t) {
@@ -234,24 +232,10 @@ void Connection::handleRequest(Json::Value& root) {
             PlanetSurface * surf = getSurfaceFromJson(requestJson);
             SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
             uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
-            TaskType task = (TaskType)requestJson["action"].asInt();
 
-            if (surf->stats.peopleIdle > 0 && hasMaterialsFor(surf, task)) {
-            	surf->stats.peopleIdle--;
-            	int time = getTimeForTask(task);
-            	dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, this);
-            	result["status"] = (int)ErrorCode::OK;
-            	result["time"] = time;
-            	
-            } else {
-                if (surf->stats.peopleIdle <= 0) {
-                    result["status"] = (int)ErrorCode::NO_PEOPLE_AVAILABLE;
-            	} else {
-            	    result["status"] = (int)ErrorCode::INSUFFICIENT_RESOURCES;
-            	}
-            	result["time"] = -1;
-            }
-
+        	surf->stats.peopleIdle--;
+        	result["status"] = (int)dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, this);
+        	
             totalJson["results"].append(result);
 
         } else {
