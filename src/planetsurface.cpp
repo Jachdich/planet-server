@@ -105,14 +105,24 @@ void PlanetSurface::generate(Planet * p) {
     generated = true;
 }
 
+PlanetSurface::PlanetSurface(Json::Value root) {
+    rad = root["rad"].asInt();
+    tiles.resize((rad * 2) * (rad * 2));
+    stats = getStatsFromJson(root["stats"]);
+    for (uint32_t i = 0; i < (rad * 2) * (rad * 2); i++) {
+        tiles[i] = root["tiles"][i].asUInt64();
+    }
+    generated = true;
+}
+
 Json::Value PlanetSurface::asJson() {
     Json::Value res;
     for (unsigned int i = 0; i < tiles.size(); i++) {
         res["tiles"].append((Json::Value::UInt64)tiles[i]);
     }
     res["rad"] = rad;
-
     res["stats"] = getJsonFromStats(stats);
+    res["generated"] = true;
     
     return res;
 }

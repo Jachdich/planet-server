@@ -17,6 +17,7 @@ public:
     double noiseScl;
 
     PlanetSurface();
+    PlanetSurface(Json::Value root);
     void generate(Planet * p);
 	TileType getType(int r, int g, int b, int x, int y);
     TileType getInitialTileType(int x, int y, Planet * p);

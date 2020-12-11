@@ -65,7 +65,11 @@ Planet::Planet(Json::Value res) {
         generationZValues[i] = res["generationZValues"][i].asInt();
         generationNoise[i]   = res["generationNoise"][i].asDouble();
     }
-    surface = new PlanetSurface();
+    if (res["surface"]["generated"].asBool()) {
+        surface = new PlanetSurface(res["surface"]);
+    } else {
+        surface = new PlanetSurface();
+    }
 }
 
 PlanetSurface * Planet::getSurface() {
@@ -90,6 +94,12 @@ Json::Value Planet::asJson() {
         res["generationChances"].append(generationChances[i]);
         res["generationZValues"].append(generationZValues[i]);
         res["generationNoise"].append(generationNoise[i]);
+    }
+
+    if (surface->generated) {
+        res["surface"] = surface->asJson();
+    } else {
+        res["surface"]["generated"] = false;
     }
 
     return res;

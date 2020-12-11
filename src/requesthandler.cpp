@@ -218,7 +218,8 @@ void Connection::handleRequest(Json::Value& root) {
         } else if (req == "getSurface") {
             Json::Value result;
             PlanetSurface * surf = getSurfaceFromJson(requestJson);
-
+            Sector * sec = map.getSectorAt(requestJson["secX"].asInt(), requestJson["secT"].asInt());
+            sec->save("testsave");
             if (surf != nullptr) {
 	            result["result"] = surf->asJson();
 	            result["status"] = (int)ErrorCode::OK;
