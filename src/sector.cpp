@@ -34,7 +34,7 @@ Star * Sector::getStarAt(int x, int y) {
 }
 
 void Sector::generate() {
-    this->numStars = rand() % 8 + 2;
+    this->numStars = rand() % 4 + 0;
     this->stars = std::vector<Star>(numStars);
     for (int i = 0; i < this->numStars; i++) {
         this->stars[i] = Star(rand() % this->r, rand() % this->r);
