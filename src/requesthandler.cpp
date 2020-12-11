@@ -65,6 +65,8 @@ void sendStatsChangeRequest(Stats stats, SurfaceLocator loc, Connection * conn) 
 	Json::Value root;
 	root["wood"] = stats.wood;
 	root["stone"] = stats.stone;
+	root["people"] = stats.people;
+	root["peopleIdle"] = stats.peopleIdle;
 	root["serverRequest"] = "statsChange";
 	getJsonFromSurfaceLocator(loc, root);
 	conn->sendMessage(root);
@@ -105,7 +107,7 @@ ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, Planet
 	    return ErrorCode::INSUFFICIENT_RESOURCES;
 	}
     if (isTaskOnTile(target)) {
-        return ErrorCode::TASK_ALREADY_STARTED;;
+        return ErrorCode::TASK_ALREADY_STARTED;
     }
     surf->stats.peopleIdle--;
     switch (type) {
@@ -233,7 +235,6 @@ void Connection::handleRequest(Json::Value& root) {
             SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
             uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
 
-        	surf->stats.peopleIdle--;
         	result["status"] = (int)dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, this);
         	
             totalJson["results"].append(result);
