@@ -6,6 +6,10 @@
 
 #include <iostream>
 #include <jsoncpp/json/json.h>
+
+#include "sectormap.h"
+extern SectorMap map;
+
 class Connection {
 private:
     asio::ssl::stream<asio::ip::tcp::socket> sock;
