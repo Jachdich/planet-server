@@ -86,7 +86,7 @@ void PlanetSurface::generate(Planet * p) {
     for (int i = 0; i < p->radius * 2; i++) {
         for (int j = 0; j < p->radius * 2; j++) {
             int z;
-            TileType type = getInitialTileType(i, j, p);
+            TileType type = getInitialTileType(j, i, p);
 			if (type != TileType::WATER) {
 				int xb = i - p->radius;
 				int yb = j - p->radius;

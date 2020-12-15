@@ -74,6 +74,8 @@ void sendStatsChangeRequest(Stats stats, SurfaceLocator loc, Connection * conn) 
 
 void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc, Connection * conn) {
     Json::Value root;
+    PlanetSurface * s = getSurfaceFromLocator(loc);
+    s->tiles[pos] = (s->tiles[pos] & 0xFFFFFFFF00000000) | (int)type;
     root["tilePos"] = pos;
     root["type"] = (int)type;
     root["serverRequest"] = "changeTile";
@@ -130,13 +132,11 @@ void taskFinished(Task &t) {
     surf->stats.peopleIdle++;
     switch (t.type) {
         case TaskType::FELL_TREE:
-            surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
             sendTileChangeRequest(t.target, TileType::GRASS, t.surface, t.caller);
             surf->stats.wood += 1;
             break;
             
         case TaskType::GATHER_MINERALS:
-            surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::GRASS;
             sendTileChangeRequest(t.target, TileType::GRASS, t.surface, t.caller);
             surf->stats.stone += 1;
             break;
@@ -148,7 +148,6 @@ void taskFinished(Task &t) {
 	        break;
 	        
 	    case TaskType::BUILD_HOUSE:
-	        surf->tiles[t.target] = (surf->tiles[t.target] & 0xFFFFFFFF00000000) | (int)TileType::HOUSE;
 	        sendTileChangeRequest(t.target, TileType::HOUSE, t.surface, t.caller);
 	        surf->stats.houses += 1;
 	        break;
@@ -218,8 +217,7 @@ void Connection::handleRequest(Json::Value& root) {
         } else if (req == "getSurface") {
             Json::Value result;
             PlanetSurface * surf = getSurfaceFromJson(requestJson);
-            Sector * sec = map.getSectorAt(requestJson["secX"].asInt(), requestJson["secT"].asInt());
-            sec->save("testsave");
+            //Sector * sec = map.getSectorAt(requestJson["secX"].asInt(), requestJson["secT"].asInt());
             if (surf != nullptr) {
 	            result["result"] = surf->asJson();
 	            result["status"] = (int)ErrorCode::OK;
