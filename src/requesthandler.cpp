@@ -101,6 +101,17 @@ bool isTaskOnTile(uint32_t tile) {
     return false;
 }
 
+std::vector<TileType> getExpectedTileType(TaskType type) {
+    switch (type) {
+        case TaskType::FELL_TREE:
+            return {TileType::TREE, TileType::PINE, TileType::PINEFOREST, TileType::FOREST};
+        case TaskType::GATHER_MINERALS:
+            return {TileType::ROCK};
+        default:
+            return {TileType::GRASS};
+    }
+}
+
 ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, Connection * caller) {
     if (surf->stats.peopleIdle <= 0) {
         return ErrorCode::NO_PEOPLE_AVAILABLE;
@@ -110,6 +121,12 @@ ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, Planet
 	}
     if (isTaskOnTile(target)) {
         return ErrorCode::TASK_ALREADY_STARTED;
+    }
+
+    std::vector<TileType> expected = getExpectedTileType(type);
+    TileType got = (TileType)(surf->tiles[target] & 0x00000000FFFFFFFF);
+    if (std::find(expected.begin(), expected.end(), got) == expected.end()) {
+        return ErrorCode::TASK_ON_WRONG_TILE;
     }
     surf->stats.peopleIdle--;
     switch (type) {
