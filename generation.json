@@ -10,4 +10,6 @@
 "p_baseColMax": 255,
 "p_angularVelMultiplier": 6000.0,
 "s_numStarsMin": 0,
-"s_numStarsMax": 4}
+"s_numStarsMax": 4,
+"p_numColoursMin": 0,
+"p_numColoursMax": 5}
