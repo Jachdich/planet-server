@@ -103,7 +103,7 @@ void Sector::save(std::string dir) {
 	std::ofstream afile;
 	afile.open(dir + "/" + "s" + std::to_string(x) + "." + std::to_string(y) + ".json");
 	Json::StreamWriterBuilder writeBuilder;
-	//writeBuilder["indentation"] = "";
+	writeBuilder["indentation"] = "";
 	afile << Json::writeString(writeBuilder, this->asJson()) << "\n";
 	afile.close();
 }

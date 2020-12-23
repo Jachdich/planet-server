@@ -9,5 +9,6 @@ public:
 
     SectorMap();
     Sector * getSectorAt(int x, int y);
+    void saveAll(std::string name);
 };
 #endif

@@ -14,7 +14,7 @@ Connection::Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, ui
     }
 }
     
-void Connection::handler(std::error_code ec, std::size_t bytes_transferred) {
+void Connection::handler(asio::error_code ec, std::size_t bytes_transferred) {
     std::cout << bytes_transferred << "\n";
     if (!ec) {
         std::string request{
@@ -47,6 +47,10 @@ void Connection::handler(std::error_code ec, std::size_t bytes_transferred) {
         } else {
             this->handleRequest(root);
         }
+    } else if ((ec == asio::error::eof) ||
+            (ec == asio::error::connection_reset) ||
+            (ec == asio::ssl::error::stream_truncated)) {
+        disconnect();
     } else {
         std::cerr << "ERROR: " <<  ec.message() << "\n";
         readUntil();
@@ -54,7 +58,7 @@ void Connection::handler(std::error_code ec, std::size_t bytes_transferred) {
 }
 
 void Connection::readUntil() {
-    asio::async_read_until(sock, buf, '\n', [this] (std::error_code ec, std::size_t bytes_transferred) {
+    asio::async_read_until(sock, buf, '\n', [this] (asio::error_code ec, std::size_t bytes_transferred) {
         this->handler(ec, bytes_transferred);
     });
 }
@@ -65,7 +69,13 @@ void Connection::sendMessage(Json::Value root) {
     writeBuilder["indentation"] = "";
     const std::string output = Json::writeString(writeBuilder, root);
     asio::write(sock, asio::buffer(output + "\n"), err);
-    if (err) {
-    	std::cout << "[CONNECTION] Could not write request. Error: " << err.message() << "\n";
+    if (!err) {
+        //success; potentially do something idk
+    } else if ((err == asio::error::eof) ||
+        (err == asio::error::connection_reset) ||
+        (err == asio::ssl::error::stream_truncated)) {
+        disconnect();
+    } else {
+        std::cout << "[CONNECTION] Could not write request. Error: " << err.message() << "\n";
     }
 }

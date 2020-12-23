@@ -27,14 +27,18 @@ Sector * SectorMap::getSectorAt(int x, int y) {
     if (needToGenerate || !this->cache[y][x].generated) {
         Sector a(x, y, 256);
 
-		if (a.existsInSave("testsave")) {
-			a.generate("testsave");
+		if (a.existsInSave(saveName)) {
+			a.generate(saveName);
 		} else {
 			a.generate();
-			a.save("testsave");
+			a.save(saveName);
 		}
 
         cache[y][x] = a;
     }
     return &this->cache[y][x];
+}
+
+void SectorMap::saveAll(std::string name) {
+    
 }

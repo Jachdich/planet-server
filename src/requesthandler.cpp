@@ -7,27 +7,8 @@
 #include "sectormap.h"
 #include "common/surfacelocator.h"
 
-struct Update {
-	Json::Value value;
-	std::vector<int> readBy;
-	int numRead = 1; //1 because the thread that instantiated the object has read it
-	Update(Json::Value v, int id) {
-		value = v;
-		readBy.push_back(id);
-	}
-};
-
-struct Task {
-	TaskType type;
-	uint32_t target;
-	SurfaceLocator surface;
-	double timeLeft;
-	Connection * caller;
-};
-
 //std::mutex m;
 //std::mutex updateQueue;
-std::vector<Task> tasks;
 
 std::mutex m;
 
@@ -53,7 +34,7 @@ server: {serverRequest: set this tile to house}
 bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
     switch (type) {
         case TaskType::BUILD_HOUSE:
-            if (surf->stats.wood >= 3 && surf->stats.stone >= 6) return true;
+            if (surf->stats.wood >= 0 && surf->stats.stone >= 0) return true;
             break;
         default:
             return true;
@@ -61,7 +42,7 @@ bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
     return false;
 }
 
-void sendStatsChangeRequest(Stats stats, SurfaceLocator loc, Connection * conn) {
+void sendStatsChangeRequest(Stats stats, SurfaceLocator loc) {
 	Json::Value root;
 	root["wood"] = stats.wood;
 	root["stone"] = stats.stone;
@@ -69,10 +50,13 @@ void sendStatsChangeRequest(Stats stats, SurfaceLocator loc, Connection * conn) 
 	root["peopleIdle"] = stats.peopleIdle;
 	root["serverRequest"] = "statsChange";
 	getJsonFromSurfaceLocator(loc, root);
-	conn->sendMessage(root);
+	PlanetSurface * s = getSurfaceFromLocator(loc);
+    for (Connection *conn: s->connectedClients) {
+        conn->sendMessage(root);
+    }
 }
 
-void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc, Connection * conn) {
+void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc) {
     Json::Value root;
     PlanetSurface * s = getSurfaceFromLocator(loc);
     s->tiles[pos] = (s->tiles[pos] & 0xFFFFFFFF00000000) | (int)type;
@@ -80,16 +64,21 @@ void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc, Conn
     root["type"] = (int)type;
     root["serverRequest"] = "changeTile";
     getJsonFromSurfaceLocator(loc, root);
-    conn->sendMessage(root);
+    for (Connection *conn: s->connectedClients) {
+        conn->sendMessage(root);
+    }
 }
 
-void sendSetTimerRequest(double time, uint32_t target, SurfaceLocator loc, Connection * conn) {
+void sendSetTimerRequest(double time, uint32_t target, SurfaceLocator loc) {
     Json::Value root;
     root["serverRequest"] = "setTimer";
     root["time"] = time;
     root["tile"] = target;
     getJsonFromSurfaceLocator(loc, root);
-    conn->sendMessage(root);
+    PlanetSurface * s = getSurfaceFromLocator(loc);
+    for (Connection *conn: s->connectedClients) {
+        conn->sendMessage(root);
+    }
 }
 
 bool isTaskOnTile(uint32_t tile) {
@@ -112,7 +101,7 @@ std::vector<TileType> getExpectedTileType(TaskType type) {
     }
 }
 
-ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf, Connection * caller) {
+ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf) {
     if (surf->stats.peopleIdle <= 0) {
         return ErrorCode::NO_PEOPLE_AVAILABLE;
 	}
@@ -131,16 +120,16 @@ ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, Planet
     surf->stats.peopleIdle--;
     switch (type) {
         case TaskType::BUILD_HOUSE:
-            surf->stats.wood -= 3;
-            surf->stats.stone -= 6;
+            surf->stats.wood -= 0;
+            surf->stats.stone -= 0;
             break;
         default: break;
     }
-    sendStatsChangeRequest(surf->stats, loc, caller);
+    sendStatsChangeRequest(surf->stats, loc);
 	double time = getTimeForTask(type);
 	
-	sendSetTimerRequest(time, target, loc, caller);
-	tasks.push_back({type, target, loc, time, caller});
+	sendSetTimerRequest(time, target, loc);
+	tasks.push_back({type, target, loc, time});
 	return ErrorCode::OK;
 }
 
@@ -149,12 +138,12 @@ void taskFinished(Task &t) {
     surf->stats.peopleIdle++;
     switch (t.type) {
         case TaskType::FELL_TREE:
-            sendTileChangeRequest(t.target, TileType::GRASS, t.surface, t.caller);
+            sendTileChangeRequest(t.target, TileType::GRASS, t.surface);
             surf->stats.wood += 1;
             break;
             
         case TaskType::GATHER_MINERALS:
-            sendTileChangeRequest(t.target, TileType::GRASS, t.surface, t.caller);
+            sendTileChangeRequest(t.target, TileType::GRASS, t.surface);
             surf->stats.stone += 1;
             break;
             
@@ -165,11 +154,11 @@ void taskFinished(Task &t) {
 	        break;
 	        
 	    case TaskType::BUILD_HOUSE:
-	        sendTileChangeRequest(t.target, TileType::HOUSE, t.surface, t.caller);
+	        sendTileChangeRequest(t.target, TileType::HOUSE, t.surface);
 	        surf->stats.houses += 1;
 	        break;
     }
-    sendStatsChangeRequest(surf->stats, t.surface, t.caller);
+    sendStatsChangeRequest(surf->stats, t.surface);
 }
 
 long lastTime;
@@ -223,7 +212,6 @@ void Connection::handleRequest(Json::Value& root) {
             int x = requestJson.get("x", 0).asInt();
             int y = requestJson.get("y", 0).asInt();
             Sector * sector = map.getSectorAt(x, y);
-            //sector->save("testsave");
             Json::Value sec = sector->asJson();
 
             Json::Value result;
@@ -234,6 +222,18 @@ void Connection::handleRequest(Json::Value& root) {
         } else if (req == "getSurface") {
             Json::Value result;
             PlanetSurface * surf = getSurfaceFromJson(requestJson);
+            surf->connectedClients.push_back(this);
+            this->surfacesLoaded.push_back(surf);
+            SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
+            for (Task &t : tasks) {
+                if (t.surface == loc) {
+                    //sendSetTimerRequest(t.timeLeft, t.target, loc, this);
+                    totalJson["serverRequest"] = "setTimer";
+                    totalJson["time"] = t.timeLeft;
+                    totalJson["tile"] = t.target;
+                    getJsonFromSurfaceLocator(t.surface, totalJson);
+                }
+            }
             //Sector * sec = map.getSectorAt(requestJson["secX"].asInt(), requestJson["secT"].asInt());
             if (surf != nullptr) {
 	            result["result"] = surf->asJson();
@@ -251,7 +251,7 @@ void Connection::handleRequest(Json::Value& root) {
             SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
             uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
 
-        	result["status"] = (int)dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf, this);
+        	result["status"] = (int)dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf);
         	
             totalJson["results"].append(result);
 
@@ -263,6 +263,11 @@ void Connection::handleRequest(Json::Value& root) {
         }
     }
 
-   sendMessage(totalJson);
-   
+   sendMessage(totalJson);   
+}
+
+void Connection::disconnect() {
+    for (PlanetSurface *surf : surfacesLoaded) {
+        surf->connectedClients.erase(std::remove(surf->connectedClients.begin(), surf->connectedClients.end(), this), surf->connectedClients.end()); 
+    }
 }
