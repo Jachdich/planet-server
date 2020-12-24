@@ -10,8 +10,7 @@ ServerInterface iface(5555);
 std::string saveName = "testsavev2.0";
 std::vector<Task> tasks;
 
-void save() {
-    map.saveAll(saveName);
+void saveTasks() {
     Json::Value tasksJson;
     for (Task& t : tasks) {
         Json::Value value;
@@ -29,6 +28,12 @@ void save() {
 	writeBuilder["indentation"] = "";
 	afile << Json::writeString(writeBuilder, tasksJson) << "\n";
 	afile.close();
+}
+
+void save() {
+    map.saveAll(saveName);
+    map.unloadAll();
+    saveTasks();
 }
 
 void loadTasks() {

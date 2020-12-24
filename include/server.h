@@ -14,6 +14,8 @@ struct Task {
 	double timeLeft;
 };
 
+void save();
+
 extern std::vector<Task> tasks;
 extern std::mutex m;
 extern Json::Value generation_config;

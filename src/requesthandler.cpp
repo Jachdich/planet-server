@@ -182,6 +182,7 @@ void tick() {
 
 	lastTime = std::chrono::duration_cast<std::chrono::milliseconds>(
 	    		std::chrono::system_clock::now().time_since_epoch()).count();
+	save(); //TODO not a good idea!
 }
 
 void runServerLogic() {
@@ -234,10 +235,11 @@ void Connection::handleRequest(Json::Value& root) {
                     getJsonFromSurfaceLocator(t.surface, totalJson);
                 }
             }
-            //Sector * sec = map.getSectorAt(requestJson["secX"].asInt(), requestJson["secT"].asInt());
             if (surf != nullptr) {
 	            result["result"] = surf->asJson();
 	            result["status"] = (int)ErrorCode::OK;
+	            Sector * sec = map.getSectorAt(requestJson["secX"].asInt(), requestJson["secT"].asInt());
+	            sec->save(saveName);
             } else {
 	            result["status"] = (int)ErrorCode::OUT_OF_BOUNDS;
             }
