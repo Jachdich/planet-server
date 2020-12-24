@@ -4,15 +4,6 @@
 #include <jsoncpp/json/json.h>
 #include <fstream>
 
-//int p_radMin = 8;
-//int p_radMax = 28;
-//double p_genChanceMin = 0.4d;
-//double p_genChanceMax = 0.7d;
-//double p_genNoiseMin = 0.1d;
-//double p_genNoiseMax = 1.0d;
-//int p_baseColMin = 80;
-//int p_baseColMax = 255;
-//double p_angularVelMultiplier = 6000.0d;
 Json::Value genConf;
 
 void setDefault(std::string value) {

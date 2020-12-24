@@ -6,6 +6,7 @@
 #include "common/enums.h"
 #include "common/stats.h"
 class Planet;
+class Connection;
 
 class PlanetSurface {
 public:
@@ -15,8 +16,10 @@ public:
     int rad = 0;
     int noiseZ;
     double noiseScl;
+    std::vector<Connection*> connectedClients;
 
     PlanetSurface();
+    PlanetSurface(Json::Value root);
     void generate(Planet * p);
 	TileType getType(int r, int g, int b, int x, int y);
     TileType getInitialTileType(int x, int y, Planet * p);

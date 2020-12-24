@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include "star.h"
+#include "generation.h"
 
 /*
 #include <random>
@@ -34,7 +35,7 @@ Star * Sector::getStarAt(int x, int y) {
 }
 
 void Sector::generate() {
-    this->numStars = rand() % 8 + 2;
+    this->numStars = rndInt(genConf["s_numStarsMin"].asInt(), genConf["s_numStarsMax"].asInt());
     this->stars = std::vector<Star>(numStars);
     for (int i = 0; i < this->numStars; i++) {
         this->stars[i] = Star(rand() % this->r, rand() % this->r);
@@ -102,7 +103,7 @@ void Sector::save(std::string dir) {
 	std::ofstream afile;
 	afile.open(dir + "/" + "s" + std::to_string(x) + "." + std::to_string(y) + ".json");
 	Json::StreamWriterBuilder writeBuilder;
-	//writeBuilder["indentation"] = "";
+	writeBuilder["indentation"] = "";
 	afile << Json::writeString(writeBuilder, this->asJson()) << "\n";
 	afile.close();
 }

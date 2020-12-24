@@ -3,7 +3,7 @@
 
 #include <asio.hpp>
 #include <asio/ssl.hpp>
-
+#include <vector>
 #include <iostream>
 #include <jsoncpp/json/json.h>
 
@@ -14,6 +14,7 @@ class Connection {
 private:
     asio::ssl::stream<asio::ip::tcp::socket> sock;
     asio::streambuf buf;
+    std::vector<PlanetSurface*> surfacesLoaded;
 
 public:
     uint32_t id;
@@ -23,8 +24,9 @@ public:
     void sendMessage(Json::Value root);
     
 private:
-    void handler(std::error_code ec, std::size_t bytes_transferred);
+    void handler(asio::error_code ec, std::size_t bytes_transferred);
     void readUntil();
+    void disconnect();
 };
 
 class ServerInterface {
