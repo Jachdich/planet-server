@@ -5,6 +5,7 @@
 #include <cstdint>
 #include "common/enums.h"
 #include "common/stats.h"
+#include "common/surfacelocator.h"
 class Planet;
 class Connection;
 
@@ -16,11 +17,13 @@ public:
     int rad = 0;
     int noiseZ;
     double noiseScl;
+    SurfaceLocator loc;
     std::vector<Connection*> connectedClients;
 
-    PlanetSurface();
-    PlanetSurface(Json::Value root);
+    PlanetSurface(SurfaceLocator loc);
+    PlanetSurface(Json::Value root, SurfaceLocator loc);
     void generate(Planet * p);
+    void tick(double elapsedTime);
 	TileType getType(int r, int g, int b, int x, int y);
     TileType getInitialTileType(int x, int y, Planet * p);
     Json::Value asJson();

@@ -8,15 +8,17 @@
 #include <jsoncpp/json/json.h>
 
 #include "sectormap.h"
+
 extern SectorMap map;
 
-class Connection {
+class Connection : public std::enable_shared_from_this<Connection> {
 private:
     asio::ssl::stream<asio::ip::tcp::socket> sock;
     asio::streambuf buf;
-    std::vector<PlanetSurface*> surfacesLoaded;
 
 public:
+    std::vector<PlanetSurface*> surfacesLoaded;
+
     uint32_t id;
     Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, uint32_t id);
 
@@ -39,11 +41,11 @@ private:
     asio::ip::tcp::acceptor acceptor;
 
     uint32_t IDCounter = 0;
-    
+
+public:
     typedef std::shared_ptr<Connection> Conn;
     std::vector<Conn> connections;
 
-public:
     ServerInterface(uint16_t port);
     ~ServerInterface();
 
@@ -54,5 +56,10 @@ public:
 };
 
 void runServerLogic();
+
+#include "server.h"
+#include "common/surfacelocator.h"
+
+void sendStatsChangeRequest(Stats stats, SurfaceLocator loc);
 
 #endif

@@ -4,6 +4,9 @@
 
 #include "generation.h"
 #include "planet.h"
+#include "common/surfacelocator.h"
+
+class Planet;
 class Star {
 public:
     int radius;
@@ -14,8 +17,8 @@ public:
 
     int num = 0;
     Star();
-    Star(int x, int y);
-	Star(Json::Value root);
+    Star(int x, int y, SurfaceLocator loc);
+	Star(Json::Value root, SurfaceLocator loc);
     Json::Value asJson();
     
 };

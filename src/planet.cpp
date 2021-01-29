@@ -6,7 +6,7 @@
 
 Planet::Planet() {}
 
-Planet::Planet(int posFromStar) {
+Planet::Planet(int posFromStar, SurfaceLocator loc) {
 	this->mass = 0;
     this->theta = (rndInt(0, 360) / 180.0) * 3.14159265358979323;
     this->posFromStar = posFromStar;
@@ -39,10 +39,10 @@ Planet::Planet(int posFromStar) {
     this->baseColour.rand(genConf["p_baseColMin"].asInt() % 256, genConf["p_baseColMax"].asInt() % 256);
     this->angularVelocity = 1.0 / (posFromStar * posFromStar) * genConf["p_angularVelMultiplier"].asDouble();
 
-    this->surface = new PlanetSurface();
+    this->surface = new PlanetSurface(loc);
 }
 
-Planet::Planet(Json::Value res) {
+Planet::Planet(Json::Value res, SurfaceLocator loc) {
     mass = res["mass"].asDouble();
     radius = res["radius"].asInt();
     numColours = res["numColours"].asInt();
@@ -66,9 +66,9 @@ Planet::Planet(Json::Value res) {
         generationNoise[i]   = res["generationNoise"][i].asDouble();
     }
     if (res["surface"]["generated"].asBool()) {
-        surface = new PlanetSurface(res["surface"]);
+        surface = new PlanetSurface(res["surface"], loc);
     } else {
-        surface = new PlanetSurface();
+        surface = new PlanetSurface(loc);
     }
 }
 

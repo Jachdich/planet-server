@@ -5,8 +5,7 @@
 #include "star.h"
 #include "sector.h"
 #include "sectormap.h"
-#include "common/surfacelocator.h"
-
+#include "common/surfacelocator_test.h"
 //std::mutex m;
 //std::mutex updateQueue;
 
@@ -155,7 +154,6 @@ void taskFinished(Task &t) {
 	        
 	    case TaskType::BUILD_HOUSE:
 	        sendTileChangeRequest(t.target, TileType::HOUSE, t.surface);
-	        surf->stats.houses += 1;
 	        break;
     }
     sendStatsChangeRequest(surf->stats, t.surface);
@@ -174,6 +172,19 @@ void tick() {
             taskFinished(t);
         }
     }
+    
+	std::vector<PlanetSurface*> surfacesToTick;
+	for (ServerInterface::Conn conn : iface.connections) {
+		for (PlanetSurface *surf : conn->surfacesLoaded) {
+			if (std::find(surfacesToTick.begin(), surfacesToTick.end(), surf) == surfacesToTick.end()) {
+				surfacesToTick.push_back(surf);
+			}
+		}
+	}
+
+	for (PlanetSurface *surf : surfacesToTick) {
+		surf->tick(delta);
+	}
 
     tasks.erase(std::remove_if(tasks.begin(), tasks.end(),
 	[](Task& t) {
@@ -210,8 +221,8 @@ void Connection::handleRequest(Json::Value& root) {
         std::string req = requestJson.get("request", "NULL").asString();
 
         if (req == "getSector") {
-            int x = requestJson.get("x", 0).asInt();
-            int y = requestJson.get("y", 0).asInt();
+            int x = requestJson.get("x", 0).asUInt();
+            int y = requestJson.get("y", 0).asUInt();
             Sector * sector = map.getSectorAt(x, y);
             Json::Value sec = sector->asJson();
 
@@ -269,7 +280,10 @@ void Connection::handleRequest(Json::Value& root) {
 }
 
 void Connection::disconnect() {
+	std::cout << "Client disconnected\n";
     for (PlanetSurface *surf : surfacesLoaded) {
         surf->connectedClients.erase(std::remove(surf->connectedClients.begin(), surf->connectedClients.end(), this), surf->connectedClients.end()); 
     }
+    iface.connections.erase(std::remove(iface.connections.begin(), iface.connections.end(), shared_from_this()), iface.connections.end()); 
+
 }

@@ -1,13 +1,15 @@
 #include "planetsurface.h"
 #include "planet.h"
 #include "server.h"
+#include "network.h"
 #include "generation.h"
 
 #include <jsoncpp/json/json.h>
 #include <iostream>
 
-PlanetSurface::PlanetSurface() {
+PlanetSurface::PlanetSurface(SurfaceLocator loc) {
     generated = false;
+    this->loc = loc;
 }
 
 TileType PlanetSurface::getType(int r, int g, int b, int x, int y) {
@@ -105,14 +107,41 @@ void PlanetSurface::generate(Planet * p) {
     generated = true;
 }
 
-PlanetSurface::PlanetSurface(Json::Value root) {
+void PlanetSurface::tick(double elapsedTime) {
+	Stats originalStats = stats;
+	stats.peopleSlots = 0;
+	for (uint16_t y = 0; y < rad * 2; y++) {
+		for (uint16_t x = 0; x < rad * 2; x++) {
+	    	uint32_t index = (y * rad * 2) + x;
+	    	switch ((TileType)(tiles[index] & 0xFFFFFFFF)) {
+	    		case TileType::HOUSE:
+	    			stats.peopleSlots += 3;
+	    			break;
+	    		default: break;
+	    	}
+	    }
+	}
+
+	if (stats.people < stats.peopleSlots) {
+		if (rndDouble(0.0, 10.0 / elapsedTime) < 1) {
+			stats.people += 1;
+			stats.peopleIdle += 1;
+		}
+	}
+	if (stats != originalStats) {
+		sendStatsChangeRequest(stats, loc);
+	}
+}
+
+PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc) {
     rad = root["rad"].asInt();
     tiles.resize((rad * 2) * (rad * 2));
     stats = getStatsFromJson(root["stats"]);
-    for (int32_t i = 0; i < (rad * 2) * (rad * 2); i++) {
+    for (uint32_t i = 0; i < (rad * 2) * (rad * 2); i++) {
         tiles[i] = root["tiles"][i].asUInt64();
     }
     generated = true;
+    this->loc = loc;
 }
 
 Json::Value PlanetSurface::asJson() {

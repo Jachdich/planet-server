@@ -7,7 +7,7 @@
 
 Star::Star() {}
 
-Star::Star(int x, int y) {
+Star::Star(int x, int y, SurfaceLocator loc) {
     this->x = x;
     this->y = y;
 
@@ -17,11 +17,12 @@ Star::Star(int x, int y) {
 
     this->planets = new Planet[this->num];
     for (int i = 0; i < this->num; i++) {
-        this->planets[i] = Planet(rand() % 200 + this->radius * 6 + 20);
+    	loc.planetPos = i;
+        this->planets[i] = Planet(rand() % 200 + this->radius * 6 + 20, loc);
     }
 }
 
-Star::Star(Json::Value root) {
+Star::Star(Json::Value root, SurfaceLocator loc) {
 	x = root["x"].asInt();
     y = root["y"].asInt();
     num = root["num"].asInt();
@@ -30,7 +31,8 @@ Star::Star(Json::Value root) {
     radius = root["radius"].asInt();
 	this->planets = new Planet[this->num];
     for (int i = 0; i < num; i++) {
-        planets[i] = Planet(root["planets"][i]);
+    	loc.planetPos = i;
+        planets[i] = Planet(root["planets"][i], loc);
     }
 }
 
