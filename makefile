@@ -7,7 +7,7 @@ server: $(OBJECTS)
 
 obj/%.o: src/%.cpp $(HEADERS)
 	@mkdir -p obj
-	g++ -std=c++20 -c -o $@ $< -Wall -Werror -g -Iinclude
+	g++ -std=c++20 -c -o $@ $< -Wall -O3 -Iinclude
 
 obj/FastNoise.o: src/FastNoise.cpp
 	g++ -c -o $@ $< -Wall -g -O3 -std=c++11 -Iinclude

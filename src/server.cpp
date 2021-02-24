@@ -9,6 +9,7 @@ Logger logger;
 ServerInterface iface(5555);
 std::string saveName = "testsavev2.0";
 std::vector<Task> tasks;
+uint64_t ticks = 0;
 
 void saveTasks() {
     Json::Value tasksJson;
@@ -34,6 +35,7 @@ void save() {
     map.saveAll(saveName);
     map.unloadAll();
     saveTasks();
+    //TODO save ticks
 }
 
 void loadTasks() {
@@ -76,6 +78,7 @@ int main() {
     srand(LEVEL_SEED);
     loadConfig();
     loadTasks();
+    registerTaskTypeInfo();
 
     iface.startServer();
 }

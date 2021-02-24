@@ -60,6 +60,6 @@ void runServerLogic();
 #include "server.h"
 #include "common/surfacelocator.h"
 
-void sendStatsChangeRequest(Stats stats, SurfaceLocator loc);
-
+void sendResourcesChangeRequest(Resources resources, SurfaceLocator loc);
+void registerTaskTypeInfo();
 #endif

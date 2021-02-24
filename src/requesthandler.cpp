@@ -9,6 +9,31 @@
 //std::mutex m;
 //std::mutex updateQueue;
 
+
+struct TaskTypeInfo {
+    std::vector<TileType> expectedTileTypes;
+    Resources cost;
+    Resources gains;
+    TileType tileType;
+    uint32_t time;
+};
+
+std::unordered_map<TaskType, TaskTypeInfo> taskTypeInfos;
+
+void registerTaskTypeInfo() {
+    taskTypeInfos[TaskType::FELL_TREE]             = TaskTypeInfo{{TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
+    taskTypeInfos[TaskType::MINE_ROCK]             = TaskTypeInfo{{TileType::ROCK}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
+    taskTypeInfos[TaskType::CLEAR]                 = TaskTypeInfo{{}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
+    taskTypeInfos[TaskType::PLANT_TREE]            = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::TREE, 2};
+    taskTypeInfos[TaskType::BUILD_HOUSE]           = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 6}, {"stone", 3}}), Resources(), TileType::HOUSE, 2};
+    taskTypeInfos[TaskType::BUILD_FARM]            = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 5}, {"stone", 7}}), Resources(), TileType::FARM, 2};
+    taskTypeInfos[TaskType::BUILD_GREENHOUSE]      = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::GREENHOUSE, 2};
+    taskTypeInfos[TaskType::BUILD_WATERPUMP]       = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::WATERPUMP, 2};
+    taskTypeInfos[TaskType::BUILD_MINE]            = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::MINE, 2};
+    taskTypeInfos[TaskType::BUILD_BLASTFURNACE]    = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::BLASTFURNACE, 2};
+    taskTypeInfos[TaskType::BUILD_WAREHOUSE]       = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::WAREHOUSE, 2};
+}
+
 std::mutex m;
 
 int lastID;
@@ -31,23 +56,11 @@ server: {serverRequest: set this tile to house}
 */
 
 bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
-    switch (type) {
-        case TaskType::BUILD_HOUSE:
-            if (surf->stats.wood >= 0 && surf->stats.stone >= 0) return true;
-            break;
-        default:
-            return true;
-    }
-    return false;
+   return surf->resources > taskTypeInfos[type].cost;
 }
 
-void sendStatsChangeRequest(Stats stats, SurfaceLocator loc) {
+void sendResourcesChangeRequest(Resources resources, SurfaceLocator loc) {
 	Json::Value root;
-	root["wood"] = stats.wood;
-	root["stone"] = stats.stone;
-	root["people"] = stats.people;
-	root["peopleIdle"] = stats.peopleIdle;
-	root["serverRequest"] = "statsChange";
 	getJsonFromSurfaceLocator(loc, root);
 	PlanetSurface * s = getSurfaceFromLocator(loc);
     for (Connection *conn: s->connectedClients) {
@@ -58,7 +71,9 @@ void sendStatsChangeRequest(Stats stats, SurfaceLocator loc) {
 void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc) {
     Json::Value root;
     PlanetSurface * s = getSurfaceFromLocator(loc);
-    s->tiles[pos] = (s->tiles[pos] & 0xFFFFFFFF00000000) | (int)type;
+    uint32_t z = s->tiles[pos]->z;
+    s->tiles[pos] = Tile::fromType(type);
+    s->tiles[pos]->z = z;
     root["tilePos"] = pos;
     root["type"] = (int)type;
     root["serverRequest"] = "changeTile";
@@ -90,18 +105,11 @@ bool isTaskOnTile(uint32_t tile) {
 }
 
 std::vector<TileType> getExpectedTileType(TaskType type) {
-    switch (type) {
-        case TaskType::FELL_TREE:
-            return {TileType::TREE, TileType::PINE, TileType::PINEFOREST, TileType::FOREST};
-        case TaskType::GATHER_MINERALS:
-            return {TileType::ROCK};
-        default:
-            return {TileType::GRASS};
-    }
+    return taskTypeInfos[type].expectedTileTypes;
 }
 
 ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf) {
-    if (surf->stats.peopleIdle <= 0) {
+    if (surf->resources["peopleIdle"] <= 0) {
         return ErrorCode::NO_PEOPLE_AVAILABLE;
 	}
 	if (!hasMaterialsFor(surf, type)) {
@@ -112,20 +120,15 @@ ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, Planet
     }
 
     std::vector<TileType> expected = getExpectedTileType(type);
-    TileType got = (TileType)(surf->tiles[target] & 0x00000000FFFFFFFF);
+    TileType got = surf->tiles[target]->getType();
     if (std::find(expected.begin(), expected.end(), got) == expected.end()) {
         return ErrorCode::TASK_ON_WRONG_TILE;
     }
-    surf->stats.peopleIdle--;
-    switch (type) {
-        case TaskType::BUILD_HOUSE:
-            surf->stats.wood -= 0;
-            surf->stats.stone -= 0;
-            break;
-        default: break;
-    }
-    sendStatsChangeRequest(surf->stats, loc);
-	double time = getTimeForTask(type);
+    surf->resources["peopleIdle"]--;
+    surf->resources -= taskTypeInfos[type].cost;
+
+    sendResourcesChangeRequest(surf->resources, loc);
+	double time = taskTypeInfos[type].time;
 	
 	sendSetTimerRequest(time, target, loc);
 	tasks.push_back({type, target, loc, time});
@@ -134,29 +137,11 @@ ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, Planet
 
 void taskFinished(Task &t) {
     PlanetSurface * surf = getSurfaceFromLocator(t.surface);
-    surf->stats.peopleIdle++;
-    switch (t.type) {
-        case TaskType::FELL_TREE:
-            sendTileChangeRequest(t.target, TileType::GRASS, t.surface);
-            surf->stats.wood += 1;
-            break;
-            
-        case TaskType::GATHER_MINERALS:
-            sendTileChangeRequest(t.target, TileType::GRASS, t.surface);
-            surf->stats.stone += 1;
-            break;
-            
-        case TaskType::CLEAR:
-            break;
-            
-	    case TaskType::PLANT_TREE:
-	        break;
-	        
-	    case TaskType::BUILD_HOUSE:
-	        sendTileChangeRequest(t.target, TileType::HOUSE, t.surface);
-	        break;
-    }
-    sendStatsChangeRequest(surf->stats, t.surface);
+    surf->resources["peopleIdle"]++;
+
+    surf->resources += taskTypeInfos[t.type].gains;
+    sendTileChangeRequest(t.target, taskTypeInfos[t.type].tileType, t.surface);
+    sendResourcesChangeRequest(surf->resources, t.surface);
 }
 
 long lastTime;
@@ -194,6 +179,7 @@ void tick() {
 	lastTime = std::chrono::duration_cast<std::chrono::milliseconds>(
 	    		std::chrono::system_clock::now().time_since_epoch()).count();
 	save(); //TODO not a good idea!
+	ticks++;
 }
 
 void runServerLogic() {

@@ -23,4 +23,5 @@ extern Logger logger;
 extern FastNoise noiseGen;
 extern ServerInterface iface;
 extern std::string saveName;
+extern uint64_t ticks;
 #endif
