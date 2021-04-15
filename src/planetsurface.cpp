@@ -114,7 +114,7 @@ void PlanetSurface::generate(Planet * p) {
 				z = -1;
 			}
 			tile->z = z;
-            tiles.push_back(tile);
+            tiles[j * (rad * 2) + i] = tile;
         }
     }
     generated = true;
