@@ -21,17 +21,17 @@ struct TaskTypeInfo {
 std::unordered_map<TaskType, TaskTypeInfo> taskTypeInfos;
 
 void registerTaskTypeInfo() {
-    taskTypeInfos[TaskType::FELL_TREE]             = TaskTypeInfo{{TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
-    taskTypeInfos[TaskType::MINE_ROCK]             = TaskTypeInfo{{TileType::ROCK}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
-    taskTypeInfos[TaskType::CLEAR]                 = TaskTypeInfo{{}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
-    taskTypeInfos[TaskType::PLANT_TREE]            = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::TREE, 2};
-    taskTypeInfos[TaskType::BUILD_HOUSE]           = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 6}, {"stone", 3}}), Resources(), TileType::HOUSE, 2};
-    taskTypeInfos[TaskType::BUILD_FARM]            = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 5}, {"stone", 7}}), Resources(), TileType::FARM, 2};
-    taskTypeInfos[TaskType::BUILD_GREENHOUSE]      = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::GREENHOUSE, 2};
-    taskTypeInfos[TaskType::BUILD_WATERPUMP]       = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::WATERPUMP, 2};
-    taskTypeInfos[TaskType::BUILD_MINE]            = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::MINE, 2};
-    taskTypeInfos[TaskType::BUILD_BLASTFURNACE]    = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::BLASTFURNACE, 2};
-    taskTypeInfos[TaskType::BUILD_WAREHOUSE]       = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::WAREHOUSE, 2};
+    taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo{{TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
+    taskTypeInfos[TaskType::MINE_ROCK]          = TaskTypeInfo{{TileType::ROCK}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
+    taskTypeInfos[TaskType::CLEAR]              = TaskTypeInfo{{}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
+    taskTypeInfos[TaskType::PLANT_TREE]         = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::TREE, 2};
+    taskTypeInfos[TaskType::BUILD_HOUSE]        = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 6}, {"stone", 3}}), Resources(), TileType::HOUSE, 2};
+    taskTypeInfos[TaskType::BUILD_FARM]         = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 5}, {"stone", 7}}), Resources(), TileType::FARM, 2};
+    taskTypeInfos[TaskType::BUILD_GREENHOUSE]   = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::GREENHOUSE, 2};
+    taskTypeInfos[TaskType::BUILD_WATERPUMP]    = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::WATERPUMP, 2};
+    taskTypeInfos[TaskType::BUILD_MINE]         = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::MINE, 2};
+    taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::BLASTFURNACE, 2};
+    taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::WAREHOUSE, 2};
 }
 
 std::mutex m;
@@ -62,7 +62,9 @@ bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
 void sendResourcesChangeRequest(Resources resources, SurfaceLocator loc) {
 	Json::Value root;
 	getJsonFromSurfaceLocator(loc, root);
+	root["resources"] = getJsonFromResources(resources);
 	PlanetSurface * s = getSurfaceFromLocator(loc);
+	root["serverRequest"] = "statsChange";
     for (Connection *conn: s->connectedClients) {
         conn->sendMessage(root);
     }

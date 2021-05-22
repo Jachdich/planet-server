@@ -158,7 +158,7 @@ void PlanetSurface::tick(double elapsedTime) {
     	    }
     	}
     	//DEBUG
-        if (resources["people"] < 4) resources["peopleSlots"] = 4;
+        if (resources["peopleSlots"] < 4) resources["peopleSlots"] = 4;
     	///DEBUG
 
         //enough places for people to live?
@@ -171,8 +171,10 @@ void PlanetSurface::tick(double elapsedTime) {
     	}
 
         //not enough places to live?
+        std::cout << resources["people"] << "\n";
     	if (resources["people"] > resources["peopleSlots"]) {
     	    //d i e
+    	    std::cout << "KILLING PEOPLE LOL\n";
             uint32_t delta = resources["people"] - resources["peopleSlots"];
     	    resources["people"] = resources["peopleSlots"];
     	    
@@ -191,6 +193,7 @@ void PlanetSurface::tick(double elapsedTime) {
 
 
     	resources["food"] -= 0.1 * resources["people"];
+    	//std::cout << resources["food"] << ", " << resources["people"] << "" << "\n";
 	}
 
  	if (resources != originalResources) {
