@@ -92,11 +92,23 @@ uint32_t rgb2hsv(uint8_t r_, uint8_t g_, uint8_t b_) {
     return ((int)h << 24) | ((int)(s * 256) << 8) | (int)(v * 256);
 }
 
+#include <iostream>
 
 void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     parent->resources["peopleSlots"] += 3;
-    
-    parent->resources["water"] -= 1;
+    for (int32_t x = -1; x < 2; x++) {
+        for (int32_t y = -1; y < 2; y++) {
+            if (x == 0 && y == 0) continue;
+            int32_t cx = pos.x + x;
+            int32_t cy = pos.y + y;
+            int32_t index = (cy * parent->rad * 2) + cx;
+            if (index > (parent->rad * 2) * (parent->rad * 2) || index < 0) continue;
+            if (parent->tiles[index]->getType() == TileType::WATER) {
+                parent->resources["water"] += 0.3;
+                return;
+            }
+        }
+    }
 }
 
 void FarmTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {

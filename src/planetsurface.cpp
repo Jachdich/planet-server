@@ -72,6 +72,7 @@ void PlanetSurface::generate(Planet * p) {
     this->resources["people"] = 4;
     this->resources["peopleIdle"] = 4;
     this->resources["food"] = 1000;
+    this->resources["water"] = 1000;
     int pos = -1;
     for (int i = 0; i < p->numColours; i++) {
         Pixel c = p->generationColours[i];
@@ -124,37 +125,14 @@ void PlanetSurface::tick(double elapsedTime) {
 	uint64_t deltaTicks = ticks - lastTicks;
 
 	Resources originalResources = resources.clone();
-	/*
-
-	for (uint16_t y = 0; y < rad * 2; y++) {
-		for (uint16_t x = 0; x < rad * 2; x++) {
-	    	uint32_t index = (y * rad * 2) + x;
-	    	
-	    	switch ((TileType)(tiles[index] & 0xFFFFFFFF)) {
-	    		case TileType::HOUSE:
-	    		    //check if house meets requirements
-	    		    if ((TileType)(tiles[(y * rad * 2) + x + 1] & 0xFFFFFFFF) == TileType::WATER ||
-	    		        (TileType)(tiles[(y * rad * 2) + x - 1] & 0xFFFFFFFF) == TileType::WATER ||
-	    		        (TileType)(tiles[((y - 1) * rad * 2) + x] & 0xFFFFFFFF) == TileType::WATER ||
-	    		        (TileType)(tiles[((y + 1) * rad * 2) + x] & 0xFFFFFFFF) == TileType::WATER) {
-	    			    resources["peopleSlots"] += 3;
-	    			}
-	    			else if (resources["water"] > 0) {
-	    			    resources["water"]--;
-	    			    resources["peopleSlots"] += 3;
-	    			}
-	    			break;
-	    		default: break;
-	    	}
-	    }
-	}*/
 
     for (uint64_t i = 0; i < deltaTicks; i++) {
+        uint64_t tileTicks = lastTicks + i;
     	resources["peopleSlots"] = 0;
     	for (uint16_t y = 0; y < rad * 2; y++) {
     		for (uint16_t x = 0; x < rad * 2; x++) {
     	    	uint32_t index = (y * rad * 2) + x;
-    	        tiles[index]->tick(ticks, olc::vi2d(x, y), this);
+    	        tiles[index]->tick(tileTicks, olc::vi2d(x, y), this);
     	    }
     	}
     	//DEBUG
@@ -171,10 +149,8 @@ void PlanetSurface::tick(double elapsedTime) {
     	}
 
         //not enough places to live?
-        std::cout << resources["people"] << "\n";
     	if (resources["people"] > resources["peopleSlots"]) {
     	    //d i e
-    	    std::cout << "KILLING PEOPLE LOL\n";
             uint32_t delta = resources["people"] - resources["peopleSlots"];
     	    resources["people"] = resources["peopleSlots"];
     	    
@@ -187,13 +163,13 @@ void PlanetSurface::tick(double elapsedTime) {
             //d i e
             if (resources["food"] < 0) resources["food"] = 0;
             if (resources["water"] < 0) resources["water"] = 0;
-            if (resources["people"] > 0) resources["people"] -= 1;
+            if (resources["people"] > 0) resources["people"] -= 1; //TODO this is based off of the tickrate!
             if (resources["peopleIdle"] > 0) resources["peopleIdle"] -= 1;
     	}
 
 
-    	resources["food"] -= 0.1 * resources["people"];
-    	//std::cout << resources["food"] << ", " << resources["people"] << "" << "\n";
+    	resources["food"]  -= 0.1 * resources["people"];
+    	resources["water"] -= 0.1 * resources["people"];
 	}
 
  	if (resources != originalResources) {
