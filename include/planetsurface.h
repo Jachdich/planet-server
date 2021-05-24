@@ -18,7 +18,7 @@ public:
     Resources resources;
     int rad = 0;
     int noiseZ;
-    uint64_t lastTicks;
+    uint64_t lastTicks = -1;
     double noiseScl;
     SurfaceLocator loc;
     Planet *parent;

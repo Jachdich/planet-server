@@ -119,9 +119,13 @@ void PlanetSurface::generate(Planet * p) {
         }
     }
     generated = true;
+    
 }
 
 void PlanetSurface::tick(double elapsedTime) {
+    if (lastTicks == -1) {
+        lastTicks = ticks - 1;
+    }
 	uint64_t deltaTicks = ticks - lastTicks;
 
 	Resources originalResources = resources.clone();
@@ -170,9 +174,11 @@ void PlanetSurface::tick(double elapsedTime) {
 
     	resources["food"]  -= 0.1 * resources["people"];
     	resources["water"] -= 0.1 * resources["people"];
+    	std::cout << resources["peopleSlots"] << ", " << resources["people"] << ", " << resources["food"] << ", " << resources["water"] << ", " << "\n";
 	}
 
- 	if (resources != originalResources) {
+ 	if (resources != originalResources || ticks % 100 == 0) {
+ 	    //ticks % 100 is to just make sure it is updated every now and then in case it gets out of sync for any reason
 		sendResourcesChangeRequest(resources, loc);
 	}
 	lastTicks = ticks;
