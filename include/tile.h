@@ -33,7 +33,7 @@ public:
 };
 
 struct VoidTile : public Tile {
-    inline TileType getType() { return TileType::VOID; }
+    inline TileType getType() { return TileType::AIR; }
 };
 struct GrassTile : public Tile {
     inline TileType getType() { return TileType::GRASS; }

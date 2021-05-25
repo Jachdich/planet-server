@@ -2,7 +2,7 @@
 
 Tile* Tile::fromType(TileType type) {
     switch (type) {
-    	case TileType::VOID:
+    	case TileType::AIR:
     	    return new VoidTile(); break;
     	case TileType::GRASS:
     	    return new GrassTile(); break;
