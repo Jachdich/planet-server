@@ -25,7 +25,7 @@ Sector * SectorMap::getSectorAt(int x, int y) {
         cache[y].resize(x + 1);
         needToGenerate = true;
     }*/
-    if (!this->cache.contains(index)) {
+    if (!(this->cache.count(index) > 0)) {
         Sector a(x, y, 256);
 
 		if (a.existsInSave(saveName)) {

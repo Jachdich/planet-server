@@ -6,9 +6,9 @@
 #include "sector.h"
 #include "sectormap.h"
 #include "common/surfacelocator_test.h"
+#include <thread>
 //std::mutex m;
 //std::mutex updateQueue;
-
 
 struct TaskTypeInfo {
     std::vector<TileType> expectedTileTypes;
