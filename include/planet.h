@@ -26,9 +26,11 @@ public:
     double angularVelocity;
 
     Planet();
-    Planet(int posFromStar, SurfaceLocator loc);
+    Planet(SurfaceLocator loc);
 	Planet(Json::Value res, SurfaceLocator loc);
     Json::Value asJson();
     PlanetSurface * getSurface();
+
+    void setPosFromStar(uint32_t pos);
 };
 #endif

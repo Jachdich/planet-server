@@ -6,10 +6,10 @@
 
 Planet::Planet() {}
 
-Planet::Planet(int posFromStar, SurfaceLocator loc) {
+Planet::Planet(SurfaceLocator loc) {
 	this->mass = 0;
     this->theta = (rndInt(0, 360) / 180.0) * 3.14159265358979323;
-    this->posFromStar = posFromStar;
+    this->posFromStar = 0;
     this->radius = rndInt(genConf["p_radMin"].asInt(), genConf["p_radMax"].asInt());
     this->numColours = rndInt(genConf["p_numColoursMin"].asInt(), genConf["p_numColoursMax"].asInt());
 
@@ -37,9 +37,13 @@ Planet::Planet(int posFromStar, SurfaceLocator loc) {
 	}
 
     this->baseColour.rand(genConf["p_baseColMin"].asInt() % 256, genConf["p_baseColMax"].asInt() % 256);
-    this->angularVelocity = 1.0 / (posFromStar * posFromStar) * genConf["p_angularVelMultiplier"].asDouble();
 
     this->surface = new PlanetSurface(loc);
+}
+
+void Planet::setPosFromStar(uint32_t pos) {
+    this->posFromStar = pos;
+    this->angularVelocity = 1.0 / (posFromStar * posFromStar) * genConf["p_angularVelMultiplier"].asDouble();
 }
 
 Planet::Planet(Json::Value res, SurfaceLocator loc) {
