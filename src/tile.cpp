@@ -112,13 +112,13 @@ void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
 }
 
 void FarmTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    if (ticks % 50 == 0) {
+    if (ticks % 25 == 0) {
         parent->resources["food"] += 5;
     }
 }
 
 void GreenhouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    if (ticks % 25 == 0) {
+    if (ticks % 12 == 0) {
         parent->resources["food"] += 5;
     }
 }

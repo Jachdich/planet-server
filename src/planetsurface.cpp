@@ -144,7 +144,7 @@ void PlanetSurface::tick(double elapsedTime) {
     	///DEBUG
 
         //enough places for people to live?
-    	if (resources["people"] < resources["peopleSlots"] && resources["food"] > 0) {
+    	if (resources["people"] < resources["peopleSlots"] && resources["food"] > 0 && resources["people"] > 0) {
     	    //r e p r o d u c e
     	    if (rndDouble(0.0, 1.0) > 0.9) {
     			resources["people"] += 1;
