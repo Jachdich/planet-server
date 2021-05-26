@@ -257,7 +257,10 @@ void Connection::handleRequest(Json::Value& root) {
             }
 
             totalJson["results"].append(result);
-
+        } else if (req == "unloadSurface") {
+            PlanetSurface * surf = getSurfaceFromJson(requestJson);
+            surf->connectedClients.erase(std::remove(surf->connectedClients.begin(), surf->connectedClients.end(), this), surf->connectedClients.end()); 
+            surfacesLoaded.erase(std::remove(surfacesLoaded.begin(), surfacesLoaded.end(), surf), surfacesLoaded.end()); 
         } else if (req == "userAction") {
             Json::Value result;
 
@@ -277,7 +280,7 @@ void Connection::handleRequest(Json::Value& root) {
         }
     }
 
-   sendMessage(totalJson);   
+   sendMessage(totalJson);
 }
 
 void Connection::disconnect() {
