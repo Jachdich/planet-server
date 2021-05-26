@@ -68,7 +68,9 @@ void Connection::sendMessage(Json::Value root) {
     Json::StreamWriterBuilder writeBuilder;
     writeBuilder["indentation"] = "";
     const std::string output = Json::writeString(writeBuilder, root);
+    std::unique_lock<std::mutex> lock(mutex);
     asio::write(sock, asio::buffer(output + "\n"), err);
+    lock.unlock();
     if (!err) {
         //success; potentially do something idk
     } else if ((err == asio::error::eof) ||

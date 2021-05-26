@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <jsoncpp/json/json.h>
+#include <mutex>
 
 #include "sectormap.h"
 
@@ -15,6 +16,7 @@ class Connection : public std::enable_shared_from_this<Connection> {
 private:
     asio::ssl::stream<asio::ip::tcp::socket> sock;
     asio::streambuf buf;
+    std::mutex mutex;
 
 public:
     std::vector<PlanetSurface*> surfacesLoaded;
