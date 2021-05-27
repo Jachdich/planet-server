@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include "star.h"
+#include "generation.h"
 
 /*
 #include <random>
@@ -16,7 +17,7 @@ void random_integer(int a, int b) {
 }*/
 
 Sector::Sector() {}
-Sector::Sector(int sx, int sy, int sr) {
+Sector::Sector(uint32_t sx, uint32_t sy, int sr) {
     this->x = sx;
     this->y = sy;
     this->r = sr;
@@ -34,10 +35,11 @@ Star * Sector::getStarAt(int x, int y) {
 }
 
 void Sector::generate() {
-    this->numStars = rand() % 8 + 2;
+    this->numStars = rndInt(genConf["c_numStarsMin"].asInt(), genConf["c_numStarsMax"].asInt());
     this->stars = std::vector<Star>(numStars);
     for (int i = 0; i < this->numStars; i++) {
-        this->stars[i] = Star(rand() % this->r, rand() % this->r);
+    	SurfaceLocator loc = {0, (uint8_t)i, (int32_t)x, (int32_t)y};
+        this->stars[i] = Star(rand() % this->r, rand() % this->r, loc);
     }
     generated = true;
 }
@@ -68,13 +70,14 @@ void Sector::generate(std::string dir) {
 
 	afile.close();
 
-	this->x = root["x"].asInt();
-    this->y = root["y"].asInt();
+	this->x = root["x"].asUInt();
+    this->y = root["y"].asUInt();
     this->r = root["r"].asInt();
     this->numStars = root["numStars"].asInt();
 	this->stars = std::vector<Star>(numStars);
     for (int i = 0; i < numStars; i++) {
-        stars[i] = Star(root["stars"][i]);
+        SurfaceLocator loc = {0, (uint8_t)i, (int32_t)x, (int32_t)y};
+        stars[i] = Star(root["stars"][i], loc);
     }
 
 	this->generated = true;
@@ -102,7 +105,7 @@ void Sector::save(std::string dir) {
 	std::ofstream afile;
 	afile.open(dir + "/" + "s" + std::to_string(x) + "." + std::to_string(y) + ".json");
 	Json::StreamWriterBuilder writeBuilder;
-	//writeBuilder["indentation"] = "";
+	writeBuilder["indentation"] = "";
 	afile << Json::writeString(writeBuilder, this->asJson()) << "\n";
 	afile.close();
 }

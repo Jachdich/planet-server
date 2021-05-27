@@ -7,12 +7,13 @@
 
 class Sector {
 public:
-    int x, y, r, numStars;
+    uint32_t x, y;
+    int32_t r, numStars;
     bool generated = false;
     std::vector<Star> stars;
     
     Sector();
-    Sector(int sx, int sy, int sr);
+    Sector(uint32_t sx, uint32_t sy, int sr);
     Star * getStarAt(int x, int y);
     void generate();
 	void generate(std::string dir);

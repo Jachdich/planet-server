@@ -3,6 +3,9 @@
 #include <jsoncpp/json/json.h>
 #include "generation.h"
 #include "planetsurface.h"
+#include "common/surfacelocator.h"
+
+class PlanetSurface;
 
 class Planet {
 public:
@@ -23,9 +26,11 @@ public:
     double angularVelocity;
 
     Planet();
-    Planet(int posFromStar);
-	Planet(Json::Value res);
+    Planet(SurfaceLocator loc);
+	Planet(Json::Value res, SurfaceLocator loc);
     Json::Value asJson();
     PlanetSurface * getSurface();
+
+    void setPosFromStar(uint32_t pos);
 };
 #endif

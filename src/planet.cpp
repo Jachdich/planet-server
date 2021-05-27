@@ -6,12 +6,12 @@
 
 Planet::Planet() {}
 
-Planet::Planet(int posFromStar) {
+Planet::Planet(SurfaceLocator loc) {
 	this->mass = 0;
     this->theta = (rndInt(0, 360) / 180.0) * 3.14159265358979323;
-    this->posFromStar = posFromStar;
+    this->posFromStar = 0;
     this->radius = rndInt(genConf["p_radMin"].asInt(), genConf["p_radMax"].asInt());
-    this->numColours = (this->radius - 5) / (genConf["p_radMax"].asInt() - 5.0) * 3;
+    this->numColours = rndInt(genConf["p_numColoursMin"].asInt(), genConf["p_numColoursMax"].asInt());
 
 	if (this->numColours == 0) {
 		this->generationChances = new double[1];
@@ -37,12 +37,16 @@ Planet::Planet(int posFromStar) {
 	}
 
     this->baseColour.rand(genConf["p_baseColMin"].asInt() % 256, genConf["p_baseColMax"].asInt() % 256);
-    this->angularVelocity = 1.0 / (posFromStar * posFromStar) * genConf["p_angularVelMultiplier"].asDouble();
 
-    this->surface = new PlanetSurface();
+    this->surface = new PlanetSurface(loc);
 }
 
-Planet::Planet(Json::Value res) {
+void Planet::setPosFromStar(uint32_t pos) {
+    this->posFromStar = pos;
+    this->angularVelocity = 1.0 / (posFromStar * posFromStar) * genConf["p_angularVelMultiplier"].asDouble();
+}
+
+Planet::Planet(Json::Value res, SurfaceLocator loc) {
     mass = res["mass"].asDouble();
     radius = res["radius"].asInt();
     numColours = res["numColours"].asInt();
@@ -52,7 +56,7 @@ Planet::Planet(Json::Value res) {
     theta = res["theta"].asDouble();
     angularVelocity = res["angularVelocity"].asDouble();
 
-    this->generationChances = new double[this->numColours];
+    this->generationChances = new double[this->numColours]; //TODO WILL NOT UNLOAD! VERY BAD IDEA
     this->generationColours = new Pixel[this->numColours];
     this->generationZValues = new int[this->numColours];
     this->generationNoise   = new double[this->numColours];
@@ -65,7 +69,11 @@ Planet::Planet(Json::Value res) {
         generationZValues[i] = res["generationZValues"][i].asInt();
         generationNoise[i]   = res["generationNoise"][i].asDouble();
     }
-    surface = new PlanetSurface();
+    if (res["surface"]["generated"].asBool()) {
+        surface = new PlanetSurface(res["surface"], loc);
+    } else {
+        surface = new PlanetSurface(loc);
+    }
 }
 
 PlanetSurface * Planet::getSurface() {
@@ -90,6 +98,12 @@ Json::Value Planet::asJson() {
         res["generationChances"].append(generationChances[i]);
         res["generationZValues"].append(generationZValues[i]);
         res["generationNoise"].append(generationNoise[i]);
+    }
+
+    if (surface->generated) {
+        res["surface"] = surface->asJson();
+    } else {
+        res["surface"]["generated"] = false;
     }
 
     return res;

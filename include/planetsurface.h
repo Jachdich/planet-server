@@ -4,23 +4,35 @@
 #include <vector>
 #include <cstdint>
 #include "common/enums.h"
-#include "common/stats.h"
+#include "common/resources.h"
+#include "common/surfacelocator.h"
+#include "tile.h"
 class Planet;
+class Connection;
+class Tile;
 
 class PlanetSurface {
 public:
-    std::vector<uint64_t> tiles;
+    std::vector<Tile*> tiles;
     bool generated = false;
-    Stats stats;
+    Resources resources;
     int rad = 0;
     int noiseZ;
+    uint64_t lastTicks = -1;
     double noiseScl;
+    SurfaceLocator loc;
+    Planet *parent;
+    std::vector<Connection*> connectedClients;
 
-    PlanetSurface();
+    PlanetSurface(SurfaceLocator loc);
+    PlanetSurface(Json::Value root, SurfaceLocator loc);
     void generate(Planet * p);
-	TileType getType(int r, int g, int b, int x, int y);
-    TileType getInitialTileType(int x, int y, Planet * p);
+    void tick(double elapsedTime);
+	Tile* getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t y);
+    Tile* getInitialTileType(int32_t x, int32_t y);
+    uint32_t getTileColour(int32_t x, int32_t y);
     Json::Value asJson();
+
 };
 
 #endif

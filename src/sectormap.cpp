@@ -6,14 +6,15 @@
 #include "server.h"
 
 SectorMap::SectorMap() {
-    this->cache = std::vector<std::vector<Sector>>(0);
 }
 
 Sector * SectorMap::getSectorAt(int x, int y) {
     std::lock_guard<std::mutex> lock(m);
-    if (x < 0 || y < 0) {
-        return &this->cache[0][0];
-    }
+    uint64_t index = (uint64_t)x << 32 | (uint32_t)y;
+    //if (x < 0 || y < 0) {
+    //    return &this->cache[0][0];
+    //}
+    /*
     bool needToGenerate = false;
     if ((signed)cache.size() <= y) {
         cache.resize(y + 1);
@@ -23,18 +24,26 @@ Sector * SectorMap::getSectorAt(int x, int y) {
     if ((signed)cache[y].size() <= x) {
         cache[y].resize(x + 1);
         needToGenerate = true;
-    }
-    if (needToGenerate || !this->cache[y][x].generated) {
+    }*/
+    if (!(this->cache.count(index) > 0)) {
         Sector a(x, y, 256);
 
-		if (a.existsInSave("testsave")) {
-			a.generate("testsave");
+		if (a.existsInSave(saveName)) {
+			a.generate(saveName);
 		} else {
 			a.generate();
-			a.save("testsave");
+			a.save(saveName);
 		}
 
-        cache[y][x] = a;
+        cache[index] = a;
     }
-    return &this->cache[y][x];
+    return &this->cache[index];
+}
+
+void SectorMap::saveAll(std::string name) {
+    //for (int y = 0; y < )
+}
+
+void SectorMap::unloadAll() {
+
 }

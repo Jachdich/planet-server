@@ -3,19 +3,24 @@
 
 #include <asio.hpp>
 #include <asio/ssl.hpp>
-
+#include <vector>
 #include <iostream>
 #include <jsoncpp/json/json.h>
+#include <mutex>
 
 #include "sectormap.h"
+
 extern SectorMap map;
 
-class Connection {
+class Connection : public std::enable_shared_from_this<Connection> {
 private:
     asio::ssl::stream<asio::ip::tcp::socket> sock;
     asio::streambuf buf;
+    std::mutex mutex;
 
 public:
+    std::vector<PlanetSurface*> surfacesLoaded;
+
     uint32_t id;
     Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, uint32_t id);
 
@@ -23,8 +28,9 @@ public:
     void sendMessage(Json::Value root);
     
 private:
-    void handler(std::error_code ec, std::size_t bytes_transferred);
+    void handler(asio::error_code ec, std::size_t bytes_transferred);
     void readUntil();
+    void disconnect();
 };
 
 class ServerInterface {
@@ -37,11 +43,11 @@ private:
     asio::ip::tcp::acceptor acceptor;
 
     uint32_t IDCounter = 0;
-    
+
+public:
     typedef std::shared_ptr<Connection> Conn;
     std::vector<Conn> connections;
 
-public:
     ServerInterface(uint16_t port);
     ~ServerInterface();
 
@@ -53,4 +59,9 @@ public:
 
 void runServerLogic();
 
+#include "server.h"
+#include "common/surfacelocator.h"
+
+void sendResourcesChangeRequest(Resources resources, SurfaceLocator loc);
+void registerTaskTypeInfo();
 #endif
