@@ -35,7 +35,7 @@ Star * Sector::getStarAt(int x, int y) {
 }
 
 void Sector::generate() {
-    this->numStars = rndInt(genConf["s_numStarsMin"].asInt(), genConf["s_numStarsMax"].asInt());
+    this->numStars = rndInt(genConf["c_numStarsMin"].asInt(), genConf["c_numStarsMax"].asInt());
     this->stars = std::vector<Star>(numStars);
     for (int i = 0; i < this->numStars; i++) {
     	SurfaceLocator loc = {0, (uint8_t)i, (int32_t)x, (int32_t)y};
