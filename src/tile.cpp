@@ -45,53 +45,6 @@ Tile* Tile::fromType(TileType type) {
                        //also the 0x1 is so I can debug shit dont question it
 }
 
-uint32_t rgb2hsv(uint8_t r_, uint8_t g_, uint8_t b_) {
-    double h, s, v, r, g, b;
-    r = (double)r_ / 256;
-    g = (double)g_ / 256;
-    b = (double)b_ / 256;
-    
-    double min, max, delta;
-
-    min = r < g ? r : g;
-    min = min < b ? min : b;
-
-    max = r > g ? r : g;
-    max = max > b ? max : b;
-
-    v = max; // v
-    delta = max - min;
-    if (delta < 0.00001)
-    {
-        s = 0;
-        h = 0; // undefined, maybe nan?
-        return ((int)(h / 360 * 256) << 16) | ((int)(s * 256) << 8) | (int)(v * 256);
-    }
-    if( max > 0.0 ) { // NOTE: if Max is == 0, this divide would cause a crash
-        s = (delta / max);                  // s
-    } else {
-        // if max is 0, then r = g = b = 0              
-        // s = 0, h is undefined
-        s = 0.0;
-        h = 0.0;
-        return ((int)(h / 360 * 256) << 16) | ((int)(s * 256) << 8) | (int)(v * 256);
-    }
-    if( r >= max )                           // > is bogus, just keeps compilor happy
-        h = ( g - b ) / delta;        // between yellow & magenta
-    else
-    if( g >= max )
-        h = 2.0 + ( b - r ) / delta;  // between cyan & yellow
-    else
-        h = 4.0 + ( r - g ) / delta;  // between magenta & cyan
-
-    h *= 60.0;                              // degrees
-
-    if( h < 0.0 )
-        h += 360.0;
-
-    return ((int)h << 24) | ((int)(s * 256) << 8) | (int)(v * 256);
-}
-
 #include <iostream>
 
 void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
@@ -130,21 +83,44 @@ void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
 }
 
 void MineTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    uint32_t colour = parent->getTileColour(pos.x, pos.y);
-    uint8_t r = colour >> 16;
-    uint8_t g = (colour >> 8) & 0xFF;
-    uint8_t b = colour & 0xFF;
-    uint32_t hsv = rgb2hsv(r, g, b);
-    uint16_t h = hsv >> 16;
-    uint8_t s = (hsv >> 8) & 0xFF;
-    uint8_t v = hsv & 0xFF;
-    if (h >= 47 && h <= 61 && s >= 64 && v >= 205) {
+    if (ticks % 100 == 0) {
+        //FFUUUUUUCKCCKCKKKKKK
+        uint32_t colour = parent->getTileColour(pos.y, pos.x);
+        //FUCK
+        TileMinerals minerals = getTileMinerals(colour);
+        parent->resources["ironOre"] += minerals.iron;
+        parent->resources["copperOre"] += minerals.copper;
+        parent->resources["aluminiumOre"] += minerals.aluminium;
+        parent->resources["sand"] += minerals.sand;
+
+        parent->resources["stone"] += 1;
         
     }
 }
 
+std::string getProduct(std::string n) {
+    if (n == "ironOre") return "iron";
+    if (n == "copperOre") return "copper";
+    if (n == "aluminiumOre") return "aluminium";
+    if (n == "sand") return "glass";
+    return "";
+}
+
 void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    
+    if (ticks % 50 == 0) {
+        if (parent->resources["wood"] < 1) return;
+        std::vector<std::string> choices;
+        if (parent->resources["ironOre"] >= 1) choices.push_back("ironOre");
+        if (parent->resources["aluminiumOre"] >= 1) choices.push_back("aluminiumOre");
+        if (parent->resources["copperOre"] >= 1) choices.push_back("copperOre");
+        if (parent->resources["sand"] >= 1) choices.push_back("sand");
+        if (choices.size() > 0) {
+            uint8_t choice = rand() % choices.size();
+            parent->resources[choices[choice]] -= 1;
+            parent->resources[getProduct(choices[choice])] += 1;
+            parent->resources["wood"] -= 1;
+        }
+    }
 }
 
 void WarehouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {

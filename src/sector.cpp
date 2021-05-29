@@ -24,10 +24,10 @@ Sector::Sector(uint32_t sx, uint32_t sy, int sr) {
 }
 
 Star * Sector::getStarAt(int x, int y) {
-    for (int i = 0; i < numStars; i++) {
-        int dx = x - stars[i].x;
-        int dy = y - stars[i].y;
-        if (dx * dx + dy * dy < stars[i].radius * stars[i].radius) {
+    for (uint32_t i = 0; i < numStars; i++) {
+        int32_t dx = x - stars[i].x;
+        int32_t dy = y - stars[i].y;
+        if ((unsigned)(dx * dx + dy * dy) < stars[i].radius * stars[i].radius) {
             return &this->stars[i];
         }
     }
@@ -37,7 +37,7 @@ Star * Sector::getStarAt(int x, int y) {
 void Sector::generate() {
     this->numStars = rndInt(genConf["c_numStarsMin"].asInt(), genConf["c_numStarsMax"].asInt());
     this->stars = std::vector<Star>(numStars);
-    for (int i = 0; i < this->numStars; i++) {
+    for (uint32_t i = 0; i < this->numStars; i++) {
     	SurfaceLocator loc = {0, (uint8_t)i, (int32_t)x, (int32_t)y};
         this->stars[i] = Star(rand() % this->r, rand() % this->r, loc);
     }
@@ -75,7 +75,7 @@ void Sector::generate(std::string dir) {
     this->r = root["r"].asInt();
     this->numStars = root["numStars"].asInt();
 	this->stars = std::vector<Star>(numStars);
-    for (int i = 0; i < numStars; i++) {
+    for (uint32_t i = 0; i < numStars; i++) {
         SurfaceLocator loc = {0, (uint8_t)i, (int32_t)x, (int32_t)y};
         stars[i] = Star(root["stars"][i], loc);
     }
@@ -91,7 +91,7 @@ bool Sector::existsInSave(std::string dir) {
 
 Json::Value Sector::asJson() {
     Json::Value res;
-    for (int i = 0; i < numStars; i++) {
+    for (uint32_t i = 0; i < numStars; i++) {
         res["stars"].append(stars[i].asJson());
     }
     res["numStars"] = numStars;

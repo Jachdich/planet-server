@@ -32,6 +32,12 @@ Tile* PlanetSurface::getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t
 }
 
 uint32_t PlanetSurface::getTileColour(int32_t x, int32_t y) {
+    //FUCCK THE FUCKING X AND Y ARE WEIRD AGAIN PLEASE FUCKING KILL ME NOW
+    //I CANNOT DEAL WITH THIS ANYMORE
+    //I CAN NOT GO ON
+    //I WILL NOT GO ON
+    //THIS IS THE END FOLKS
+    //HAVE FUN DEBUGGING THIS AFTER I'M GONE
     int32_t xb = x - parent->radius;
 	int32_t yb = y - parent->radius;
 
@@ -123,8 +129,8 @@ void PlanetSurface::generate(Planet * p) {
 }
 
 void PlanetSurface::tick(double elapsedTime) {
-    if (lastTicks == -1) {
-        lastTicks = ticks - 1;
+    if (lastTicks == (uint32_t)-1) {
+        lastTicks = ticks - 1; //TODO save and load lastTicks and also shouldn't this be set to zero?
     }
 	uint64_t deltaTicks = ticks - lastTicks;
 

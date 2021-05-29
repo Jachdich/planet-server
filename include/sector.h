@@ -8,7 +8,8 @@
 class Sector {
 public:
     uint32_t x, y;
-    int32_t r, numStars;
+    uint32_t r;
+    uint32_t numStars;
     bool generated = false;
     std::vector<Star> stars;
     
