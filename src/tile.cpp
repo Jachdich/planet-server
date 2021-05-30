@@ -1,4 +1,5 @@
 #include "tile.h"
+#include "network.h"
 
 Tile* Tile::fromType(TileType type) {
     switch (type) {
@@ -36,6 +37,8 @@ Tile* Tile::fromType(TileType type) {
     	    return new BlastfurnaceTile(); break;
     	case TileType::WAREHOUSE:
     	    return new WarehouseTile(); break;
+    	case TileType::FORESTRY:
+    	    return new ForestryTile(); break;
     }
     return (Tile*)0x1; //this is to get the compiler to shut the fuck up
                        //I don't wanna add a `default` case so the compiler
@@ -54,8 +57,8 @@ void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
             if (x == 0 && y == 0) continue;
             int32_t cx = pos.x + x;
             int32_t cy = pos.y + y;
-            int32_t index = (cy * parent->rad * 2) + cx;
-            if (index > (parent->rad * 2) * (parent->rad * 2) || index < 0) continue;
+            uint32_t index = (cy * parent->rad * 2) + cx;
+            if (cx < 0 || cx > parent->rad * 2 || cy < 0 || cy > parent->rad * 2) continue;
             if (parent->tiles[index]->getType() == TileType::WATER) {
                 parent->resources["water"] += 0.3;
                 return;
@@ -78,7 +81,19 @@ void GreenhouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) 
 
 void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     if (ticks % 10 == 0) {
-        parent->resources["water"] += 10;
+        for (int32_t x = -1; x < 2; x++) {
+            for (int32_t y = -1; y < 2; y++) {
+                if (x == 0 && y == 0) continue;
+                int32_t cx = pos.x + x;
+                int32_t cy = pos.y + y;
+                uint32_t index = (cy * parent->rad * 2) + cx;
+                if (cx < 0 || cx > parent->rad * 2 || cy < 0 || cy > parent->rad * 2) continue;
+                if (parent->tiles[index]->getType() == TileType::WATER) {
+                    parent->resources["water"] += 10;
+                    return;
+                }
+            }
+        }
     }
 }
 
@@ -125,4 +140,52 @@ void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent
 
 void WarehouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     
+}
+
+std::vector<uint32_t> getTilesInRadius(PlanetSurface *parent, olc::vi2d centre, olc::vi2d size, TileType type) {
+    int32_t xn = size.x / 2;
+    int32_t yn = size.y / 2;
+
+    std::vector<uint32_t> available_pos;
+    for (int32_t x = -xn; x < xn + 1; x++) {
+        for (int32_t y = -yn; y < yn + 1; y++) {
+            int32_t cx = centre.x + x;
+            int32_t cy = centre.y + y;
+            uint32_t index = (cy * parent->rad * 2) + cx;
+            if (cx < 0 || cx > parent->rad * 2 || cy < 0 || cy > parent->rad * 2) continue;
+            if (parent->tiles[index]->getType() == type) {
+                available_pos.push_back(index);
+            }
+        }
+    }
+    return available_pos;
+}
+
+void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+    if (ticks % 50 == 0) {
+        //std::vector<uint32_t> available_pos = getTilesInRadius(parent, pos, {5, 5}, TileType::GRASS);
+        //if (available_pos.size() == 0) return;
+        //uint32_t pos = available_pos[rand() % available_pos.size()];
+        int32_t cx = pos.x - 5 / 2 + rand() % 5;
+        int32_t cy = pos.y - 5 / 2 + rand() % 5;
+        uint32_t pos = (cy * parent->rad * 2) + cx;
+        if (parent->tiles[pos]->getType() == TileType::GRASS) {
+            sendTileChangeRequest(pos, TileType::TREE, parent->loc);
+        }
+    }
+
+    if ((ticks + 25) % 50 == 0) {
+    /*
+        std::vector<uint32_t> available_pos = getTilesInRadius(parent, pos, {5, 5}, TileType::TREE);
+        if (available_pos.size() == 0) return;
+        uint32_t pos = available_pos[rand() % available_pos.size()];
+        sendTileChangeRequest(pos, TileType::GRASS, parent->loc);*/
+        parent->resources["wood"] += 1;
+        int32_t cx = pos.x - 5 / 2 + rand() % 5;
+        int32_t cy = pos.y - 5 / 2 + rand() % 5;
+        uint32_t pos = (cy * parent->rad * 2) + cx;
+        if (parent->tiles[pos]->getType() == TileType::TREE) {
+            sendTileChangeRequest(pos, TileType::GRASS, parent->loc);
+        }
+    }
 }

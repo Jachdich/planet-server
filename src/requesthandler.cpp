@@ -33,6 +33,8 @@ void registerTaskTypeInfo() {
     taskTypeInfos[TaskType::BUILD_MINE]         = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 8}, {"stone", 8}}), Resources(), TileType::MINE, 120};
     taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 2}, {"stone", 8}}), Resources(), TileType::BLASTFURNACE, 140};
     taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 16}, {"stone", 12}}), Resources(), TileType::WAREHOUSE, 150};
+    taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::FORESTRY, 2};
+
 */
     taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo{{TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
     taskTypeInfos[TaskType::MINE_ROCK]          = TaskTypeInfo{{TileType::ROCK}, Resources(), Resources({{"stone", 1}}), TileType::GRASS, 2};
@@ -45,6 +47,7 @@ void registerTaskTypeInfo() {
     taskTypeInfos[TaskType::BUILD_MINE]         = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::MINE, 2};
     taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::BLASTFURNACE, 2};
     taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::WAREHOUSE, 2};
+    taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo{{TileType::GRASS}, Resources(), Resources(), TileType::FORESTRY, 2};
 }
 
 std::mutex m;
@@ -87,6 +90,7 @@ void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc) {
     Json::Value root;
     PlanetSurface * s = getSurfaceFromLocator(loc);
     uint32_t z = s->tiles[pos]->z;
+    delete s->tiles[pos]; // I Think
     s->tiles[pos] = Tile::fromType(type);
     s->tiles[pos]->z = z;
     root["tilePos"] = pos;

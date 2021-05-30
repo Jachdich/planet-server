@@ -30,6 +30,7 @@ public:
     virtual void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {}
     virtual TileType getType() = 0;
     static Tile* fromType(TileType type);
+    virtual ~Tile() {}
 };
 
 struct VoidTile : public Tile {
@@ -90,5 +91,8 @@ struct WarehouseTile : public Tile {
     inline TileType getType() { return TileType::WAREHOUSE; }
     void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
-
+struct ForestryTile : public Tile {
+    inline TileType getType() { return TileType::FORESTRY; }
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+};
 #endif
