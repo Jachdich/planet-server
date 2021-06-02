@@ -27,6 +27,7 @@ namespace olc {
 class Tile {
 public:
     uint32_t z = 0;
+    bool has_person = false;
     virtual void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {}
     virtual TileType getType() = 0;
     static Tile* fromType(TileType type);

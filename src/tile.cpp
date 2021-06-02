@@ -42,7 +42,7 @@ Tile* Tile::fromType(TileType type) {
     }
     return (Tile*)0x1; //this is to get the compiler to shut the fuck up
                        //I don't wanna add a `default` case so the compiler
-                       //*does* warn if a TileType is not handled, but since
+                       // *does* warn if a TileType is not handled, but since
                        //all types are handled there is no issue.
 
                        //also the 0x1 is so I can debug shit dont question it
@@ -69,18 +69,41 @@ void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
 
 void FarmTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     if (ticks % 25 == 0) {
-        parent->resources["food"] += 5;
+        if (!has_person) {
+            if (parent->resources["peopleIdle"] > 0) {
+                parent->resources["peopleIdle"] -= 1;
+                has_person = true;
+            }
+        }
+        if (has_person) {
+            parent->resources["food"] += 5;
+        }
     }
 }
 
 void GreenhouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     if (ticks % 12 == 0) {
-        parent->resources["food"] += 5;
+        if (!has_person) {
+            if (parent->resources["peopleIdle"] > 0) {
+                parent->resources["peopleIdle"] -= 1;
+                has_person = true;
+            }
+        }
+        if (has_person) {
+            parent->resources["food"] += 5;
+        }
     }
 }
 
 void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     if (ticks % 10 == 0) {
+        if (!has_person) {
+            if (parent->resources["peopleIdle"] > 0) {
+                parent->resources["peopleIdle"] -= 1;
+                has_person = true;
+            }
+        }
+        if (!has_person) return;
         for (int32_t x = -1; x < 2; x++) {
             for (int32_t y = -1; y < 2; y++) {
                 if (x == 0 && y == 0) continue;
@@ -98,7 +121,7 @@ void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
 }
 
 void MineTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    if (ticks % 100 == 0) {
+    if (ticks % 150 == 0) {
         //FFUUUUUUCKCCKCKKKKKK
         uint32_t colour = parent->getTileColour(pos.y, pos.x);
         //FUCK
@@ -123,6 +146,14 @@ std::string getProduct(std::string n) {
 
 void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     if (ticks % 50 == 0) {
+        if (!has_person) {
+            if (parent->resources["peopleIdle"] > 0) {
+                parent->resources["peopleIdle"] -= 1;
+                has_person = true;
+            }
+        }
+        if (!has_person) return;
+        
         if (parent->resources["wood"] < 1) return;
         std::vector<std::string> choices;
         if (parent->resources["ironOre"] >= 1) choices.push_back("ironOre");
@@ -163,6 +194,16 @@ std::vector<uint32_t> getTilesInRadius(PlanetSurface *parent, olc::vi2d centre, 
 
 void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
     if (ticks % 50 == 0) {
+        if (!has_person) {
+            if (parent->resources["peopleIdle"] > 0) {
+                parent->resources["peopleIdle"] -= 1;
+                has_person = true;
+            }
+        }
+        if (!has_person) return;
+    }
+    
+    if (ticks % 100 == 0) {
         //std::vector<uint32_t> available_pos = getTilesInRadius(parent, pos, {5, 5}, TileType::GRASS);
         //if (available_pos.size() == 0) return;
         //uint32_t pos = available_pos[rand() % available_pos.size()];
@@ -174,7 +215,7 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
         }
     }
 
-    if ((ticks + 25) % 50 == 0) {
+    if ((ticks + 50) % 100 == 0) {
     /*
         std::vector<uint32_t> available_pos = getTilesInRadius(parent, pos, {5, 5}, TileType::TREE);
         if (available_pos.size() == 0) return;

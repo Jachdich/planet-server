@@ -25,5 +25,5 @@
     "s_noiseSclMin": 20,
     "s_noiseSclMax": 40,
     "s_noiseEffectMin": 0.35,
-    "s_noiseEffectMax": 0.15,
+    "s_noiseEffectMax": 0.15
 }
