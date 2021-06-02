@@ -41,9 +41,10 @@ Sector * SectorMap::getSectorAt(int x, int y) {
 }
 
 void SectorMap::saveAll(std::string name) {
-    //for (int y = 0; y < )
+    for (auto &pair : this->cache) {
+        pair.second.save(name);
+    }
 }
 
 void SectorMap::unloadAll() {
-
 }

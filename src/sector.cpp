@@ -46,7 +46,7 @@ void Sector::generate() {
 
 void Sector::generate(std::string dir) {
 	std::ifstream afile;
-	afile.open(dir + "/" + "s" + std::to_string(x) + "." + std::to_string(y) + ".json");
+	afile.open(dir + "/" + "s" + std::to_string((int32_t)x) + "." + std::to_string((int32_t)y) + ".json");
 
 	std::string content((std::istreambuf_iterator<char>(afile)), (std::istreambuf_iterator<char>()));
 
@@ -103,7 +103,7 @@ Json::Value Sector::asJson() {
 
 void Sector::save(std::string dir) {
 	std::ofstream afile;
-	afile.open(dir + "/" + "s" + std::to_string(x) + "." + std::to_string(y) + ".json");
+	afile.open(dir + "/" + "s" + std::to_string((int32_t)x) + "." + std::to_string((int32_t)y) + ".json");
 	Json::StreamWriterBuilder writeBuilder;
 	writeBuilder["indentation"] = "";
 	afile << Json::writeString(writeBuilder, this->asJson()) << "\n";

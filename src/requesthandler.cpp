@@ -198,7 +198,9 @@ void tick() {
 
 	lastTime = std::chrono::duration_cast<std::chrono::milliseconds>(
 	    		std::chrono::system_clock::now().time_since_epoch()).count();
-	save(); //TODO not a good idea!
+    if (ticks % 100 == 0) {
+	    save(); //TODO not a good idea!
+	}
 	ticks++;
 }
 
