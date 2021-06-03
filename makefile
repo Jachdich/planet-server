@@ -13,7 +13,7 @@ obj/FastNoise.o: src/FastNoise.cpp
 	g++ -c -o $@ $< -Wall -O3 -std=c++11 -Iinclude
 
 debug: server
-	gdb server
+	gdb server -ex ru
 
 run: server
 	./server

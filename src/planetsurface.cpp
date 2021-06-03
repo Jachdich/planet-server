@@ -182,10 +182,11 @@ void PlanetSurface::tick(double elapsedTime) {
 	lastTicks = ticks;
 }
 
-PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc) {
+PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc, Planet *parent) {
     rad = root["rad"].asInt();
     tiles.resize((rad * 2) * (rad * 2));
     resources = getResourcesFromJson(root["resources"]);
+    this->parent = parent;
     for (uint32_t i = 0; i < (rad * 2) * (rad * 2); i++) {
         uint64_t tile = root["tiles"][i].asUInt64();
         uint32_t z = (tile & 0x7FFFFFFF00000000) >> 32;

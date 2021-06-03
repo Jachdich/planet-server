@@ -27,7 +27,7 @@ public:
 
     Planet();
     Planet(SurfaceLocator loc);
-	Planet(Json::Value res, SurfaceLocator loc);
+	Planet(Json::Value res, SurfaceLocator loc, Planet *other_this);
     Json::Value asJson();
     PlanetSurface * getSurface();
 

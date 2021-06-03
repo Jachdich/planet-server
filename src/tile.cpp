@@ -156,7 +156,7 @@ std::string getProduct(std::string n) {
 }
 
 void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    if (ticks % 50 == 0) {
+    if (ticks % 80 == 0) {
         if (!has_person) {
             if (parent->resources["peopleIdle"] > 0) {
                 parent->resources["peopleIdle"] -= 1;
@@ -207,7 +207,7 @@ std::vector<uint32_t> getTilesInRadius(PlanetSurface *parent, olc::vi2d centre, 
 }
 
 void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
-    if (ticks % 50 == 0) {
+    if (ticks % 32 == 0) {
         if (!has_person) {
             if (parent->resources["peopleIdle"] > 1) {
                 parent->resources["peopleIdle"] -= 1;
@@ -220,30 +220,36 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
         if (!has_person) return;
     }
     
-    if (ticks % 100 == 0) {
+    if (ticks % 64 == 0) {
         //std::vector<uint32_t> available_pos = getTilesInRadius(parent, pos, {5, 5}, TileType::GRASS);
         //if (available_pos.size() == 0) return;
         //uint32_t pos = available_pos[rand() % available_pos.size()];
         int32_t cx = pos.x - 5 / 2 + rand() % 5;
         int32_t cy = pos.y - 5 / 2 + rand() % 5;
         uint32_t pos = (cy * parent->rad * 2) + cx;
-        if (parent->tiles[pos]->getType() == TileType::GRASS) {
+
+        uint32_t col = parent->getTileColour(cy, cx);
+        uint8_t r = (col >> 16) & 0xFF;
+        uint8_t g = (col >> 8) & 0xFF;
+        uint8_t b = col & 0xFF;
+
+        if (parent->tiles[pos]->getType() == TileType::GRASS && (g > r && g > b * 1.5)) {
             sendTileChangeRequest(pos, TileType::TREE, parent->loc);
         }
     }
 
-    if ((ticks + 50) % 100 == 0) {
+    if ((ticks + 32) % 64 == 0) {
     /*
         std::vector<uint32_t> available_pos = getTilesInRadius(parent, pos, {5, 5}, TileType::TREE);
         if (available_pos.size() == 0) return;
         uint32_t pos = available_pos[rand() % available_pos.size()];
         sendTileChangeRequest(pos, TileType::GRASS, parent->loc);*/
-        parent->resources["wood"] += 1;
         int32_t cx = pos.x - 5 / 2 + rand() % 5;
         int32_t cy = pos.y - 5 / 2 + rand() % 5;
         uint32_t pos = (cy * parent->rad * 2) + cx;
         if (parent->tiles[pos]->getType() == TileType::TREE) {
             sendTileChangeRequest(pos, TileType::GRASS, parent->loc);
+            parent->resources["wood"] += 1;
         }
     }
 }
