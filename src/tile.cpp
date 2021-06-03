@@ -39,6 +39,8 @@ Tile* Tile::fromType(TileType type) {
     	    return new WarehouseTile(); break;
     	case TileType::FORESTRY:
     	    return new ForestryTile(); break;
+    	case TileType::CAPSULE:
+    	    return new CapsuleTile(); break;
     }
     return (Tile*)0x1; //this is to get the compiler to shut the fuck up
                        //I don't wanna add a `default` case so the compiler
@@ -74,6 +76,9 @@ void FarmTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
                 parent->resources["peopleIdle"] -= 1;
                 has_person = true;
             }
+        } else if (parent->resources["peopleIdle"] < 1) {
+            has_person = false;
+            parent->resources["peopleIdle"] += 1;
         }
         if (has_person) {
             parent->resources["food"] += 5;
@@ -88,6 +93,9 @@ void GreenhouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) 
                 parent->resources["peopleIdle"] -= 1;
                 has_person = true;
             }
+        } else if (parent->resources["peopleIdle"] < 1) {
+            has_person = false;
+            parent->resources["peopleIdle"] += 1;
         }
         if (has_person) {
             parent->resources["food"] += 5;
@@ -102,6 +110,9 @@ void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
                 parent->resources["peopleIdle"] -= 1;
                 has_person = true;
             }
+        } else if (parent->resources["peopleIdle"] < 1) {
+            has_person = false;
+            parent->resources["peopleIdle"] += 1;
         }
         if (!has_person) return;
         for (int32_t x = -1; x < 2; x++) {
@@ -151,6 +162,9 @@ void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent
                 parent->resources["peopleIdle"] -= 1;
                 has_person = true;
             }
+        } else if (parent->resources["peopleIdle"] < 1) {
+            has_person = false;
+            parent->resources["peopleIdle"] += 1;
         }
         if (!has_person) return;
         
@@ -195,10 +209,13 @@ std::vector<uint32_t> getTilesInRadius(PlanetSurface *parent, olc::vi2d centre, 
 void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
     if (ticks % 50 == 0) {
         if (!has_person) {
-            if (parent->resources["peopleIdle"] > 0) {
+            if (parent->resources["peopleIdle"] > 1) {
                 parent->resources["peopleIdle"] -= 1;
                 has_person = true;
             }
+        } else if (parent->resources["peopleIdle"] < 1) {
+            has_person = false;
+            parent->resources["peopleIdle"] += 1;
         }
         if (!has_person) return;
     }
@@ -229,4 +246,18 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
             sendTileChangeRequest(pos, TileType::GRASS, parent->loc);
         }
     }
+}
+
+void CapsuleTile::onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+    parent->resources["people"] += 1;
+    parent->resources["peopleIdle"] += 1;
+    parent->resources["peopleSlots"] += 1;
+    parent->resources["water"] += 0.1;
+    parent->resources["food"] += 0.1;
+}
+
+void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+    parent->resources["peopleSlots"] += 1;
+    parent->resources["water"] += 0.1;
+    parent->resources["food"] += 0.1;
 }
