@@ -53,7 +53,7 @@ Tile* Tile::fromType(TileType type) {
 #include <iostream>
 
 void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    parent->resources["peopleSlots"] += 3;
+    parent->resources.getCapacity("people") += 3;
     for (int32_t x = -1; x < 2; x++) {
         for (int32_t y = -1; y < 2; y++) {
             if (x == 0 && y == 0) continue;
@@ -162,7 +162,7 @@ void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent
                 parent->resources["peopleIdle"] -= 1;
                 has_person = true;
             }
-        } else if (parent->resources["peopleIdle"] < 1) {
+        } else if (parent->resources["people"] < 1) {
             has_person = false;
             parent->resources["peopleIdle"] += 1;
         }
@@ -184,7 +184,11 @@ void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent
 }
 
 void WarehouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    
+    for (auto &elem: parent->resources.data) {
+        if (elem.first == "people") continue;
+        //if (elem.first == "water") continue;
+        elem.second.capacity += 100;
+	}
 }
 
 std::vector<uint32_t> getTilesInRadius(PlanetSurface *parent, olc::vi2d centre, olc::vi2d size, TileType type) {
@@ -263,7 +267,11 @@ void CapsuleTile::onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) 
 }
 
 void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
-    parent->resources["peopleSlots"] += 1;
+    parent->resources.getCapacity("people") += 1;
     parent->resources["water"] += 0.1;
     parent->resources["food"] += 0.1;
+    for (auto &elem: parent->resources.data) {
+        if (elem.first == "people") continue;
+        elem.second.capacity += 100;
+	}
 }

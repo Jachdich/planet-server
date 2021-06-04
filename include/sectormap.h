@@ -6,7 +6,6 @@
 
 class SectorMap {
 public:
-    //std::vector<std::vector<Sector>> cache;
 	std::unordered_map<uint64_t, Sector> cache;
 
     SectorMap();
