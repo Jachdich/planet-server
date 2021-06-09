@@ -42,7 +42,7 @@ struct TaskTypeInfo {
 
 std::unordered_map<TaskType, TaskTypeInfo> taskTypeInfos;
 
-void registerTaskTypeInfo() {/*
+void registerTaskTypeInfo() {
     taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo{{TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 5};
     taskTypeInfos[TaskType::MINE_ROCK]          = TaskTypeInfo{{TileType::ROCK}, Resources(), Resources({{"stone", 1}}), TileType::GRASS, 10};
     taskTypeInfos[TaskType::CLEAR]              = TaskTypeInfo{{}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
@@ -55,8 +55,8 @@ void registerTaskTypeInfo() {/*
     taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 2}, {"stone", 8}}), Resources(), TileType::BLASTFURNACE, 140};
     taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 16}, {"stone", 12}}), Resources(), TileType::WAREHOUSE, 150};
     taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 24}, {"stone", 6}, {"iron", 5}}), Resources(), TileType::FORESTRY, 2};
-*/
-
+    taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
+/*
     taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo({TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2);
     taskTypeInfos[TaskType::MINE_ROCK]          = TaskTypeInfo({TileType::ROCK}, Resources(), Resources({{"stone", 1}}), TileType::GRASS, 2);
     taskTypeInfos[TaskType::CLEAR]              = TaskTypeInfo({}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2);
@@ -69,7 +69,7 @@ void registerTaskTypeInfo() {/*
     taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::BLASTFURNACE, 2);
     taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::WAREHOUSE, 2);
     taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::FORESTRY, 2);
-    taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
+    taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);*/
 }
 
 std::mutex m;
@@ -79,7 +79,8 @@ int numConnectedClients;
 //int lastID;
 //int numConnectedClients;
 
-//Logger logger;
+//Logger logger;    taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
+
 
 SectorMap map;
 FastNoise noiseGen;
@@ -155,19 +156,19 @@ std::vector<TileType> getExpectedTileType(TaskType type) {
 
 ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf) {
     if (surf->resources["peopleIdle"] <= 0 && taskTypeInfos[type].requiresPeople) {
-        return ErrorCode::NO_PEOPLE_AVAILABLE;
+        return ErrorCode(ErrorCode::INVALID_ACTION, "No people available to\ncomplete action!");
 	}
 	if (!hasMaterialsFor(surf, type)) {
-	    return ErrorCode::INSUFFICIENT_RESOURCES;
+	    return ErrorCode(ErrorCode::INVALID_ACTION, "Insufficient resources!");
 	}
     if (isTaskOnTile(target)) {
-        return ErrorCode::TASK_ALREADY_STARTED;
+        return ErrorCode(ErrorCode::INVALID_ACTION, "There is already a task\non this tile!");
     }
 
     std::vector<TileType> expected = getExpectedTileType(type);
     TileType got = surf->tiles[target]->getType();
     if (std::find(expected.begin(), expected.end(), got) == expected.end()) {
-        return ErrorCode::TASK_ON_WRONG_TILE;
+        return ErrorCode(ErrorCode::INVALID_ACTION, "This task is not available\non this tile!");
     }
     if (taskTypeInfos[type].requiresPeople) {
         surf->resources["peopleIdle"]--;
@@ -304,7 +305,11 @@ void Connection::handleRequest(Json::Value& root) {
             SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
             uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
 
-        	result["status"] = (int)dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf);
+            ErrorCode code = dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf);
+        	result["status"] = (int)code.type;
+        	if (code.type != ErrorCode::OK) {
+                result["error_message"] = code.message;
+        	}
         	
             totalJson["results"].append(result);
 
