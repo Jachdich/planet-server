@@ -123,7 +123,7 @@ void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
                 uint32_t index = (cy * parent->rad * 2) + cx;
                 if (cx < 0 || cx > parent->rad * 2 || cy < 0 || cy > parent->rad * 2) continue;
                 if (parent->tiles[index]->getType() == TileType::WATER) {
-                    parent->resources["water"] += 10;
+                    parent->resources["water"] += 8;
                     return;
                 }
             }
@@ -156,7 +156,7 @@ std::string getProduct(std::string n) {
 }
 
 void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    if (ticks % 80 == 0) {
+    if (ticks % 128 == 0) {
         if (!has_person) {
             if (parent->resources["peopleIdle"] > 0) {
                 parent->resources["peopleIdle"] -= 1;
