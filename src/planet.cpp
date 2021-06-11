@@ -46,7 +46,7 @@ void Planet::setPosFromStar(uint32_t pos) {
     this->angularVelocity = 1.0 / (posFromStar * posFromStar) * genConf["p_angularVelMultiplier"].asDouble();
 }
 
-Planet::Planet(Json::Value res, SurfaceLocator loc) {
+Planet::Planet(Json::Value res, SurfaceLocator loc, Planet *other_this) {
     mass = res["mass"].asDouble();
     radius = res["radius"].asInt();
     numColours = res["numColours"].asInt();
@@ -70,7 +70,7 @@ Planet::Planet(Json::Value res, SurfaceLocator loc) {
         generationNoise[i]   = res["generationNoise"][i].asDouble();
     }
     if (res["surface"]["generated"].asBool()) {
-        surface = new PlanetSurface(res["surface"], loc);
+        surface = new PlanetSurface(res["surface"], loc, other_this);
     } else {
         surface = new PlanetSurface(loc);
     }

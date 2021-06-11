@@ -25,7 +25,7 @@ public:
     std::vector<Connection*> connectedClients;
 
     PlanetSurface(SurfaceLocator loc);
-    PlanetSurface(Json::Value root, SurfaceLocator loc);
+    PlanetSurface(Json::Value root, SurfaceLocator loc, Planet *parent);
     void generate(Planet * p);
     void tick(double elapsedTime);
 	Tile* getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t y);

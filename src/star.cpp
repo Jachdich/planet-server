@@ -85,7 +85,7 @@ Star::Star(Json::Value root, SurfaceLocator loc) {
 	this->planets = new Planet[this->num];
     for (uint32_t i = 0; i < num; i++) {
     	loc.planetPos = i;
-        planets[i] = Planet(root["planets"][i], loc);
+        planets[i] = Planet(root["planets"][i], loc, &planets[i]); //WTF?
     }
     
     noiseScl = root["noiseScl"].asDouble();

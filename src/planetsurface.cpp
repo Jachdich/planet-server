@@ -75,10 +75,6 @@ Tile* PlanetSurface::getInitialTileType(int32_t x, int32_t y) {
 
 void PlanetSurface::generate(Planet * p) {
     this->parent = p;
-    this->resources["people"] = 4;
-    this->resources["peopleIdle"] = 4;
-    this->resources["food"] = 1000;
-    this->resources["water"] = 1000;
     int pos = -1;
     for (int i = 0; i < p->numColours; i++) {
         Pixel c = p->generationColours[i];
@@ -139,18 +135,17 @@ void PlanetSurface::tick(double elapsedTime) {
     for (uint64_t i = 0; i < deltaTicks; i++) {
         uint64_t tileTicks = lastTicks + i;
     	resources["peopleSlots"] = 0;
+    	for (auto &elem: resources.data) {
+            elem.second.capacity = 0;
+    	}
     	for (uint16_t y = 0; y < rad * 2; y++) {
     		for (uint16_t x = 0; x < rad * 2; x++) {
     	    	uint32_t index = (y * rad * 2) + x;
     	        tiles[index]->tick(tileTicks, olc::vi2d(x, y), this);
     	    }
     	}
-    	//DEBUG
-        if (resources["peopleSlots"] < 4) resources["peopleSlots"] = 4;
-    	///DEBUG
-
         //enough places for people to live?
-    	if (resources["people"] < resources["peopleSlots"] && resources["food"] > 0 && resources["people"] > 0) {
+    	if (resources["people"] < resources.getCapacity("people") && resources["food"] > 0 && resources["people"] > 0) {
     	    //r e p r o d u c e
     	    if (rndDouble(0.0, 1.0) > 0.9) {
     			resources["people"] += 1;
@@ -159,12 +154,12 @@ void PlanetSurface::tick(double elapsedTime) {
     	}
 
         //not enough places to live?
-    	if (resources["people"] > resources["peopleSlots"]) {
+    	if (resources["people"] > resources.getCapacity("people")) {
     	    //d i e
-            uint32_t delta = resources["people"] - resources["peopleSlots"];
-    	    resources["people"] = resources["peopleSlots"];
+            uint32_t delta = resources["people"] - resources.getCapacity("people");
+    	    resources["people"] = resources.getCapacity("people");
     	    
-    	    if (((int32_t)resources["peopleIdle"]) - delta < 0) resources["peopleIdle"] = 0;
+    	    if (((int32_t)resources["peopleIdle"]) - delta < 0) resources.getCapacity("people") = 0;
     	    else resources["peopleIdle"] -= delta;
     	}
 
@@ -180,7 +175,12 @@ void PlanetSurface::tick(double elapsedTime) {
 
     	resources["food"]  -= 0.1 * resources["people"];
     	resources["water"] -= 0.1 * resources["people"];
-    	std::cout << resources["peopleSlots"] << ", " << resources["people"] << ", " << resources["food"] << ", " << resources["water"] << ", " << "\n";
+    	std::cout << resources.getCapacity("people") << ", " << resources["people"] << ", " << resources["food"] << ", " << resources["water"] << ", " << "\n";
+        for (auto &elem: resources.data) {
+            if (elem.second.value > elem.second.capacity) {
+                elem.second.value = elem.second.capacity;
+            }
+        }
 	}
 
  	if (resources != originalResources || ticks % 100 == 0) {
@@ -190,16 +190,19 @@ void PlanetSurface::tick(double elapsedTime) {
 	lastTicks = ticks;
 }
 
-PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc) {
+PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc, Planet *parent) {
     rad = root["rad"].asInt();
     tiles.resize((rad * 2) * (rad * 2));
     resources = getResourcesFromJson(root["resources"]);
+    this->parent = parent;
     for (uint32_t i = 0; i < (rad * 2) * (rad * 2); i++) {
         uint64_t tile = root["tiles"][i].asUInt64();
-        uint32_t z = (tile & 0xFFFFFFFF00000000) >> 32;
+        uint32_t z = (tile & 0x7FFFFFFF00000000) >> 32;
         TileType type = (TileType)(tile & 0xFFFFFFFF);
+        bool has_person =tile >> 63;
         tiles[i] = Tile::fromType(type);
         tiles[i]->z = z;
+        tiles[i]->has_person = has_person;
     }
     generated = true;
     this->loc = loc;
@@ -208,7 +211,7 @@ PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc) {
 Json::Value PlanetSurface::asJson() {
     Json::Value res;
     for (unsigned int i = 0; i < tiles.size(); i++) {
-        uint64_t n = (uint32_t)tiles[i]->getType() | ((uint64_t)tiles[i]->z << 32);
+        uint64_t n = (uint32_t)tiles[i]->getType() | ((uint64_t)tiles[i]->z << 32) | ((((uint64_t)tiles[i]->has_person) & 0x01) << 63);
         res["tiles"].append((Json::Value::UInt64)n);
     }
     res["rad"] = rad;
