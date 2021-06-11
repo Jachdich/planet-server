@@ -112,7 +112,7 @@ void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
                 uint32_t index = (cy * parent->rad * 2) + cx;
                 if (cx < 0 || cx > parent->rad * 2 || cy < 0 || cy > parent->rad * 2) continue;
                 if (parent->tiles[index]->getType() == TileType::WATER) {
-                    parent->resources["water"] += 10;
+                    parent->resources["water"] += 8;
                     return;
                 }
             }
@@ -145,7 +145,7 @@ std::string getProduct(std::string n) {
 }
 
 void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
-    if (ticks % 50 == 0) {
+    if (ticks % 128 == 0) {
         if (!has_person) {
             if (parent->resources["peopleIdle"] > 0) {
                 parent->resources["peopleIdle"] -= 1;
@@ -193,7 +193,7 @@ std::vector<uint32_t> getTilesInRadius(PlanetSurface *parent, olc::vi2d centre, 
 }
 
 void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
-    if (ticks % 50 == 0) {
+    if (ticks % 32 == 0) {
         if (!has_person) {
             if (parent->resources["peopleIdle"] > 0) {
                 parent->resources["peopleIdle"] -= 1;
@@ -203,7 +203,7 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
         if (!has_person) return;
     }
     
-    if (ticks % 100 == 0) {
+    if (ticks % 64 == 0) {
         //std::vector<uint32_t> available_pos = getTilesInRadius(parent, pos, {5, 5}, TileType::GRASS);
         //if (available_pos.size() == 0) return;
         //uint32_t pos = available_pos[rand() % available_pos.size()];
@@ -215,7 +215,7 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
         }
     }
 
-    if ((ticks + 50) % 100 == 0) {
+    if ((ticks + 32) % 64 == 0) {
     /*
         std::vector<uint32_t> available_pos = getTilesInRadius(parent, pos, {5, 5}, TileType::TREE);
         if (available_pos.size() == 0) return;
