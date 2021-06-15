@@ -271,15 +271,16 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
 void CapsuleTile::onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     parent->resources["people"] += 1;
     parent->resources["peopleIdle"] += 1;
-    parent->resources["peopleSlots"] += 1;
     parent->resources["water"] += 0.1;
     parent->resources["food"] += 0.1;
 }
 
 void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
     parent->resources.getCapacity("people") += 1;
-    parent->resources["water"] += 0.1;
-    parent->resources["food"] += 0.1;
+    if (parent->resources["people"] > 0) {
+        parent->resources["water"] += 0.1;
+        parent->resources["food"] += 0.1;
+    }
     for (auto &elem: parent->resources.data) {
         if (elem.first == "people") continue;
         elem.second.capacity += 100;
