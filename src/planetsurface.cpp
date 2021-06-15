@@ -134,7 +134,7 @@ void PlanetSurface::tick(double elapsedTime) {
 
     for (uint64_t i = 0; i < deltaTicks; i++) {
         uint64_t tileTicks = lastTicks + i;
-    	resources["peopleSlots"] = 0;
+    	resources["peopleIdle"] = resources["people"];
     	for (auto &elem: resources.data) {
             elem.second.capacity = 0;
     	}
@@ -202,7 +202,7 @@ PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc, Planet *paren
         bool has_person =tile >> 63;
         tiles[i] = Tile::fromType(type);
         tiles[i]->z = z;
-        tiles[i]->has_person = has_person;
+        //tiles[i]->has_person = has_person;
     }
     generated = true;
     this->loc = loc;
@@ -211,7 +211,7 @@ PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc, Planet *paren
 Json::Value PlanetSurface::asJson() {
     Json::Value res;
     for (unsigned int i = 0; i < tiles.size(); i++) {
-        uint64_t n = (uint32_t)tiles[i]->getType() | ((uint64_t)tiles[i]->z << 32) | ((((uint64_t)tiles[i]->has_person) & 0x01) << 63);
+        uint64_t n = (uint32_t)tiles[i]->getType() | ((uint64_t)tiles[i]->z << 32);
         res["tiles"].append((Json::Value::UInt64)n);
     }
     res["rad"] = rad;

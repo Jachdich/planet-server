@@ -52,6 +52,11 @@ Tile* Tile::fromType(TileType type) {
 
 #include <iostream>
 
+void Tile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+}
+
+#define CHECK_ENOUGH_PEOPLE if (parent->resources["peopleIdle"] > 1) { parent->resources["peopleIdle"] -= 1; } else { return; }
+
 void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     parent->resources.getCapacity("people") += 3;
     for (int32_t x = -1; x < 2; x++) {
@@ -70,51 +75,22 @@ void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
 }
 
 void FarmTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+    CHECK_ENOUGH_PEOPLE
     if (ticks % 25 == 0) {
-        if (!has_person) {
-            if (parent->resources["peopleIdle"] > 0) {
-                parent->resources["peopleIdle"] -= 1;
-                has_person = true;
-            }
-        } else if (parent->resources["peopleIdle"] < 1) {
-            has_person = false;
-            parent->resources["peopleIdle"] += 1;
-        }
-        if (has_person) {
-            parent->resources["food"] += 5;
-        }
+        parent->resources["food"] += 5;
     }
 }
 
 void GreenhouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+    CHECK_ENOUGH_PEOPLE
     if (ticks % 12 == 0) {
-        if (!has_person) {
-            if (parent->resources["peopleIdle"] > 0) {
-                parent->resources["peopleIdle"] -= 1;
-                has_person = true;
-            }
-        } else if (parent->resources["peopleIdle"] < 1) {
-            has_person = false;
-            parent->resources["peopleIdle"] += 1;
-        }
-        if (has_person) {
-            parent->resources["food"] += 5;
-        }
+        parent->resources["food"] += 5;
     }
 }
 
 void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+    CHECK_ENOUGH_PEOPLE
     if (ticks % 10 == 0) {
-        if (!has_person) {
-            if (parent->resources["peopleIdle"] > 0) {
-                parent->resources["peopleIdle"] -= 1;
-                has_person = true;
-            }
-        } else if (parent->resources["peopleIdle"] < 1) {
-            has_person = false;
-            parent->resources["peopleIdle"] += 1;
-        }
-        if (!has_person) return;
         for (int32_t x = -1; x < 2; x++) {
             for (int32_t y = -1; y < 2; y++) {
                 if (x == 0 && y == 0) continue;
@@ -132,6 +108,7 @@ void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
 }
 
 void MineTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+    CHECK_ENOUGH_PEOPLE
     if (ticks % 150 == 0) {
         //FFUUUUUUCKCCKCKKKKKK
         uint32_t colour = parent->getTileColour(pos.y, pos.x);
@@ -156,17 +133,8 @@ std::string getProduct(std::string n) {
 }
 
 void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+    CHECK_ENOUGH_PEOPLE
     if (ticks % 128 == 0) {
-        if (!has_person) {
-            if (parent->resources["peopleIdle"] > 0) {
-                parent->resources["peopleIdle"] -= 1;
-                has_person = true;
-            }
-        } else if (parent->resources["people"] < 1) {
-            has_person = false;
-            parent->resources["peopleIdle"] += 1;
-        }
-        if (!has_person) return;
         
         if (parent->resources["wood"] < 1) return;
         std::vector<std::string> choices;
@@ -184,6 +152,7 @@ void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent
 }
 
 void WarehouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+    CHECK_ENOUGH_PEOPLE
     for (auto &elem: parent->resources.data) {
         if (elem.first == "people") continue;
         //if (elem.first == "water") continue;
@@ -221,23 +190,13 @@ TileType genRandomTree() {
 }
 
 void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
-    if (ticks % 32 == 0) {
-        if (!has_person) {
-            if (parent->resources["peopleIdle"] > 1) {
-                parent->resources["peopleIdle"] -= 1;
-                has_person = true;
-            }
-        } else if (parent->resources["peopleIdle"] < 1) {
-            has_person = false;
-            parent->resources["peopleIdle"] += 1;
-        }
-        if (!has_person) return;
-    }
+    CHECK_ENOUGH_PEOPLE
     
     if (ticks % 64 == 0) {
         //std::vector<uint32_t> available_pos = getTilesInRadius(parent, pos, {5, 5}, TileType::GRASS);
         //if (available_pos.size() == 0) return;
         //uint32_t pos = available_pos[rand() % available_pos.size()];
+
         int32_t cx = pos.x - 5 / 2 + rand() % 5;
         int32_t cy = pos.y - 5 / 2 + rand() % 5;
         uint32_t pos = (cy * parent->rad * 2) + cx;
