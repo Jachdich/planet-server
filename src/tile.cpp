@@ -210,6 +210,16 @@ std::vector<uint32_t> getTilesInRadius(PlanetSurface *parent, olc::vi2d centre, 
     return available_pos;
 }
 
+TileType genRandomTree() {
+    switch (rand() % 4) {
+        case 0: return TileType::TREE;
+        case 1: return TileType::PINE;
+        case 2: return TileType::FOREST;
+        case 3: return TileType::PINEFOREST;
+        default: return TileType::TREE; //should never run, just to shut the compiler up
+    }
+}
+
 void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
     if (ticks % 32 == 0) {
         if (!has_person) {
@@ -238,7 +248,7 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
         uint8_t b = col & 0xFF;
 
         if (parent->tiles[pos]->getType() == TileType::GRASS && (g > r && g > b * 1.5)) {
-            sendTileChangeRequest(pos, TileType::TREE, parent->loc);
+            sendTileChangeRequest(pos, genRandomTree(), parent->loc);
         }
     }
 
@@ -251,7 +261,7 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
         int32_t cx = pos.x - 5 / 2 + rand() % 5;
         int32_t cy = pos.y - 5 / 2 + rand() % 5;
         uint32_t pos = (cy * parent->rad * 2) + cx;
-        if (parent->tiles[pos]->getType() == TileType::TREE) {
+        if (isTree(parent->tiles[pos]->getType())) {
             sendTileChangeRequest(pos, TileType::GRASS, parent->loc);
             parent->resources["wood"] += 1;
         }
