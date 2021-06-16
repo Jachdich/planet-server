@@ -42,19 +42,19 @@ struct TaskTypeInfo {
 
 std::unordered_map<TaskType, TaskTypeInfo> taskTypeInfos;
 
-void registerTaskTypeInfo() {
-/*    taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo{{TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 5};
-    taskTypeInfos[TaskType::MINE_ROCK]          = TaskTypeInfo{{TileType::ROCK}, Resources(), Resources(), TileType::GRASS, 10};
-    taskTypeInfos[TaskType::CLEAR]              = TaskTypeInfo{{}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2};
-    taskTypeInfos[TaskType::PLANT_TREE]         = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 1}}), Resources(), TileType::TREE, 2};
-    taskTypeInfos[TaskType::BUILD_HOUSE]        = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 6}, {"stone", 3}}), Resources(), TileType::HOUSE, 20};
-    taskTypeInfos[TaskType::BUILD_FARM]         = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 5}, {"stone", 7}}), Resources(), TileType::FARM, 45};
-    taskTypeInfos[TaskType::BUILD_GREENHOUSE]   = TaskTypeInfo{{TileType::GRASS}, Resources({{"glass", 8}, {"wood", 3}, {"iron", 1}}), Resources(), TileType::GREENHOUSE, 100};
-    taskTypeInfos[TaskType::BUILD_WATERPUMP]    = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 2}, {"stone", 3}, {"iron", 6}}), Resources(), TileType::WATERPUMP, 120};
-    taskTypeInfos[TaskType::BUILD_MINE]         = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 8}, {"stone", 8}}), Resources(), TileType::MINE, 120};
-    taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 2}, {"stone", 8}}), Resources(), TileType::BLASTFURNACE, 140};
-    taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 16}, {"stone", 12}}), Resources(), TileType::WAREHOUSE, 150};
-    taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo{{TileType::GRASS}, Resources({{"wood", 24}, {"stone", 6}, {"iron", 5}}), Resources(), TileType::FORESTRY, 2};
+void registerTaskTypeInfo() {/*
+    taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo({TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 5);
+    taskTypeInfos[TaskType::MINE_ROCK]          = TaskTypeInfo({TileType::ROCK}, Resources(), Resources({{"stone", 1}}), TileType::GRASS, 10);
+    taskTypeInfos[TaskType::CLEAR]              = TaskTypeInfo({}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2);
+    taskTypeInfos[TaskType::PLANT_TREE]         = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 1}}), Resources(), TileType::TREE, 2);
+    taskTypeInfos[TaskType::BUILD_HOUSE]        = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 6}, {"stone", 3}}), Resources(), TileType::HOUSE, 20);
+    taskTypeInfos[TaskType::BUILD_FARM]         = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 5}, {"stone", 7}}), Resources(), TileType::FARM, 45);
+    taskTypeInfos[TaskType::BUILD_GREENHOUSE]   = TaskTypeInfo({TileType::GRASS}, Resources({{"glass", 8}, {"wood", 3}, {"iron", 1}}), Resources(), TileType::GREENHOUSE, 100);
+    taskTypeInfos[TaskType::BUILD_WATERPUMP]    = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 2}, {"stone", 3}, {"iron", 6}}), Resources(), TileType::WATERPUMP, 120);
+    taskTypeInfos[TaskType::BUILD_MINE]         = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 8}, {"stone", 8}}), Resources(), TileType::MINE, 120);
+    taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 2}, {"stone", 8}}), Resources(), TileType::BLASTFURNACE, 140);
+    taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 16}, {"stone", 12}}), Resources(), TileType::WAREHOUSE, 150);
+    taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 24}, {"stone", 6}, {"iron", 5}}), Resources(), TileType::FORESTRY, 2);
     taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
 */
     taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo({TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2, false);
@@ -170,6 +170,7 @@ ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, Planet
     if (std::find(expected.begin(), expected.end(), got) == expected.end() && taskTypeInfos[type].expectedTileTypes.size() != 0) {
         return ErrorCode(ErrorCode::INVALID_ACTION, "This task is not available\non this tile!");
     }
+    
     if (taskTypeInfos[type].requiresPeople) {
         surf->resources["peopleIdle"]--;
     }
@@ -185,9 +186,6 @@ ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, Planet
 
 void taskFinished(Task &t) {
     PlanetSurface * surf = getSurfaceFromLocator(t.surface);
-    if (taskTypeInfos[t.type].requiresPeople) {
-        surf->resources["peopleIdle"]++;
-    }
 
     surf->resources += taskTypeInfos[t.type].gains;
     sendTileChangeRequest(t.target, taskTypeInfos[t.type].tileType, t.surface);
@@ -200,13 +198,6 @@ void tick() {
     long ms = std::chrono::duration_cast<std::chrono::milliseconds>(
     		std::chrono::system_clock::now().time_since_epoch()).count();
     double delta = (ms - lastTime) / 1000.0;
-
-    for (Task &t : tasks) {
-        t.timeLeft -= delta;
-        if (t.timeLeft <= 0) {
-            taskFinished(t);
-        }
-    }
     
 	std::vector<PlanetSurface*> surfacesToTick;
 	for (ServerInterface::Conn conn : iface.connections) {
@@ -218,6 +209,21 @@ void tick() {
 	}
 
 	for (PlanetSurface *surf : surfacesToTick) {
+		surf->resetPeopleIdle();
+	}
+
+	for (Task &t : tasks) {
+        t.timeLeft -= delta;
+        if (taskTypeInfos[t.type].requiresPeople) {
+            PlanetSurface * surf = getSurfaceFromLocator(t.surface);
+            surf->resources["peopleIdle"]--;
+        }
+        if (t.timeLeft <= 0) {
+            taskFinished(t);
+        }
+    }
+
+    for (PlanetSurface *surf : surfacesToTick) {
 		surf->tick(delta);
 	}
 

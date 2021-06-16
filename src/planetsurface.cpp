@@ -124,6 +124,10 @@ void PlanetSurface::generate(Planet * p) {
     
 }
 
+void PlanetSurface::resetPeopleIdle() {
+    resources["peopleIdle"] = resources["people"];
+}
+
 void PlanetSurface::tick(double elapsedTime) {
     if (lastTicks == (uint32_t)-1) {
         lastTicks = ticks - 1; //TODO save and load lastTicks and also shouldn't this be set to zero?
@@ -134,7 +138,6 @@ void PlanetSurface::tick(double elapsedTime) {
 
     for (uint64_t i = 0; i < deltaTicks; i++) {
         uint64_t tileTicks = lastTicks + i;
-    	resources["peopleIdle"] = resources["people"];
     	for (auto &elem: resources.data) {
             elem.second.capacity = 0;
     	}
