@@ -55,7 +55,11 @@ Tile* Tile::fromType(TileType type) {
 void Tile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
 }
 
-#define CHECK_ENOUGH_PEOPLE if (parent->resources["peopleIdle"] > 1) { parent->resources["peopleIdle"] -= 1; } else { return; }
+std::string Tile::getTileError() {
+    return "";
+}
+
+#define CHECK_ENOUGH_PEOPLE if (parent->resources["peopleIdle"] > 1) { hasPerson = true; parent->resources["peopleIdle"] -= 1; } else { hasPerson = false; return; }
 
 void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     parent->resources.getCapacity("people") += 3;

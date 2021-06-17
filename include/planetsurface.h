@@ -31,7 +31,7 @@ public:
 	Tile* getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t y);
     Tile* getInitialTileType(int32_t x, int32_t y);
     uint32_t getTileColour(int32_t x, int32_t y);
-    Json::Value asJson();
+    Json::Value asJson(bool addErrors = false);
 
 };
 

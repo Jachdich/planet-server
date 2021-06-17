@@ -197,22 +197,26 @@ PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc, Planet *paren
     this->parent = parent;
     for (uint32_t i = 0; i < (rad * 2) * (rad * 2); i++) {
         uint64_t tile = root["tiles"][i].asUInt64();
-        uint32_t z = (tile & 0x7FFFFFFF00000000) >> 32;
+        uint32_t z = (tile & 0xFFFFFFFF00000000) >> 32;
         TileType type = (TileType)(tile & 0xFFFFFFFF);
-        bool has_person =tile >> 63;
         tiles[i] = Tile::fromType(type);
         tiles[i]->z = z;
-        //tiles[i]->has_person = has_person;
     }
     generated = true;
     this->loc = loc;
 }
 
-Json::Value PlanetSurface::asJson() {
+Json::Value PlanetSurface::asJson(bool addErrors) {
     Json::Value res;
     for (unsigned int i = 0; i < tiles.size(); i++) {
         uint64_t n = (uint32_t)tiles[i]->getType() | ((uint64_t)tiles[i]->z << 32);
         res["tiles"].append((Json::Value::UInt64)n);
+        if (addErrors && tiles[i]->getTileError() != "") {
+            Json::Value err;
+            err["pos"] = i;
+            err["msg"] = tiles[i]->getTileError();
+            res["tileErrors"].append(err);
+        }
     }
     res["rad"] = rad;
     res["resources"] = getJsonFromResources(resources);

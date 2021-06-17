@@ -285,7 +285,7 @@ void Connection::handleRequest(Json::Value& root) {
                 }
             }
             if (surf != bade) {
-	            result["result"] = surf->asJson();
+	            result["result"] = surf->asJson(true);
 	            result["status"] = (int)ErrorCode::OK;
 	            Sector * sec = map.getSectorAt(requestJson["secX"].asInt(), requestJson["secT"].asInt());
 	            sec->save(saveName);
