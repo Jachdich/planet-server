@@ -32,6 +32,7 @@ public:
     Tile* getInitialTileType(int32_t x, int32_t y);
     uint32_t getTileColour(int32_t x, int32_t y);
     Json::Value asJson(bool addErrors = false);
+    void resetPeopleIdle();
 
 };
 
