@@ -34,10 +34,6 @@ server: {serverRequest: set this tile to house}
 
 */
 
-bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
-    return surf->resources >= taskTypeInfos[type].cost;
-}
-
 void sendTileErrorSetRequest(SurfaceLocator loc, uint32_t index, std::string err) {
     Json::Value root;
     Json::Value tileError;

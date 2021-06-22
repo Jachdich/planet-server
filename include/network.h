@@ -66,4 +66,6 @@ void sendResourcesChangeRequest(Resources resources, SurfaceLocator loc);
 void registerTaskTypeInfo();
 void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc);
 void sendTileErrorSetRequest(SurfaceLocator loc, uint32_t index, std::string err);
+void sendSetTimerRequest(double time, uint32_t target, SurfaceLocator loc);
+
 #endif

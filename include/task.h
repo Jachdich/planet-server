@@ -1,12 +1,8 @@
 #ifndef __TASK_H
 #define __TASK_H
 #include <vector>
-#include "common/resources.h"
 #include "common/enums.h"
 #include "common/surfacelocator.h"
-#include "tile.h"
-
-class PlanetSurface;
 
 struct Task {
 	TaskType type;
@@ -14,6 +10,12 @@ struct Task {
 	SurfaceLocator surface;
 	double timeLeft;
 };
+
+#include "common/resources.h"
+#include "tile.h"
+
+class PlanetSurface;
+
 
 struct TaskTypeInfo {
     std::vector<TileType> expectedTileTypes;

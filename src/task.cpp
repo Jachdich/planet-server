@@ -33,8 +33,8 @@ void registerTaskTypeInfo() {/*
     taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
 }
 
-bool isTaskOnTile(uint32_t tile) {
-    for (Task &t : tasks) {
+bool isTaskOnTile(PlanetSurface* surf, uint32_t tile) {
+    for (Task &t : surf->tasks) {
         if (t.target == tile) {
             return true;
         }
@@ -46,6 +46,10 @@ std::vector<TileType> getExpectedTileType(TaskType type) {
     return taskTypeInfos[type].expectedTileTypes;
 }
 
+bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
+    return surf->resources >= taskTypeInfos[type].cost;
+}
+
 ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf) {
     if (surf->resources["peopleIdle"] <= 0 && taskTypeInfos[type].requiresPeople) {
         return ErrorCode(ErrorCode::INVALID_ACTION, "No people available to\ncomplete action!");
@@ -53,7 +57,7 @@ ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, Planet
 	if (!hasMaterialsFor(surf, type)) {
 	    return ErrorCode(ErrorCode::INVALID_ACTION, "Insufficient resources!");
 	}
-    if (isTaskOnTile(target)) {
+    if (isTaskOnTile(surf, target)) {
         return ErrorCode(ErrorCode::INVALID_ACTION, "There is already a task\non this tile!");
     }
 
