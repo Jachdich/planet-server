@@ -59,6 +59,18 @@ std::string Tile::getTileError() {
     return "";
 }
 
+std::string defaultTileErrorFn(Tile *t) {
+    if (!t->hasPerson) {
+        if (!t->lastError) t->edge = true; else t->edge = false;
+        t->lastError = true;
+        return "Noone";
+    } else {
+        if (t->lastError) t->edge = true; else t->edge = false;
+        t->lastError = false;
+        return "";
+    }
+}
+
 #define CHECK_ENOUGH_PEOPLE if (parent->resources["peopleIdle"] > 1) { hasPerson = true; parent->resources["peopleIdle"] -= 1; } else { hasPerson = false; return; }
 
 void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {

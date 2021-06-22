@@ -12,66 +12,6 @@
 
 #define bade nullptr
 
-struct TaskTypeInfo {
-    std::vector<TileType> expectedTileTypes;
-    Resources cost;
-    Resources gains;
-    TileType tileType;
-    uint32_t time;
-    bool requiresPeople = true;
-
-    TaskTypeInfo(std::vector<TileType> expectedTileTypes, Resources cost, Resources gains, TileType tileType, uint32_t time) {
-        this->expectedTileTypes = expectedTileTypes;
-        this->cost = cost;
-        this->gains = gains;
-        this->tileType = tileType;
-        this->time = time;
-    }
-
-    TaskTypeInfo(std::vector<TileType> expectedTileTypes, Resources cost, Resources gains, TileType tileType, uint32_t time, bool requiresPeople) {
-        this->expectedTileTypes = expectedTileTypes;
-        this->cost = cost;
-        this->gains = gains;
-        this->tileType = tileType;
-        this->time = time;
-        this->requiresPeople = requiresPeople;
-    }
-
-    TaskTypeInfo() {}
-};
-
-std::unordered_map<TaskType, TaskTypeInfo> taskTypeInfos;
-
-void registerTaskTypeInfo() {/*
-    taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo({TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 5);
-    taskTypeInfos[TaskType::MINE_ROCK]          = TaskTypeInfo({TileType::ROCK}, Resources(), Resources({{"stone", 1}}), TileType::GRASS, 10);
-    taskTypeInfos[TaskType::CLEAR]              = TaskTypeInfo({}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2);
-    taskTypeInfos[TaskType::PLANT_TREE]         = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 1}}), Resources(), TileType::TREE, 2);
-    taskTypeInfos[TaskType::BUILD_HOUSE]        = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 6}, {"stone", 3}}), Resources(), TileType::HOUSE, 20);
-    taskTypeInfos[TaskType::BUILD_FARM]         = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 5}, {"stone", 7}}), Resources(), TileType::FARM, 45);
-    taskTypeInfos[TaskType::BUILD_GREENHOUSE]   = TaskTypeInfo({TileType::GRASS}, Resources({{"glass", 8}, {"wood", 3}, {"iron", 1}}), Resources(), TileType::GREENHOUSE, 100);
-    taskTypeInfos[TaskType::BUILD_WATERPUMP]    = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 2}, {"stone", 3}, {"iron", 6}}), Resources(), TileType::WATERPUMP, 120);
-    taskTypeInfos[TaskType::BUILD_MINE]         = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 8}, {"stone", 8}}), Resources(), TileType::MINE, 120);
-    taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 2}, {"stone", 8}}), Resources(), TileType::BLASTFURNACE, 140);
-    taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 16}, {"stone", 12}}), Resources(), TileType::WAREHOUSE, 150);
-    taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 24}, {"stone", 6}, {"iron", 5}}), Resources(), TileType::FORESTRY, 2);
-    taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
-*/
-    taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo({TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 2, false);
-    taskTypeInfos[TaskType::MINE_ROCK]          = TaskTypeInfo({TileType::ROCK}, Resources(), Resources({{"stone", 1}}), TileType::GRASS, 2, false);
-    taskTypeInfos[TaskType::CLEAR]              = TaskTypeInfo({}, Resources(), Resources(), TileType::GRASS, 2, false);
-    taskTypeInfos[TaskType::PLANT_TREE]         = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::TREE, 2, false);
-    taskTypeInfos[TaskType::BUILD_HOUSE]        = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::HOUSE, 2, false);
-    taskTypeInfos[TaskType::BUILD_FARM]         = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::FARM, 2, false);
-    taskTypeInfos[TaskType::BUILD_GREENHOUSE]   = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::GREENHOUSE, 2, false);
-    taskTypeInfos[TaskType::BUILD_WATERPUMP]    = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::WATERPUMP, 2, false);
-    taskTypeInfos[TaskType::BUILD_MINE]         = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::MINE, 2, false);
-    taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::BLASTFURNACE, 2, false);
-    taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::WAREHOUSE, 2, false);
-    taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::FORESTRY, 2, false);
-    taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
-}
-
 std::mutex m;
 
 int lastID;
@@ -96,6 +36,20 @@ server: {serverRequest: set this tile to house}
 
 bool hasMaterialsFor(PlanetSurface * surf, TaskType type) {
     return surf->resources >= taskTypeInfos[type].cost;
+}
+
+void sendTileErrorSetRequest(SurfaceLocator loc, uint32_t index, std::string err) {
+    Json::Value root;
+    Json::Value tileError;
+	getJsonFromSurfaceLocator(loc, root);
+    root["serverRequest"] = "updateTileError";
+    tileError["pos"] = index;
+    tileError["msg"] = err;
+    root["tileError"] = tileError;
+	PlanetSurface * s = getSurfaceFromLocator(loc);
+    for (Connection *conn: s->connectedClients) {
+        conn->sendMessage(root);
+    }
 }
 
 void sendResourcesChangeRequest(Resources resources, SurfaceLocator loc) {
@@ -141,57 +95,6 @@ void sendSetTimerRequest(double time, uint32_t target, SurfaceLocator loc) {
     }
 }
 
-bool isTaskOnTile(uint32_t tile) {
-    for (Task &t : tasks) {
-        if (t.target == tile) {
-            return true;
-        }
-    }
-    return false;
-}
-
-std::vector<TileType> getExpectedTileType(TaskType type) {
-    return taskTypeInfos[type].expectedTileTypes;
-}
-
-ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf) {
-    if (surf->resources["peopleIdle"] <= 0 && taskTypeInfos[type].requiresPeople) {
-        return ErrorCode(ErrorCode::INVALID_ACTION, "No people available to\ncomplete action!");
-	}
-	if (!hasMaterialsFor(surf, type)) {
-	    return ErrorCode(ErrorCode::INVALID_ACTION, "Insufficient resources!");
-	}
-    if (isTaskOnTile(target)) {
-        return ErrorCode(ErrorCode::INVALID_ACTION, "There is already a task\non this tile!");
-    }
-
-    std::vector<TileType> expected = getExpectedTileType(type);
-    TileType got = surf->tiles[target]->getType();
-    if (std::find(expected.begin(), expected.end(), got) == expected.end() && taskTypeInfos[type].expectedTileTypes.size() != 0) {
-        return ErrorCode(ErrorCode::INVALID_ACTION, "This task is not available\non this tile!");
-    }
-    
-    if (taskTypeInfos[type].requiresPeople) {
-        surf->resources["peopleIdle"]--;
-    }
-    surf->resources -= taskTypeInfos[type].cost;
-
-    sendResourcesChangeRequest(surf->resources, loc);
-	double time = taskTypeInfos[type].time;
-	
-	sendSetTimerRequest(time, target, loc);
-	tasks.push_back({type, target, loc, time});
-	return ErrorCode::OK;
-}
-
-void taskFinished(Task &t) {
-    PlanetSurface * surf = getSurfaceFromLocator(t.surface);
-
-    surf->resources += taskTypeInfos[t.type].gains;
-    sendTileChangeRequest(t.target, taskTypeInfos[t.type].tileType, t.surface);
-    sendResourcesChangeRequest(surf->resources, t.surface);
-}
-
 long lastTime;
 
 void tick() {
@@ -208,29 +111,9 @@ void tick() {
 		}
 	}
 
-	for (PlanetSurface *surf : surfacesToTick) {
-		surf->resetPeopleIdle();
-	}
-
-	for (Task &t : tasks) {
-        t.timeLeft -= delta;
-        if (taskTypeInfos[t.type].requiresPeople) {
-            PlanetSurface * surf = getSurfaceFromLocator(t.surface);
-            surf->resources["peopleIdle"]--;
-        }
-        if (t.timeLeft <= 0) {
-            taskFinished(t);
-        }
-    }
-
     for (PlanetSurface *surf : surfacesToTick) {
 		surf->tick(delta);
 	}
-
-    tasks.erase(std::remove_if(tasks.begin(), tasks.end(),
-	[](Task& t) {
-		return t.timeLeft <= 0;
-	}), tasks.end());
 
 	lastTime = std::chrono::duration_cast<std::chrono::milliseconds>(
 	    		std::chrono::system_clock::now().time_since_epoch()).count();
@@ -281,14 +164,12 @@ void Connection::handleRequest(Json::Value& root) {
             surf->connectedClients.push_back(this);
             this->surfacesLoaded.push_back(surf);
             SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
-            for (Task &t : tasks) {
-                if (t.surface == loc) {
-                    //sendSetTimerRequest(t.timeLeft, t.target, loc, this);
-                    totalJson["serverRequest"] = "setTimer";
-                    totalJson["time"] = t.timeLeft;
-                    totalJson["tile"] = t.target;
-                    getJsonFromSurfaceLocator(t.surface, totalJson);
-                }
+            for (Task &t : surf->tasks) {
+                //sendSetTimerRequest(t.timeLeft, t.target, loc, this);
+                totalJson["serverRequest"] = "setTimer";
+                totalJson["time"] = t.timeLeft;
+                totalJson["tile"] = t.target;
+                getJsonFromSurfaceLocator(t.surface, totalJson);
             }
             if (surf != bade) {
 	            result["result"] = surf->asJson(true);

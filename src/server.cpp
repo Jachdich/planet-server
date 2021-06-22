@@ -8,9 +8,9 @@
 Logger logger;
 ServerInterface iface(5555);
 std::string saveName = "testsavev2.0";
-std::vector<Task> tasks;
 uint64_t ticks = 0;
 
+/*
 void saveTasks() {
     Json::Value tasksJson;
     for (Task& t : tasks) {
@@ -29,15 +29,16 @@ void saveTasks() {
 	writeBuilder["indentation"] = "";
 	afile << Json::writeString(writeBuilder, tasksJson) << "\n";
 	afile.close();
-}
+}*/
 
 void save() {
     map.saveAll(saveName);
     map.unloadAll();
-    saveTasks();
+    //saveTasks();
     //TODO save ticks
 }
 
+/*
 void loadTasks() {
     std::ifstream afile;
 	afile.open(saveName + "/" + "tasks.json");
@@ -70,14 +71,15 @@ void loadTasks() {
                           loc,
                           task["timeLeft"].asDouble()});
      }
-}
+}*/
+
 int main() {
     const uint32_t LEVEL_SEED = 12345;
 
     noiseGen.SetNoiseType(FastNoise::Simplex);
     srand(LEVEL_SEED);
     loadConfig();
-    loadTasks();
+    //loadTasks();
     registerTaskTypeInfo();
 
     iface.startServer();

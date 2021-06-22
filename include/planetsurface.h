@@ -7,6 +7,7 @@
 #include "common/resources.h"
 #include "common/surfacelocator.h"
 #include "tile.h"
+#include "task.h"
 class Planet;
 class Connection;
 class Tile;
@@ -14,6 +15,7 @@ class Tile;
 class PlanetSurface {
 public:
     std::vector<Tile*> tiles;
+    std::vector<Task> tasks;
     bool generated = false;
     Resources resources;
     int rad = 0;

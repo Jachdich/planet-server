@@ -7,16 +7,8 @@
 #include "FastNoise.h"
 #include "common/surfacelocator.h"
 
-struct Task {
-	TaskType type;
-	uint32_t target;
-	SurfaceLocator surface;
-	double timeLeft;
-};
-
 void save();
 
-extern std::vector<Task> tasks;
 extern std::mutex m;
 extern Json::Value generation_config;
 extern Logger logger;

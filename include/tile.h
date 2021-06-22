@@ -35,9 +35,12 @@ public:
     static Tile* fromType(TileType type);
     virtual ~Tile() {}
 
-protected:
     bool hasPerson = false;
+    bool lastError = false;
+    bool edge = false;
 };
+
+std::string defaultTileErrorFn(Tile *t);
 
 struct VoidTile : public Tile {
     inline TileType getType() { return TileType::AIR; }
@@ -74,37 +77,37 @@ struct TonkTile : public Tile {
     inline TileType getType() { return TileType::TONK; }
 };
 struct FarmTile : public Tile {
-    inline std::string getTileError() { if (!hasPerson) return "Noone"; else return ""; }
+    inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::FARM; }
     void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
 struct GreenhouseTile : public Tile {
-    inline std::string getTileError() { if (!hasPerson) return "Noone"; else return ""; }
+    inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::GREENHOUSE; }
     void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
 struct WaterpumpTile : public Tile {
-    inline std::string getTileError() { if (!hasPerson) return "Noone"; else return ""; }
+    inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::WATERPUMP; }
     void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
 struct MineTile : public Tile {
-    inline std::string getTileError() { if (!hasPerson) return "Noone"; else return ""; }
+    inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::MINE; }
     void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
 struct BlastfurnaceTile : public Tile {
-    inline std::string getTileError() { if (!hasPerson) return "Noone"; else return ""; }
+    inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::BLASTFURNACE; }
     void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
 struct WarehouseTile : public Tile {
-    inline std::string getTileError() { if (!hasPerson) return "Noone"; else return ""; }
+    inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::WAREHOUSE; }
     void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
 struct ForestryTile : public Tile {
-    inline std::string getTileError() { if (!hasPerson) return "Noone"; else return ""; }
+    inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::FORESTRY; }
     void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
