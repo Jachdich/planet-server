@@ -7,32 +7,15 @@
 #include "sectormap.h"
 #include "common/surfacelocator_test.h"
 #include <thread>
-//std::mutex m;
-//std::mutex updateQueue;
-
 #define bade nullptr
 
 std::mutex m;
 
 int lastID;
 int numConnectedClients;
-//int lastID;
-//int numConnectedClients;
-
-//Logger logger;    taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
-
 
 SectorMap map;
 FastNoise noiseGen;
-
-/*
-
-client: {request: user action, type: build house}
-server: {status: 0, serverRequest: change these material values}
-server: {serverRequest: add timer on this tile at 5 seconds}
-server: {serverRequest: set this tile to house}
-
-*/
 
 void sendTileErrorSetRequest(SurfaceLocator loc, uint32_t index, std::string err) {
     Json::Value root;
@@ -159,9 +142,7 @@ void Connection::handleRequest(Json::Value& root) {
             PlanetSurface * surf = getSurfaceFromJson(requestJson);
             surf->connectedClients.push_back(this);
             this->surfacesLoaded.push_back(surf);
-            SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
             for (Task &t : surf->tasks) {
-                //sendSetTimerRequest(t.timeLeft, t.target, loc, this);
                 totalJson["serverRequest"] = "setTimer";
                 totalJson["time"] = t.timeLeft;
                 totalJson["tile"] = t.target;

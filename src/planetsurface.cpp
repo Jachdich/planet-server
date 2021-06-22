@@ -3,7 +3,6 @@
 #include "server.h"
 #include "network.h"
 #include "generation.h"
-//#include "common/"
 
 #include <jsoncpp/json/json.h>
 #include <iostream>
@@ -231,6 +230,15 @@ PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc, Planet *paren
         tiles[i] = Tile::fromType(type);
         tiles[i]->z = z;
     }
+
+    for (Json::Value task : root["tasks"]) {
+        tasks.push_back({
+            (TaskType)task["type"].asInt(),
+            task["target"].asUInt(),
+            loc,
+            task["timeLeft"].asDouble()
+        });
+    }
     generated = true;
     this->loc = loc;
 }
@@ -246,6 +254,13 @@ Json::Value PlanetSurface::asJson(bool addErrors) {
             err["msg"] = tiles[i]->getTileError();
             res["tileErrors"].append(err);
         }
+    }
+    for (Task& t : tasks) {
+        Json::Value value;
+        value["type"] = (int)t.type;
+        value["target"] = t.target;
+        value["timeLeft"] = t.timeLeft;
+        res["tasks"].append(value);
     }
     res["rad"] = rad;
     res["resources"] = getJsonFromResources(resources);
