@@ -169,7 +169,7 @@ void PlanetSurface::tick(double elapsedTime) {
     	}
         //enough places for people to live?
     	if (resources["people"] < resources.getCapacity("people") && resources["food"] > 0 && resources["people"] > 0) {
-    	    std::cout << "Possibility of reproduction\n";
+    	    //std::cout << "Possibility of reproduction\n";
     	    //r e p r o d u c e
     	    if (rndDouble(0.0, 1.0) > 0.9) {
     			resources["people"] += 1;
@@ -179,7 +179,7 @@ void PlanetSurface::tick(double elapsedTime) {
 
         //not enough places to live?
     	if (resources["people"] > resources.getCapacity("people")) {
-    	    std::cout << "Not enough houses\n";
+    	    //std::cout << "Not enough houses\n";
     	    //d i e
             uint32_t delta = resources["people"] - resources.getCapacity("people");
     	    resources["people"] = resources.getCapacity("people");
@@ -190,7 +190,7 @@ void PlanetSurface::tick(double elapsedTime) {
 
         //not enough food or water?
     	if (resources["food"] <= 0 || resources["water"] <= 0) {
-    	    std::cout << "Not enough food or water\n";
+    	    //std::cout << "Not enough food or water\n";
             //d i e
             if (resources["food"] < 0) resources["food"] = 0;
             if (resources["water"] < 0) resources["water"] = 0;
@@ -201,14 +201,14 @@ void PlanetSurface::tick(double elapsedTime) {
 
     	resources["food"]  -= 0.1 * resources["people"];
     	resources["water"] -= 0.1 * resources["people"];
-    	std::cout << resources.getCapacity("people") << ", " << resources["people"] << ", " << resources["food"] << ", " << resources["water"] << ", " << tileTicks << "\n";
+    	//std::cout << resources.getCapacity("people") << ", " << resources["people"] << ", " << resources["food"] << ", " << resources["water"] << ", " << tileTicks << "\n";
         for (auto &elem: resources.data) {
             if (elem.second.value > elem.second.capacity) {
-                std::cout << "Too much " << elem.first << "\n";
+                //std::cout << "Too much " << elem.first << "\n";
                 elem.second.value = elem.second.capacity;
             }
         }
-        std::cout << "\n";
+        //std::cout << "\n";
 	}
 
  	if (resources != originalResources || ticks % 100 == 0) {

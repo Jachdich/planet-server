@@ -53,7 +53,8 @@ void Connection::handler(asio::error_code ec, std::size_t bytes_transferred) {
         disconnect();
     } else {
         std::cerr << "ERROR: " <<  ec.message() << "\n";
-        readUntil();
+        //readUntil();
+        disconnect();
     }
 }
 

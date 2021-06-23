@@ -116,6 +116,9 @@ void runServerLogic() {
 	    	std::chrono::system_clock::now().time_since_epoch()).count();
 
 		std::this_thread::sleep_for(std::chrono::microseconds(100000 - (endns - startns)));
+		unsigned long long lastns = std::chrono::duration_cast< std::chrono::microseconds >(
+	    	std::chrono::system_clock::now().time_since_epoch()).count();
+		std::cout << "Tick took " << (endns - startns) / 1000.0 << "ms (" << 1000000.0 / (lastns - startns) << "tps)\n";
 	}
 }
 
