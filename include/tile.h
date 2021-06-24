@@ -116,4 +116,23 @@ struct CapsuleTile : public Tile {
     void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
     void onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
+
+struct RoadTile : public Tile {
+    inline TileType getType() { return TileType::ROAD; }
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+};
+struct PipeTile : public Tile {
+    inline TileType getType() { return TileType::PIPE; }
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+};
+struct CableTile : public Tile {
+    inline TileType getType() { return TileType::CABLE; }
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+};
+
+struct PowerstationTile : public Tile {
+    inline std::string getTileError() { return defaultTileErrorFn(this); }
+    inline TileType getType() { return TileType::POWERSTATION; }
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+};
 #endif

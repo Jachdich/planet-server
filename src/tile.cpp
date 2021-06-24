@@ -3,44 +3,29 @@
 
 Tile* Tile::fromType(TileType type) {
     switch (type) {
-    	case TileType::AIR:
-    	    return new VoidTile(); break;
-    	case TileType::GRASS:
-    	    return new GrassTile(); break;
-    	case TileType::BUSH:
-    	    return new BushTile(); break;
-    	case TileType::TREE:
-    	    return new TreeTile(); break;
-    	case TileType::PINE:
-    	    return new PineTile(); break;
-    	case TileType::WATER:
-    	    return new WaterTile(); break;
-    	case TileType::ROCK:
-    	    return new RockTile(); break;
-    	case TileType::HOUSE:
-    	    return new HouseTile(); break;
-    	case TileType::PINEFOREST:
-    	    return new PineforestTile(); break;
-    	case TileType::FOREST:
-    	    return new ForestTile(); break;
-    	case TileType::TONK:
-    	    return new TonkTile(); break;
-    	case TileType::FARM:
-    	    return new FarmTile(); break;
-    	case TileType::GREENHOUSE:
-    	    return new GreenhouseTile(); break;
-    	case TileType::WATERPUMP:
-    	    return new WaterpumpTile(); break;
-    	case TileType::MINE:
-    	    return new MineTile(); break;
-    	case TileType::BLASTFURNACE:
-    	    return new BlastfurnaceTile(); break;
-    	case TileType::WAREHOUSE:
-    	    return new WarehouseTile(); break;
-    	case TileType::FORESTRY:
-    	    return new ForestryTile(); break;
-    	case TileType::CAPSULE:
-    	    return new CapsuleTile(); break;
+    	case TileType::AIR: return new VoidTile();
+    	case TileType::GRASS: return new GrassTile();
+    	case TileType::BUSH: return new BushTile();
+    	case TileType::TREE: return new TreeTile();
+    	case TileType::PINE: return new PineTile();
+    	case TileType::WATER: return new WaterTile();
+    	case TileType::ROCK: return new RockTile();
+    	case TileType::HOUSE: return new HouseTile();
+    	case TileType::PINEFOREST: return new PineforestTile();
+    	case TileType::FOREST: return new ForestTile();
+    	case TileType::TONK: return new TonkTile();
+    	case TileType::FARM: return new FarmTile();
+    	case TileType::GREENHOUSE: return new GreenhouseTile();
+    	case TileType::WATERPUMP: return new WaterpumpTile();
+    	case TileType::MINE: return new MineTile();
+    	case TileType::BLASTFURNACE: return new BlastfurnaceTile();
+    	case TileType::WAREHOUSE: return new WarehouseTile();
+    	case TileType::FORESTRY: return new ForestryTile();
+    	case TileType::CAPSULE: return new CapsuleTile();
+    	case TileType::ROAD: return new RoadTile();
+    	case TileType::PIPE: return new PipeTile();
+    	case TileType::CABLE: return new CableTile();
+    	case TileType::POWERSTATION: return new PowerstationTile();
     }
     return (Tile*)0x1; //this is to get the compiler to shut the fuck up
                        //I don't wanna add a `default` case so the compiler
@@ -260,4 +245,21 @@ void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
         if (elem.first == "people") continue;
         elem.second.capacity += 100;
 	}
+}
+
+
+void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+
+}
+
+void PipeTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+
+}
+
+void CableTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+
+}
+
+void PowerstationTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+
 }

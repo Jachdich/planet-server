@@ -93,6 +93,7 @@ void tick() {
     for (PlanetSurface *surf : surfacesToTick) {
 		surf->tick(delta);
 	}
+	std::cout << "Ticked " << surfacesToTick.size() << " surfaces\n";
 
 	lastTime = std::chrono::duration_cast<std::chrono::milliseconds>(
 	    		std::chrono::system_clock::now().time_since_epoch()).count();

@@ -18,7 +18,11 @@ void registerTaskTypeInfo() {
     taskTypeInfos[TaskType::BUILD_BLASTFURNACE] = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::BLASTFURNACE, 2, false);
     taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::WAREHOUSE, 2, false);
     taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::FORESTRY, 2, false);
-    taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
+    taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 2, false);
+    taskTypeInfos[TaskType::BUILD_ROAD]         = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::ROAD, 2, false);
+    taskTypeInfos[TaskType::BUILD_PIPE]         = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::PIPE, 2, false);
+    taskTypeInfos[TaskType::BUILD_CABLE]        = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CABLE, 2, false);
+    taskTypeInfos[TaskType::BUILD_POWERSTATION] = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::POWERSTATION, 2, false);
 #else
     taskTypeInfos[TaskType::FELL_TREE]          = TaskTypeInfo({TileType::TREE, TileType::FOREST, TileType::PINE, TileType::PINEFOREST}, Resources(), Resources({{"wood", 1}}), TileType::GRASS, 5);
     taskTypeInfos[TaskType::MINE_ROCK]          = TaskTypeInfo({TileType::ROCK}, Resources(), Resources({{"stone", 1}}), TileType::GRASS, 10);
@@ -33,6 +37,10 @@ void registerTaskTypeInfo() {
     taskTypeInfos[TaskType::BUILD_WAREHOUSE]    = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 16}, {"stone", 12}}), Resources(), TileType::WAREHOUSE, 150);
     taskTypeInfos[TaskType::BUILD_FORESTRY]     = TaskTypeInfo({TileType::GRASS}, Resources({{"wood", 24}, {"stone", 6}, {"iron", 5}}), Resources(), TileType::FORESTRY, 2);
     taskTypeInfos[TaskType::BUILD_CAPSULE]      = TaskTypeInfo({TileType::GRASS}, Resources(), Resources(), TileType::CAPSULE, 1, false);
+    taskTypeInfos[TaskType::BUILD_ROAD]         = TaskTypeInfo({TileType::GRASS}, Resources({{"stone", 2}}), Resources(), TileType::ROAD, 10);
+    taskTypeInfos[TaskType::BUILD_PIPE]         = TaskTypeInfo({TileType::GRASS}, Resources({{"iron",  3}}), Resources(), TileType::PIPE, 10);
+    taskTypeInfos[TaskType::BUILD_CABLE]        = TaskTypeInfo({TileType::GRASS}, Resources({{"copper", 3}}), Resources(), TileType::CABLE, 10);
+    taskTypeInfos[TaskType::BUILD_POWERSTATION] = TaskTypeInfo({TileType::GRASS}, Resources({{"copper", 10}, {"aluminium", 5}, {"stone", 8}, {"iron", 5}}), Resources(), TileType::POWERSTATION, 10);
 #endif
 }
 
