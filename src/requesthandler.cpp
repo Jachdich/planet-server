@@ -93,7 +93,8 @@ void tick() {
     for (PlanetSurface *surf : surfacesToTick) {
 		surf->tick(delta);
 	}
-	std::cout << "Ticked " << surfacesToTick.size() << " surfaces\n";
+	//std::cout << "Ticked " << surfacesToTick.size() << " surfaces\n";
+    logger.num_surfaces(surfacesToTick.size());
 
 	lastTime = std::chrono::duration_cast<std::chrono::milliseconds>(
 	    		std::chrono::system_clock::now().time_since_epoch()).count();
@@ -119,7 +120,8 @@ void runServerLogic() {
 		std::this_thread::sleep_for(std::chrono::microseconds(100000 - (endns - startns)));
 		unsigned long long lastns = std::chrono::duration_cast< std::chrono::microseconds >(
 	    	std::chrono::system_clock::now().time_since_epoch()).count();
-		std::cout << "Tick took " << (endns - startns) / 1000.0 << "ms (" << 1000000.0 / (lastns - startns) << "tps)\n";
+		//std::cout << "Tick took " << (endns - startns) / 1000.0 << "ms (" << 1000000.0 / (lastns - startns) << "tps)\n";
+		logger.tps((endns - startns) / 1000.0, 1000000.0 / (lastns - startns));
 	}
 }
 
@@ -193,7 +195,7 @@ void Connection::handleRequest(Json::Value& root) {
 }
 
 void Connection::disconnect() {
-	std::cout << "Client disconnected\n";
+	logger.info("Client disconnected");
     for (PlanetSurface *surf : surfacesLoaded) {
         surf->connectedClients.erase(std::remove(surf->connectedClients.begin(), surf->connectedClients.end(), this), surf->connectedClients.end()); 
     }

@@ -247,13 +247,40 @@ void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
 	}
 }
 
+TileType typeAt(olc::vi2d pos, PlanetSurface *p) {
+    return p->tiles[pos.y * p->rad * 2 + pos.x]->getType();
+}
+
+bool isPath(olc::vi2d start, olc::vi2d end, PlanetSurface *p, TileType type) {
+    olc::vi2d pos = start;
+    olc::vi2d lastPos = pos;
+    while (pos != end) {
+        if (typeAt(pos + olc::vi2d{1, 0}, p) == type && (pos + olc::vi2d{1, 0}) != lastPos) {
+            lastPos = pos; pos += olc::vi2d{1, 0};
+        } else if (typeAt(pos + olc::vi2d{-1, 0}, p) == type && (pos + olc::vi2d{-1, 0}) != lastPos) {
+            lastPos = pos; pos += olc::vi2d{-1, 0};
+        } else if (typeAt(pos + olc::vi2d{0, 1}, p) == type && (pos + olc::vi2d{0, 1}) != lastPos) {
+            lastPos = pos; pos += olc::vi2d{0, 1};
+        } else if (typeAt(pos + olc::vi2d{0, -1}, p) == type && (pos + olc::vi2d{0, -1}) != lastPos) {
+            lastPos = pos; pos += olc::vi2d{0, -1};
+        } else {
+            return false;
+        }
+    }
+    std::cout << pos.x << ", " << pos.y << ", ";
+    std::cout << end.x << ", " << end.y << "\n";
+    return true;
+}
 
 void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
-
+    
 }
 
 void PipeTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
-
+    if (isPath(pos, olc::vi2d{10, 10}, parent, TileType::ROAD)) {
+        sendTileChangeRequest(pos.y * parent->rad * 2 + pos.x, TileType::TONK, parent->loc);
+    }
+    sendTileChangeRequest(10 * parent->rad * 2 + 10, TileType::TONK, parent->loc);
 }
 
 void CableTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {

@@ -12,10 +12,10 @@ void ServerInterface::startServer() {
     try {
         waitForClientConnection();
         threadCtx = std::thread([this]() {ctx.run(); });
-        std::cout << "[SERVER] Started\n";
+        logger.info("Server Started");
         runServerLogic();
     } catch (std::exception& e) {
-        std::cerr << "[SERVER] Exception: " << e.what() << "\n";
+        logger.error("Starting server: " + std::string(e.what()));
     }
 }
 
@@ -28,12 +28,14 @@ void ServerInterface::waitForClientConnection() {
     acceptor.async_accept(
         [this](std::error_code ec, asio::ip::tcp::socket socket) {
             if (!ec) {
-                std::cout << "[SERVER] New connection: " << socket.remote_endpoint() << "\n";
+                std::stringstream ss;
+                ss << socket.remote_endpoint();
+                logger.info("New connection: " + ss.str());
                 
                 Conn newConn = std::make_shared<Connection>(sslCtx, std::move(socket), IDCounter++);
                 connections.push_back(newConn);
             } else {
-                std::cerr << "[SERVER] New connection error: " << ec.message() << "\n";
+                logger.error("New connection error: " + ec.message());
             }
             waitForClientConnection();
         }

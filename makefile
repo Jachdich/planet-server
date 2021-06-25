@@ -3,7 +3,7 @@ HEADERS := include/FastNoise.h include/logging.h include/planet.h include/random
 OBJECTS := $(patsubst src/%,obj/%,$(SOURCES:.cpp=.o))
 
 server: $(OBJECTS)
-	g++ $(OBJECTS) -o $@ -lpthread -ljsoncpp -lssl -lcrypto
+	g++ $(OBJECTS) -o $@ -lpthread -ljsoncpp -lssl -lcrypto -lncurses
 
 obj/%.o: src/%.cpp $(HEADERS)
 	@mkdir -p obj

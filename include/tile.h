@@ -19,6 +19,22 @@ namespace olc {
             x = 0;
             y = 0;
         }
+        bool operator==(const Vec2<T> &other) const {
+            return other.x == x && other.y == y;
+        }
+        
+        bool operator!=(const Vec2<T> &other) const {
+            return !(*this == other);
+        }        
+        Vec2<T> operator+=(const Vec2<T> &other) {
+            x += other.x;
+            y += other.y;
+            return *this;
+        }
+
+        Vec2<T> operator+(const Vec2<T> &other) const {
+            return {x + other.x, y + other.y};
+        }
         //TODO full vector class in common?
     };
     typedef Vec2<int32_t> vi2d;

@@ -7,7 +7,7 @@ Connection::Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, ui
     asio::error_code ec;
     sock.handshake(asio::ssl::stream_base::server, ec);
     if (ec) {
-        std::cout << "[CONNECTION] Handshake error: " << ec.message() << "\n";
+        logger.error("Connection Handshake error: " + ec.message());
         //close connection?
     } else {
         readUntil();
@@ -15,7 +15,7 @@ Connection::Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, ui
 }
     
 void Connection::handler(asio::error_code ec, std::size_t bytes_transferred) {
-    std::cout << bytes_transferred << "\n";
+    logger.debug("Read " + std::to_string(bytes_transferred) + " bytes");
     if (!ec) {
         std::string request{
                 buffers_begin(buf.data()),
@@ -52,7 +52,7 @@ void Connection::handler(asio::error_code ec, std::size_t bytes_transferred) {
             (ec == asio::ssl::error::stream_truncated)) {
         disconnect();
     } else {
-        std::cerr << "ERROR: " <<  ec.message() << "\n";
+        logger.error("Connection error: " + ec.message());
         //readUntil();
         disconnect();
     }
@@ -79,6 +79,6 @@ void Connection::sendMessage(Json::Value root) {
         (err == asio::ssl::error::stream_truncated)) {
         disconnect();
     } else {
-        std::cout << "[CONNECTION] Could not write request. Error: " << err.message() << "\n";
+        logger.error("Could not write request: " + err.message());
     }
 }
