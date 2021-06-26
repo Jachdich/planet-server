@@ -9,3 +9,9 @@ common
 common.a
 log.txt
 
+
+
+# Added by cargo
+
+/target
+Cargo.lock
