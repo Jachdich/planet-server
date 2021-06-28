@@ -248,28 +248,50 @@ void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
 }
 
 TileType typeAt(olc::vi2d pos, PlanetSurface *p) {
+    if (pos.x < 0 || pos.y < 0 || pos.x >= p->rad * 2 || pos.y >= p->rad * 2) return TileType::AIR;
     return p->tiles[pos.y * p->rad * 2 + pos.x]->getType();
 }
 
-bool isPath(olc::vi2d start, olc::vi2d end, PlanetSurface *p, TileType type) {
-    olc::vi2d pos = start;
-    olc::vi2d lastPos = pos;
-    while (pos != end) {
-        if (typeAt(pos + olc::vi2d{1, 0}, p) == type && (pos + olc::vi2d{1, 0}) != lastPos) {
-            lastPos = pos; pos += olc::vi2d{1, 0};
-        } else if (typeAt(pos + olc::vi2d{-1, 0}, p) == type && (pos + olc::vi2d{-1, 0}) != lastPos) {
-            lastPos = pos; pos += olc::vi2d{-1, 0};
-        } else if (typeAt(pos + olc::vi2d{0, 1}, p) == type && (pos + olc::vi2d{0, 1}) != lastPos) {
-            lastPos = pos; pos += olc::vi2d{0, 1};
-        } else if (typeAt(pos + olc::vi2d{0, -1}, p) == type && (pos + olc::vi2d{0, -1}) != lastPos) {
-            lastPos = pos; pos += olc::vi2d{0, -1};
-        } else {
-            return false;
+TileType typeAt(uint32_t pos, PlanetSurface *p) {
+    return p->tiles[pos]->getType();
+}
+
+Tile* tileAt(olc::vi2d pos, PlanetSurface *p) {
+    if (pos.x < 0 || pos.y < 0 || pos.x >= p->rad * 2 || pos.y >= p->rad * 2) return nullptr;
+    return p->tiles[pos.y * p->rad * 2 + pos.x];
+}
+
+std::vector<Tile*> countTilesRecursive(olc::vi2d start, PlanetSurface *p, TileType type, std::vector<olc::vi2d> &searched) {
+    //logger.info("countTilesRecursive called on " + std::to_string(start.x) + "," + std::to_string(start.y));
+    std::vector<Tile*> found;
+    std::vector<olc::vi2d> to_search;
+    to_search.push_back(start);
+    while (to_search.size() == 1) {
+        olc::vi2d pos = to_search.back();
+        to_search.pop_back();
+        for (olc::vi2d offset : {olc::vi2d{1, 0}, olc::vi2d{-1, 0}, olc::vi2d{0, 1}, olc::vi2d{0, -1}}) {
+            if (std::find(searched.begin(), searched.end(), pos + offset) != searched.end()) continue;
+            if (typeAt(pos + offset, p) == TileType::ROCK) {
+                found.push_back(tileAt(pos + offset, p));
+            }
+            if (typeAt(pos + offset, p) == type) {
+                to_search.push_back(pos + offset);
+            }
+            searched.push_back(pos + offset);
         }
     }
-    std::cout << pos.x << ", " << pos.y << ", ";
-    std::cout << end.x << ", " << end.y << "\n";
-    return true;
+    if (to_search.size() != 0) {
+        for (olc::vi2d &offset: to_search) {
+            std::vector<Tile*> res = countTilesRecursive(offset, p, type, searched);
+            found.insert(found.end(), res.begin(), res.end());
+        }
+    }
+    return found;
+}
+
+std::vector<Tile*> countTiles(olc::vi2d start, PlanetSurface *p, TileType type) {
+    std::vector<olc::vi2d> searched = {start};
+    return countTilesRecursive(start, p, type, searched);
 }
 
 void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
@@ -277,10 +299,15 @@ void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
 }
 
 void PipeTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
-    if (isPath(pos, olc::vi2d{10, 10}, parent, TileType::ROAD)) {
-        sendTileChangeRequest(pos.y * parent->rad * 2 + pos.x, TileType::TONK, parent->loc);
+    sendTileChangeRequest(pos.y * parent->rad * 2 + pos.x + 1, TileType::ROAD, parent->loc);
+    std::vector<Tile*> foundTiles = countTiles(pos + olc::vi2d{1, 0}, parent, TileType::ROAD);
+    logger.info(std::to_string(foundTiles.size()));
+    for (uint32_t i = 0; i < parent->rad * parent->rad * 4; i++) {
+        TileType ty = typeAt(i, parent);
+        if (ty == TileType::GRASS || ty == TileType::ROCK) {
+            sendTileChangeRequest(i, TileType::ROAD, parent->loc);
+        }
     }
-    sendTileChangeRequest(10 * parent->rad * 2 + 10, TileType::TONK, parent->loc);
 }
 
 void CableTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {

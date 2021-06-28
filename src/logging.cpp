@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-#define LOGGING_DEBUG true
+#define LOGGING_DEBUG false
 #define RAW_TUI
 
 #ifdef RAW_TUI
@@ -49,6 +49,7 @@ void Logger::error(std::string msg) {
 }
 
 void Logger::info(std::string msg) {
+    return;
         std::cout <<
 #ifdef RAW_TUI
                     "\x1b[2K\x1b[1G" << 
@@ -77,6 +78,7 @@ void Logger::debug(std::string msg) {
 }
 
 void Logger::tps(double ms, double tps) {
+    std::cout << tps << " " << ms << "\n";
     this->ms = ms;
     this->tpss = tps;
     draw();
@@ -87,6 +89,7 @@ void Logger::num_surfaces(uint32_t num) {
     draw();
 }
 void Logger::draw() {
+return;
 #ifdef RAW_TUI
     std::cout << "\x1b[" << mx << ";0H\x1b[2K\x1b[1G";
     std::cout << tpss << "tps (" << ms << "mspt) ticking " << num << " surfaces"<< std::flush;
