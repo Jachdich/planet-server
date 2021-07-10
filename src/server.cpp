@@ -2,6 +2,10 @@
 #include "logging.h"
 #include "generation.h"
 #include "network.h"
+#include "config.h"
+#ifdef QT_GUI
+#include "gui.h"
+#endif
 #include <fstream>
 //TODO possible race condition with tasks
 

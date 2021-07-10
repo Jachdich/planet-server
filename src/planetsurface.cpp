@@ -135,6 +135,29 @@ void PlanetSurface::tick(double elapsedTime) {
 
 	Resources originalResources = resources.clone();
 
+	//this bit is, ironically, the road tick function
+    std::vector<Tile*> foundTiles;
+    olc::vi2d pos = olc::vi2d{0, 0};
+
+
+    //TODO cache this lol
+    for (uint16_t y = 0; y < rad * 2; y++) {
+        for (uint16_t x = 0; x < rad * 2; x++) {
+            uint32_t index = (y * rad * 2) + x;
+            if (tiles[index]->getType() == TileType::CAPSULE) {
+                pos = olc::vi2d{x, y};
+                break;
+            }
+        }
+    }
+
+    for (olc::vi2d offset : {olc::vi2d{1, 0}, olc::vi2d{-1, 0}, olc::vi2d{0, 1}, olc::vi2d{0, -1}}) {
+        if (typeAt(pos + offset, this) == TileType::ROAD) {
+            std::vector<Tile*> newTiles = countTiles(pos + olc::vi2d{1, 0}, this, TileType::ROAD);
+            foundTiles.insert(foundTiles.end(), newTiles.begin(), newTiles.end());
+        }
+    }
+
     for (uint64_t i = 0; i < deltaTicks; i++) {
         uint64_t tileTicks = lastTicks + i;
     	resetPeopleIdle();
@@ -159,7 +182,7 @@ void PlanetSurface::tick(double elapsedTime) {
     	for (uint16_t y = 0; y < rad * 2; y++) {
     		for (uint16_t x = 0; x < rad * 2; x++) {
     	    	uint32_t index = (y * rad * 2) + x;
-    	        tiles[index]->tick(tileTicks, olc::vi2d(x, y), this);
+    	        tiles[index]->tick(tileTicks, olc::vi2d(x, y), this, std::find(foundTiles.begin(), foundTiles.end(), tiles[index]) != foundTiles.end());
     	        std::string err = tiles[index]->getTileError();
     	        //if new error to send to client
     	        if (tiles[index]->edge) { 
@@ -217,7 +240,8 @@ void PlanetSurface::tick(double elapsedTime) {
 	}
 
  	if (resources != originalResources || ticks % 100 == 0) {
- 	    //ticks % 100 is to just make sure it is updated every now and then in case it gets out of sync for any reason
+ 	    //ticks % 100 is to just make sure it is updated every now and then
+ 	    //in case it gets out of sync for any godforsaken reason
 		sendResourcesChangeRequest(resources, loc);
 	}
 	lastTicks = ticks;

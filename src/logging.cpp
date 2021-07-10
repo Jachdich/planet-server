@@ -1,10 +1,8 @@
 #include "logging.h"
+#include "config.h"
 
 #include <iostream>
 #include <string>
-
-#define LOGGING_DEBUG false
-#define RAW_TUI
 
 #ifdef RAW_TUI
 #include <sys/ioctl.h>
@@ -78,7 +76,6 @@ void Logger::debug(std::string msg) {
 }
 
 void Logger::tps(double ms, double tps) {
-    std::cout << tps << " " << ms << "\n";
     this->ms = ms;
     this->tpss = tps;
     draw();
@@ -89,7 +86,6 @@ void Logger::num_surfaces(uint32_t num) {
     draw();
 }
 void Logger::draw() {
-return;
 #ifdef RAW_TUI
     std::cout << "\x1b[" << mx << ";0H\x1b[2K\x1b[1G";
     std::cout << tpss << "tps (" << ms << "mspt) ticking " << num << " surfaces"<< std::flush;
