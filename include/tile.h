@@ -38,7 +38,7 @@ namespace olc {
 class Tile {
 public:
     uint32_t z = 0;
-    virtual void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent);
+    virtual void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet);
     virtual void onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {}
     virtual std::string getTileError();
     virtual TileType getType() = 0;
@@ -51,6 +51,8 @@ public:
 };
 
 std::string defaultTileErrorFn(Tile *t);
+TileType typeAt(olc::vi2d pos, PlanetSurface *p);
+std::vector<Tile*> countTiles(olc::vi2d start, PlanetSurface *p, TileType type);
 
 struct VoidTile : public Tile {
     inline TileType getType() { return TileType::AIR; }
@@ -75,7 +77,7 @@ struct RockTile : public Tile {
 };
 struct HouseTile : public Tile {
     inline TileType getType() { return TileType::HOUSE; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct PineforestTile : public Tile {
     inline TileType getType() { return TileType::PINEFOREST; }
@@ -89,60 +91,60 @@ struct TonkTile : public Tile {
 struct FarmTile : public Tile {
     inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::FARM; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct GreenhouseTile : public Tile {
     inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::GREENHOUSE; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct WaterpumpTile : public Tile {
     inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::WATERPUMP; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct MineTile : public Tile {
     inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::MINE; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct BlastfurnaceTile : public Tile {
     inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::BLASTFURNACE; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct WarehouseTile : public Tile {
     inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::WAREHOUSE; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct ForestryTile : public Tile {
     inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::FORESTRY; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct CapsuleTile : public Tile {
     inline TileType getType() { return TileType::CAPSULE; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
     void onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
 };
 
 struct RoadTile : public Tile {
     inline TileType getType() { return TileType::ROAD; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct PipeTile : public Tile {
     inline TileType getType() { return TileType::PIPE; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 struct CableTile : public Tile {
     inline TileType getType() { return TileType::CABLE; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 
 struct PowerstationTile : public Tile {
     inline std::string getTileError() { return defaultTileErrorFn(this); }
     inline TileType getType() { return TileType::POWERSTATION; }
-    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) override;
+    void tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) override;
 };
 #endif

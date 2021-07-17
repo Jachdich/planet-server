@@ -1,10 +1,8 @@
 #include "logging.h"
+#include "config.h"
 
 #include <iostream>
 #include <string>
-
-#define LOGGING_DEBUG false
-#define RAW_TUI
 
 #ifdef RAW_TUI
 #include <sys/ioctl.h>

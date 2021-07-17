@@ -37,7 +37,7 @@ Tile* Tile::fromType(TileType type) {
 
 #include <iostream>
 
-void Tile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+void Tile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
 }
 
 std::string Tile::getTileError() {
@@ -58,7 +58,8 @@ std::string defaultTileErrorFn(Tile *t) {
 
 #define CHECK_ENOUGH_PEOPLE if (parent->resources["peopleIdle"] > 1) { hasPerson = true; parent->resources["peopleIdle"] -= 1; } else { hasPerson = false; return; }
 
-void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
+    if (!inRoadNet) return;
     parent->resources.getCapacity("people") += 3;
     for (int32_t x = -1; x < 2; x++) {
         for (int32_t y = -1; y < 2; y++) {
@@ -75,21 +76,22 @@ void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     }
 }
 
-void FarmTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+void FarmTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
+    if (!inRoadNet) return;
     CHECK_ENOUGH_PEOPLE
     if (ticks % 25 == 0) {
         parent->resources["food"] += 5;
     }
 }
 
-void GreenhouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+void GreenhouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
     CHECK_ENOUGH_PEOPLE
     if (ticks % 12 == 0) {
         parent->resources["food"] += 5;
     }
 }
 
-void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
     CHECK_ENOUGH_PEOPLE
     if (ticks % 10 == 0) {
         for (int32_t x = -1; x < 2; x++) {
@@ -108,7 +110,7 @@ void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     }
 }
 
-void MineTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+void MineTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
     CHECK_ENOUGH_PEOPLE
     if (ticks % 150 == 0) {
         //FFUUUUUUCKCCKCKKKKKK
@@ -133,7 +135,7 @@ std::string getProduct(std::string n) {
     return "";
 }
 
-void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
     CHECK_ENOUGH_PEOPLE
     if (ticks % 128 == 0) {
         
@@ -152,7 +154,7 @@ void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent
     }
 }
 
-void WarehouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
+void WarehouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
     CHECK_ENOUGH_PEOPLE
     for (auto &elem: parent->resources.data) {
         if (elem.first == "people") continue;
@@ -190,7 +192,7 @@ TileType genRandomTree() {
     }
 }
 
-void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
     CHECK_ENOUGH_PEOPLE
     
     if (ticks % 64 == 0) {
@@ -235,7 +237,7 @@ void CapsuleTile::onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) 
     parent->resources["food"] += 0.1;
 }
 
-void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
     parent->resources.getCapacity("people") += 1;
     if (parent->resources["people"] > 0) {
         parent->resources["water"] += 0.1;
@@ -245,6 +247,9 @@ void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
         if (elem.first == "people") continue;
         elem.second.capacity += 100;
 	}
+
+	//Lol ironically, all the shit I said was gonna be in here is actually in
+	//the PlanetSurface tick function, for some reason
 }
 
 TileType typeAt(olc::vi2d pos, PlanetSurface *p) {
@@ -261,8 +266,22 @@ Tile* tileAt(olc::vi2d pos, PlanetSurface *p) {
     return p->tiles[pos.y * p->rad * 2 + pos.x];
 }
 
+bool shouldCountTile(TileType type) {
+    switch (type) {
+        case TileType::AIR:
+        case TileType::GRASS:
+        case TileType::TREE:
+        case TileType::FOREST:
+        case TileType::PINE:
+        case TileType::PINEFOREST:
+        case TileType::ROAD:
+            return false;
+        default:
+            return true; //it doesn't really matter if we count tiles that we shouldn't, it's just not as quick and memory efficient
+    }
+}
+
 std::vector<Tile*> countTilesRecursive(olc::vi2d start, PlanetSurface *p, TileType type, std::vector<olc::vi2d> &searched) {
-    //logger.info("countTilesRecursive called on " + std::to_string(start.x) + "," + std::to_string(start.y));
     std::vector<Tile*> found;
     std::vector<olc::vi2d> to_search;
     to_search.push_back(start);
@@ -271,7 +290,7 @@ std::vector<Tile*> countTilesRecursive(olc::vi2d start, PlanetSurface *p, TileTy
         to_search.pop_back();
         for (olc::vi2d offset : {olc::vi2d{1, 0}, olc::vi2d{-1, 0}, olc::vi2d{0, 1}, olc::vi2d{0, -1}}) {
             if (std::find(searched.begin(), searched.end(), pos + offset) != searched.end()) continue;
-            if (typeAt(pos + offset, p) == TileType::ROCK) {
+            if (shouldCountTile(typeAt(pos + offset, p))) {
                 found.push_back(tileAt(pos + offset, p));
             }
             if (typeAt(pos + offset, p) == type) {
@@ -294,26 +313,18 @@ std::vector<Tile*> countTiles(olc::vi2d start, PlanetSurface *p, TileType type) 
     return countTilesRecursive(start, p, type, searched);
 }
 
-void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
-    
+void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
+    //lol ironically, all the heavy lifting for the road shit is handled in the capsule tile
 }
 
-void PipeTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
-    sendTileChangeRequest(pos.y * parent->rad * 2 + pos.x + 1, TileType::ROAD, parent->loc);
-    std::vector<Tile*> foundTiles = countTiles(pos + olc::vi2d{1, 0}, parent, TileType::ROAD);
-    logger.info(std::to_string(foundTiles.size()));
-    for (uint32_t i = 0; i < parent->rad * parent->rad * 4; i++) {
-        TileType ty = typeAt(i, parent);
-        if (ty == TileType::GRASS || ty == TileType::ROCK) {
-            sendTileChangeRequest(i, TileType::ROAD, parent->loc);
-        }
-    }
-}
-
-void CableTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+void PipeTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
 
 }
 
-void PowerstationTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent) {
+void CableTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
+
+}
+
+void PowerstationTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
 
 }
