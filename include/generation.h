@@ -16,6 +16,7 @@ public:
     int b = 0;
     Pixel();
     Pixel(int r, int g, int b);
+    Pixel(uint32_t n);
     void rand();
     void rand(int min, int max);
     int asInt();

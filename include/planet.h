@@ -12,6 +12,8 @@ public:
     double mass;
     int radius;
     int numColours;
+
+    uint64_t owner = (uint64_t)-1;
     
     double * generationChances;
     Pixel * generationColours;

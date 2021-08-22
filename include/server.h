@@ -3,7 +3,7 @@
 #include <jsoncpp/json/json.h>
 #include <mutex>
 #include "logging.h"
-#include "network.h"
+#include "serverinterface.h"
 #include "FastNoise.h"
 #include "common/surfacelocator.h"
 

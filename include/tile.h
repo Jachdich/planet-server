@@ -46,6 +46,7 @@ public:
     virtual ~Tile() {}
 
     bool hasPerson = false;
+    bool isConnected = false;
     bool lastError = false;
     bool edge = false;
 };

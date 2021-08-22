@@ -39,6 +39,12 @@ Pixel::Pixel(int r, int g, int b) {
     this->b = b;
 }
 
+Pixel::Pixel(uint32_t n) {
+    r = (n >> 16) & 0xFF;
+    g = (n >>  8) & 0xFF;
+    b = (n >>  0) & 0xFF;
+}
+
 void Pixel::rand() {
     r = rndInt(0, 255);
     g = rndInt(0, 255);

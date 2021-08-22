@@ -19,6 +19,8 @@ public:
     double noiseScl;
     double noiseEffect;
 
+    uint64_t effective_owner = (uint64_t)-1;
+
     uint32_t num = 0;
     Star();
     Star(uint32_t x, uint32_t y, SurfaceLocator loc);

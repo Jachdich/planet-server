@@ -45,10 +45,14 @@ std::string Tile::getTileError() {
 }
 
 std::string defaultTileErrorFn(Tile *t) {
-    if (!t->hasPerson) {
+    if (!t->isConnected) {
         if (!t->lastError) t->edge = true; else t->edge = false;
         t->lastError = true;
-        return "Noone";
+        return "No road";
+    } else if (!t->hasPerson) {
+        if (!t->lastError) t->edge = true; else t->edge = false;
+        t->lastError = true;
+        return "No workers";
     } else {
         if (t->lastError) t->edge = true; else t->edge = false;
         t->lastError = false;
@@ -59,6 +63,7 @@ std::string defaultTileErrorFn(Tile *t) {
 #define CHECK_ENOUGH_PEOPLE if (parent->resources["peopleIdle"] > 1) { hasPerson = true; parent->resources["peopleIdle"] -= 1; } else { hasPerson = false; return; }
 
 void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
+    this->isConnected = inRoadNet;
     if (!inRoadNet) return;
     parent->resources.getCapacity("people") += 3;
     for (int32_t x = -1; x < 2; x++) {
@@ -77,6 +82,7 @@ void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool 
 }
 
 void FarmTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
+    this->isConnected = inRoadNet;
     if (!inRoadNet) return;
     CHECK_ENOUGH_PEOPLE
     if (ticks % 25 == 0) {
@@ -85,6 +91,8 @@ void FarmTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool i
 }
 
 void GreenhouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
+    this->isConnected = inRoadNet;
+    if (!inRoadNet) return;
     CHECK_ENOUGH_PEOPLE
     if (ticks % 12 == 0) {
         parent->resources["food"] += 5;
@@ -92,6 +100,8 @@ void GreenhouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, 
 }
 
 void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
+    this->isConnected = inRoadNet;
+    if (!inRoadNet) return;
     CHECK_ENOUGH_PEOPLE
     if (ticks % 10 == 0) {
         for (int32_t x = -1; x < 2; x++) {
@@ -111,6 +121,8 @@ void WaterpumpTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, b
 }
 
 void MineTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
+    this->isConnected = inRoadNet;
+    if (!inRoadNet) return;
     CHECK_ENOUGH_PEOPLE
     if (ticks % 150 == 0) {
         //FFUUUUUUCKCCKCKKKKKK
@@ -136,6 +148,8 @@ std::string getProduct(std::string n) {
 }
 
 void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
+    this->isConnected = inRoadNet;
+    if (!inRoadNet) return;
     CHECK_ENOUGH_PEOPLE
     if (ticks % 128 == 0) {
         
@@ -155,6 +169,8 @@ void BlastfurnaceTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent
 }
 
 void WarehouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
+    this->isConnected = inRoadNet;
+    if (!inRoadNet) return;
     CHECK_ENOUGH_PEOPLE
     for (auto &elem: parent->resources.data) {
         if (elem.first == "people") continue;
@@ -193,6 +209,8 @@ TileType genRandomTree() {
 }
 
 void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
+    this->isConnected = inRoadNet;
+    if (!inRoadNet) return;
     CHECK_ENOUGH_PEOPLE
     
     if (ticks % 64 == 0) {
@@ -235,6 +253,7 @@ void CapsuleTile::onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) 
     parent->resources["peopleIdle"] += 1;
     parent->resources["water"] += 0.1;
     parent->resources["food"] += 0.1;
+    isConnected = true;
 }
 
 void CapsuleTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
@@ -326,5 +345,6 @@ void CableTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool 
 }
 
 void PowerstationTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
-
+    this->isConnected = inRoadNet;
+    if (!inRoadNet) return;
 }

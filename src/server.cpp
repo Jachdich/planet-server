@@ -17,6 +17,7 @@ uint64_t ticks = 0;
 void save() {
     map.saveAll(saveName);
     map.unloadAll();
+    iface.saveUsers();
     //TODO save ticks
 }
 
@@ -27,6 +28,4 @@ int main() {
     srand(LEVEL_SEED);
     loadConfig();
     registerTaskTypeInfo();
-
-    iface.startServer();
 }
