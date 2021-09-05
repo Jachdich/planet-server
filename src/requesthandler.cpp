@@ -1,11 +1,13 @@
-#include "network.h"
-#include "server.h"
-#include "common/enums.h"
-#include "planet.h"
-#include "star.h"
-#include "sector.h"
-#include "sectormap.h"
-#include "common/surfacelocator_test.h"
+#include "../include/network.h"
+#include "../include/serverinterface.h"
+#include "../include/server.h"
+#include "../include/common/enums.h"
+#include "../include/planet.h"
+#include "../include/star.h"
+#include "../include/sector.h"
+#include "../include/sectormap.h"
+#include "../include/user.h"
+#include "../include/common/surfacelocator_test.h"
 #define bade nullptr
 
 std::mutex m;
@@ -119,17 +121,52 @@ void Connection::handleRequest(Json::Value& root) {
         } else if (req == "userAction") {
             Json::Value result;
 
-            PlanetSurface * surf = getSurfaceFromJson(requestJson);
-            SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
-            uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
+            //if logged in
+            if (uuid != 0) {
+                PlanetSurface * surf = getSurfaceFromJson(requestJson);
+                //TODO check they have perms in the surface
+                SurfaceLocator loc = getSurfaceLocatorFromJson(requestJson);
+                uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
+    
+                ErrorCode code = dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf);
+            	result["status"] = (int)code.type;
+            	if (code.type != ErrorCode::OK) {
+                    result["error_message"] = code.message;
+            	}
+            } else {
+                result["status"] = (int)ErrorCode::NOT_AUTHENTICATED;
+            }
 
-            ErrorCode code = dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf);
-        	result["status"] = (int)code.type;
-        	if (code.type != ErrorCode::OK) {
-                result["error_message"] = code.message;
-        	}
-        	
             totalJson["results"].append(result);
+
+        } else if (req == "login") {
+            std::string username = requestJson["username"].asString();
+            std::string password = requestJson["password"].asString();
+
+            //does the username exist?
+            if (iface->nameToUUID.find(username) != iface->nameToUUID.end()) {
+                this->uuid = iface->nameToUUID[username];
+            }
+            
+            //check if account doesn't exist
+            if (uuid == 0 || iface->accounts.find(uuid) == iface->accounts.end()) {
+                UserMetadata user(username, password);
+                uuid = user.uuid;
+                iface->accounts[uuid] = user;
+                iface->nameToUUID[username] = uuid;
+            }
+
+            Json::Value res;
+
+            UserMetadata &meta = iface->accounts[uuid];
+            if (!meta.isPasswordCorrect(password)) {
+                //Make it clear that we're not logged in
+                uuid = 0;
+                res["status"] = (int)ErrorCode::INVALID_CREDENTIALS;
+            } else {
+                res["status"] = (int)ErrorCode::OK;
+            }
+            totalJson["results"].append(res);
 
         } else {
             logger.warn("Client sent invalid request: " + root.get("request", "NULL").asString());
@@ -147,6 +184,6 @@ void Connection::disconnect() {
     for (PlanetSurface *surf : surfacesLoaded) {
         surf->connectedClients.erase(std::remove(surf->connectedClients.begin(), surf->connectedClients.end(), this), surf->connectedClients.end()); 
     }
-    iface.connections.erase(std::remove(iface.connections.begin(), iface.connections.end(), shared_from_this()), iface.connections.end()); 
+    iface->connections.erase(std::remove(iface->connections.begin(), iface->connections.end(), shared_from_this()), iface->connections.end()); 
 
 }

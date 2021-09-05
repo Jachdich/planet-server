@@ -2,8 +2,10 @@
 #include "server.h"
 #include <chrono>
 
-Connection::Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket) : sock(std::move(socket), ctx) {
+Connection::Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, ServerInterface *iface)
+     : sock(std::move(socket), ctx) {
     this->uuid = 0;
+    this->iface = iface;
     asio::error_code ec;
     sock.handshake(asio::ssl::stream_base::server, ec);
     if (ec) {

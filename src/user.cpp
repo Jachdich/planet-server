@@ -1,14 +1,23 @@
 #include "user.h"
 
+std::string hash(std::string salted) {
+    //VERY VERY BAD IDEA LOL
+    return salted;
+}
+
 UserMetadata::UserMetadata(std::string uname, std::string pword) {
     //Generate hash and salt. NOTE THIS IS A TEST DONT USE PLEASE
     password_salt = "TEST SALT NOT FOR PRODUCTION";
-    hashed_password = pword + password_salt;
+    hashed_password = hash(pword + password_salt);
     username = uname;
     uuid = (((uint64_t)rand()) << 32) | rand(); //note NOT cryptographically secure and MUST BE FIXED
     colour.rand();
 }
 
+bool UserMetadata::isPasswordCorrect(std::string pword) {
+    std::string hashed_test_password = hash(pword + password_salt);
+    return (hashed_test_password == hashed_password);
+} 
 void UserMetadata::toJson(Json::Value &root) {
     root["name"] = username;
     root["hashed_password"] = hashed_password;

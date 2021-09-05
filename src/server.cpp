@@ -28,4 +28,5 @@ int main() {
     srand(LEVEL_SEED);
     loadConfig();
     registerTaskTypeInfo();
+    iface.startServer();
 }

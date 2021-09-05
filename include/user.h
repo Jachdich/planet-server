@@ -14,5 +14,6 @@ struct UserMetadata {
     void toJson(Json::Value &val);
     void toNetworkSafeJson(Json::Value &val);
     void fromJson(Json::Value &val);
+    bool isPasswordCorrect(std::string pword);
 };
 #endif

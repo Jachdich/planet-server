@@ -62,7 +62,7 @@ void ServerInterface::waitForClientConnection() {
                 ss << socket.remote_endpoint();
                 logger.info("New connection: " + ss.str());
                 
-                Conn newConn = std::make_shared<Connection>(sslCtx, std::move(socket));
+                Conn newConn = std::make_shared<Connection>(sslCtx, std::move(socket), this);
                 connections.push_back(newConn);
             } else {
                 logger.error("New connection error: " + ec.message());

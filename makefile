@@ -13,7 +13,7 @@ server: $(OBJECTS) target/debug/libplanet_server.a
 
 obj/%.o: src/%.cpp $(HEADERS)
 	@mkdir -p obj
-	g++ -std=c++17 -c -o $@ $< -Wall -O3 -Iinclude
+	g++ -std=c++17 -c -o $@ $< -Wall -g -Iinclude
 
 obj/FastNoise.o: src/FastNoise.cpp
 	g++ -c -o $@ $< -Wall -O3 -std=c++11 -Iinclude

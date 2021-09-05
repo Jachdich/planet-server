@@ -9,17 +9,20 @@
 #include <mutex>
 #include "planetsurface.h"
 
+class ServerInterface;
+
 class Connection : public std::enable_shared_from_this<Connection> {
 private:
     asio::ssl::stream<asio::ip::tcp::socket> sock;
     asio::streambuf buf;
     std::mutex mutex;
+    ServerInterface *iface;
 
 public:
     std::vector<PlanetSurface*> surfacesLoaded;
 
     uint64_t uuid;
-    Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket);
+    Connection(asio::ssl::context& ctx, asio::ip::tcp::socket socket, ServerInterface *iface);
 
     void handleRequest(Json::Value& request);
     void sendMessage(Json::Value root);
