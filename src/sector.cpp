@@ -34,7 +34,17 @@ Star * Sector::getStarAt(int x, int y) {
     return nullptr;
 }
 
+uint32_t hash(uint32_t x) {
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+    return x;
+    
+}
+
 void Sector::generate() {
+    uint32_t seed = (hash(x) + hash(y) * 5) + hash(genConf["level_seed"].asUInt());
+    srand(seed);
     this->numStars = rndInt(genConf["c_numStarsMin"].asInt(), genConf["c_numStarsMax"].asInt());
     this->stars = std::vector<Star>(numStars);
     for (uint32_t i = 0; i < this->numStars; i++) {

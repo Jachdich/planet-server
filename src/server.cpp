@@ -1,8 +1,8 @@
-#include "server.h"
-#include "logging.h"
-#include "generation.h"
-#include "network.h"
-#include "config.h"
+#include "../include/server.h"
+#include "../include/logging.h"
+#include "../include/generation.h"
+#include "../include/network.h"
+#include "../include/config.h"
 #ifdef QT_GUI
 #include "gui.h"
 #endif
@@ -22,10 +22,12 @@ void save() {
 }
 
 int main() {
-    const uint32_t LEVEL_SEED = 12345;
-
-    noiseGen.SetNoiseType(FastNoise::Simplex);
-    srand(LEVEL_SEED);
+    noiseGen.SetNoiseType(FastNoise::SimplexFractal);
+    noiseGen.SetFractalType(FastNoise::FBM);
+    noiseGen.SetFractalOctaves(5);
+    noiseGen.SetFractalLacunarity(2);
+    noiseGen.SetFractalGain(0.5);
+    
     loadConfig();
     registerTaskTypeInfo();
     iface.startServer();

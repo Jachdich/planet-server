@@ -16,7 +16,7 @@ Tile* PlanetSurface::getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t
 	if (b > r * 2 && b * 1.2 > g) {
 		return new WaterTile();
 	}
-	if (rand() % 8 == 0) return new RockTile();
+	if (rand() % 10 == 0) return new RockTile();
 	if (g > r && g > b * 1.5) {
         if (rand() % 5 == 0) return new GrassTile();
         double noise = (noiseGen.GetNoise((float)(x / this->noiseScl), (float)(y / this->noiseScl), noiseZ) + 1) / 2;
@@ -74,6 +74,9 @@ Tile* PlanetSurface::getInitialTileType(int32_t x, int32_t y) {
 
 void PlanetSurface::generate(Planet * p) {
     this->parent = p;
+
+    //int seed = p->sectorSeed;
+    
     int pos = -1;
     for (int i = 0; i < p->numColours; i++) {
         Pixel c = p->generationColours[i];

@@ -8,8 +8,10 @@ RUST_SOURCES := $(shell find src -type f -name *.rs)
 HEADERS := $(shell find include -type f -name *.h)
 OBJECTS := $(patsubst src/%,obj/%,$(SOURCES:.cpp=.o))
 
+LIBS := -lplanet_server -ldl -lpthread -ljsoncpp -lssl -lcrypto -lncurses -largon2
+
 server: $(OBJECTS) target/debug/libplanet_server.a
-	g++ $(OBJECTS) -o $@ -Ltarget/debug -lplanet_server -ldl -lpthread -ljsoncpp -lssl -lcrypto -lncurses
+	g++ $(OBJECTS) -o $@ -Ltarget/debug $(LIBS)
 
 obj/%.o: src/%.cpp $(HEADERS)
 	@mkdir -p obj
@@ -22,7 +24,7 @@ target/debug/libplanet_server.a: $(RUST_SOURCES)
 	cargo build
 
 debug: server
-	gdb server -ex ru
+	gdb server -ex run
 
 run: server
 	./server
