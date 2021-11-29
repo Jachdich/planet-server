@@ -75,8 +75,8 @@ Tile* PlanetSurface::getInitialTileType(int32_t x, int32_t y) {
 void PlanetSurface::generate(Planet * p) {
     this->parent = p;
 
-    //int seed = p->sectorSeed;
-    
+    int seed = p->sectorSeed + hash(p->posFromStar);
+    srand(seed);
     int pos = -1;
     for (int i = 0; i < p->numColours; i++) {
         Pixel c = p->generationColours[i];

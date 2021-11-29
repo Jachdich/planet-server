@@ -51,7 +51,7 @@ uint32_t kToRGB(uint32_t k) {
 
 Star::Star() {}
 
-Star::Star(uint32_t x, uint32_t y, SurfaceLocator loc) {
+Star::Star(uint32_t x, uint32_t y, SurfaceLocator loc, uint32_t sectorSeed) {
     this->x = x;
     this->y = y;
 
@@ -68,7 +68,7 @@ Star::Star(uint32_t x, uint32_t y, SurfaceLocator loc) {
     uint32_t lastPosFromStar = rand() % 100 + this->radius * 6 + 20;
     for (uint32_t i = 0; i < this->num; i++) {
     	loc.planetPos = i;
-        this->planets[i] = Planet(loc);
+        this->planets[i] = Planet(loc, sectorSeed);
         lastPosFromStar += this->planets[i].radius * 2;
     	this->planets[i].setPosFromStar(lastPosFromStar);
     	lastPosFromStar += rand() % 100;

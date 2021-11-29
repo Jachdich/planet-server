@@ -34,14 +34,6 @@ Star * Sector::getStarAt(int x, int y) {
     return nullptr;
 }
 
-uint32_t hash(uint32_t x) {
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-    
-}
-
 void Sector::generate() {
     uint32_t seed = (hash(x) + hash(y) * 5) + hash(genConf["level_seed"].asUInt());
     srand(seed);
@@ -49,7 +41,7 @@ void Sector::generate() {
     this->stars = std::vector<Star>(numStars);
     for (uint32_t i = 0; i < this->numStars; i++) {
     	SurfaceLocator loc = {0, (uint8_t)i, (int32_t)x, (int32_t)y};
-        this->stars[i] = Star(rand() % this->r, rand() % this->r, loc);
+        this->stars[i] = Star(rand() % this->r, rand() % this->r, loc, seed);
     }
     generated = true;
 }

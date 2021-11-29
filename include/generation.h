@@ -6,8 +6,9 @@ extern Json::Value genConf;
 void loadConfig();
 
 int rndInt(int min, int max);
-
 double rndDouble(double fMin, double fMax);
+
+uint32_t hash(uint32_t x);
 
 class Pixel {
 public:

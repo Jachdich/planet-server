@@ -23,7 +23,7 @@ public:
 
     uint32_t num = 0;
     Star();
-    Star(uint32_t x, uint32_t y, SurfaceLocator loc);
+    Star(uint32_t x, uint32_t y, SurfaceLocator loc, uint32_t sectorSeed);
 	Star(Json::Value root, SurfaceLocator loc);
     Json::Value asJson();
     

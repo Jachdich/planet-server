@@ -6,7 +6,8 @@
 
 Planet::Planet() {}
 
-Planet::Planet(SurfaceLocator loc) {
+Planet::Planet(SurfaceLocator loc, uint32_t sectorSeed) {
+    this->sectorSeed = sectorSeed;
 	this->mass = 0;
     this->theta = (rndInt(0, 360) / 180.0) * 3.14159265358979323;
     this->posFromStar = 0;
@@ -56,6 +57,7 @@ Planet::Planet(Json::Value res, SurfaceLocator loc, Planet *other_this) {
     theta = res["theta"].asDouble();
     angularVelocity = res["angularVelocity"].asDouble();
     owner = res["owner"].asUInt64();
+    sectorSeed = res["sectorSeed"].asUInt();
 
     this->generationChances = new double[this->numColours]; //TODO WILL NOT UNLOAD! VERY BAD IDEA
     this->generationColours = new Pixel[this->numColours];  //TODO FUCK THIS IS A FUCKING MEMORY LEAK COS NO DESTRUCTOR
@@ -94,6 +96,7 @@ Json::Value Planet::asJson() {
     res["theta"] = theta;
     res["angularVelocity"] = angularVelocity;
     res["owner"] = (Json::UInt64)owner;
+    res["sectorSeed"] = sectorSeed;
 
     for (int i = 0; i < numColours; i++) {
         res["generationColours"].append(generationColours[i].asInt());

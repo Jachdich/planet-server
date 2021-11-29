@@ -19,6 +19,8 @@ public:
     Pixel * generationColours;
     int * generationZValues;
     double * generationNoise;
+
+    uint32_t sectorSeed;
     
     PlanetSurface * surface;
     
@@ -28,7 +30,7 @@ public:
     double angularVelocity;
 
     Planet();
-    Planet(SurfaceLocator loc);
+    Planet(SurfaceLocator loc, uint32_t sectorSeed);
 	Planet(Json::Value res, SurfaceLocator loc, Planet *other_this);
     Json::Value asJson();
     PlanetSurface * getSurface();
