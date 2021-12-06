@@ -13,10 +13,14 @@ PlanetSurface::PlanetSurface(SurfaceLocator loc) {
 }
 
 Tile* PlanetSurface::getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t y) {
-	if (b > r * 2 && b * 1.2 > g) {
-		return new WaterTile();
+	//if (b > r * 2 && b * 1.2 > g) {
+	//	return new WaterTile();
+	//}
+
+	if (getHeight(y, x) <= 0) {
+	    return new WaterTile();
 	}
-	if (rand() % 10 == 0) return new RockTile();
+	/*if (rand() % 10 == 0) return new RockTile();
 	if (g > r && g > b * 1.5) {
         if (rand() % 5 == 0) return new GrassTile();
         double noise = (noiseGen.GetNoise((float)(x / this->noiseScl), (float)(y / this->noiseScl), noiseZ) + 1) / 2;
@@ -26,17 +30,19 @@ Tile* PlanetSurface::getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t
         if (noise < 0.7) return new ForestTile();
         if (noise < 0.8) return new PineTile();
         if (noise < 1.0) return new PineforestTile();
-	}
+	}*/
 	return new GrassTile();
 }
 
+int32_t PlanetSurface::getHeight(int32_t x, int32_t y) {
+    int32_t xb = x - this->rad;
+	int32_t yb = y - this->rad;
+	double noise = noiseGen.GetNoise(xb / noiseScl, yb / noiseScl, noiseZ);
+	if (noise < 0) noise = 0;
+	return noise * 30;
+}
+
 uint32_t PlanetSurface::getTileColour(int32_t x, int32_t y) {
-    //FUCCK THE FUCKING X AND Y ARE WEIRD AGAIN PLEASE FUCKING KILL ME NOW
-    //I CANNOT DEAL WITH THIS ANYMORE
-    //I CAN NOT GO ON
-    //I WILL NOT GO ON
-    //THIS IS THE END FOLKS
-    //HAVE FUN DEBUGGING THIS AFTER I'M GONE
     int32_t xb = x - parent->radius;
 	int32_t yb = y - parent->radius;
 
@@ -78,7 +84,7 @@ void PlanetSurface::generate(Planet * p) {
     int seed = p->sectorSeed + hash(p->posFromStar);
     srand(seed);
     int pos = -1;
-    for (int i = 0; i < p->numColours; i++) {
+    /*for (int i = 0; i < p->numColours; i++) {
         Pixel c = p->generationColours[i];
         if (c.b > c.r * 2 && c.b * 1.2 > c.g) {
             pos = i;
@@ -97,9 +103,11 @@ void PlanetSurface::generate(Planet * p) {
         genNoise  = p->generationNoise[0];
         genZVal   = p->generationZValues[0];
         genChance = p->generationChances[0];
-    }
-    this->noiseZ = genZVal;
-    this->noiseScl = rndDouble(genConf["p_genNoisePlantsMin"].asDouble(), genConf["p_genNoisePlantsMax"].asDouble());
+    }*/
+    this->noiseZ = rand();//genZVal;
+    //this->noiseScl = rndDouble(genConf["p_genNoisePlantsMin"].asDouble(), genConf["p_genNoisePlantsMax"].asDouble());
+    this->noiseScl = rndDouble(genConf["p_genNoiseMin"].asDouble(), genConf["p_genNoiseMax"].asDouble());
+    
 
     this->rad = p->radius;
     tiles.resize((rad * 2) * (rad * 2));
@@ -107,17 +115,18 @@ void PlanetSurface::generate(Planet * p) {
         for (int j = 0; j < p->radius * 2; j++) {
             int z;
             Tile* tile = getInitialTileType(j, i);
-			if (tile->getType() != TileType::WATER) {
-				int xb = i - p->radius;
-				int yb = j - p->radius;
-				float az = (1 - (noiseGen.GetNoise(xb / genNoise, yb / genNoise, genZVal) + 1) / 2) - (1 - genChance);
-				z = az * 30;
-				if (z < 0) {
-					z = -z;
-				}
-			} else {
-				z = -1;
-			}
+			//if (tile->getType() != TileType::WATER) {
+				//int xb = i - p->radius;
+				//int yb = j - p->radius;
+				//float az = (1 - (noiseGen.GetNoise(xb / genNoise, yb / genNoise, genZVal) + 1) / 2) - (1 - genChance);
+				//z = az * 30;
+				//if (z < 0) {
+				//	z = -z;
+				//}
+			//} else {
+			//	z = -1;
+			//}
+			z = getHeight(i, j);
 			tile->z = z;
             tiles[j * (rad * 2) + i] = tile;
         }

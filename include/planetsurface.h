@@ -36,6 +36,8 @@ public:
     Json::Value asJson(bool addErrors = false);
     void resetPeopleIdle();
 
+    int32_t getHeight(int32_t x, int32_t y);
+
 };
 
 #endif
