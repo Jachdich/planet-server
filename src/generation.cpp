@@ -12,13 +12,6 @@ void setDefault(std::string value) {
     }
 }
 
-uint32_t hash(uint32_t x) {
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-}
-
 void loadConfig() {
     std::ifstream generation_config_file("generation.json", std::ifstream::binary);
     generation_config_file >> genConf;

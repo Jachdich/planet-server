@@ -60,7 +60,7 @@ std::string defaultTileErrorFn(Tile *t) {
     }
 }
 
-#define CHECK_ENOUGH_PEOPLE if (parent->resources["peopleIdle"] > 1) { hasPerson = true; parent->resources["peopleIdle"] -= 1; } else { hasPerson = false; return; }
+#define CHECK_ENOUGH_PEOPLE if (parent->resources["peopleIdle"] > 1 || (parent->resources["peopleIdle"] > 0 && parent->tasks.size() > 0)) { hasPerson = true; parent->resources["peopleIdle"] -= 1; } else { hasPerson = false; return; }
 
 void HouseTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent, bool inRoadNet) {
     this->isConnected = inRoadNet;

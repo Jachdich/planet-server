@@ -3,6 +3,7 @@
 #include "server.h"
 #include "tick.h"
 #include <fstream>
+
 ServerInterface::ServerInterface(uint16_t port) : sslCtx(asio::ssl::context::tls),
                                                   acceptor(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)) {
     Json::Value root;
@@ -13,7 +14,7 @@ ServerInterface::ServerInterface(uint16_t port) : sslCtx(asio::ssl::context::tls
     builder["collectComments"] = true;
     JSONCPP_STRING errs;
     if (!parseFromStream(builder, ifs, &root, &errs)) {
-        logger.error("Could not read /users.json!");
+        logger.error("Could not read " + saveName + "/users.json!");
     }
 
     for (Json::Value val : root["users"]) {

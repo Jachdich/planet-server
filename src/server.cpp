@@ -11,7 +11,7 @@
 
 Logger logger;
 ServerInterface iface(5555);
-std::string saveName = "testsavev2.0";
+std::string saveName = "universe";
 uint64_t ticks = 0;
 
 void save() {
