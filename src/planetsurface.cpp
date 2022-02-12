@@ -17,9 +17,9 @@ Tile* PlanetSurface::getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t
 	//	return new WaterTile();
 	//}
 
-	if (getHeight(y, x) <= 0) {
-	    return new WaterTile();
-	}
+	//if (getHeight(y, x) <= 0) {
+	//    return new WaterTile();
+	//}
 	/*if (rand() % 10 == 0) return new RockTile();
 	if (g > r && g > b * 1.5) {
         if (rand() % 5 == 0) return new GrassTile();
@@ -38,7 +38,7 @@ int32_t PlanetSurface::getHeight(int32_t x, int32_t y) {
     int32_t xb = x - this->rad;
 	int32_t yb = y - this->rad;
 	double noise = noiseGen.GetNoise(xb / noiseScl, yb / noiseScl, noiseZ);
-	if (noise < 0) noise = 0;
+	//if (noise < 0) noise = 0;
 	return noise * 30;
 }
 
