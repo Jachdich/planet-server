@@ -17,32 +17,38 @@ Tile* PlanetSurface::getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t
 	//	return new WaterTile();
 	//}
 
-	//if (getHeight(y, x) <= 0) {
-	//    return new WaterTile();
-	//}
-	/*if (rand() % 10 == 0) return new RockTile();
+	if (getHeight(x, y) <= parent->seaLevel) {
+	    return new WaterTile();
+	}
+	if (rand() % 10 == 0) return new RockTile();
 	if (g > r && g > b * 1.5) {
-        if (rand() % 5 == 0) return new GrassTile();
-        double noise = (noiseGen.GetNoise((float)(x / this->noiseScl), (float)(y / this->noiseScl), noiseZ) + 1) / 2;
+        if (rand() % 3 == 0) return new GrassTile();
+        double noise = (noiseGen.GetNoise((double)(x / this->noiseScl), (double)(y / this->noiseScl), (double)noiseZ) + 1) / 2;
         if (noise < 0.2) return new GrassTile();
         if (noise < 0.3) return new BushTile();
         if (noise < 0.5) return new TreeTile();
         if (noise < 0.7) return new ForestTile();
         if (noise < 0.8) return new PineTile();
         if (noise < 1.0) return new PineforestTile();
-	}*/
+	}
 	return new GrassTile();
 }
 
 int32_t PlanetSurface::getHeight(int32_t x, int32_t y) {
-    int32_t xb = x - this->rad;
-	int32_t yb = y - this->rad;
-	double noise = noiseGen.GetNoise(xb / noiseScl, yb / noiseScl, noiseZ);
-	//if (noise < 0) noise = 0;
-	return noise * 30;
+    double xb = x - this->rad;
+	double yb = y - this->rad;
+	double noise = noiseGen.GetNoise(xb / parent->generationNoise[0], yb / parent->generationNoise[0], (double)parent->generationZValues[0]);
+	int32_t height = noise *= 30;
+	if (height < parent->seaLevel) height = parent->seaLevel;
+	//std::cout << "[" << xb << "," << yb << "," << noise << "]\n";
+	return height;
 }
 
 uint32_t PlanetSurface::getTileColour(int32_t x, int32_t y) {
+    if (getHeight(x, y) <= parent->seaLevel) {
+        //water, return b l u e
+        return parent->generationColours[0].asInt();
+    }
     int32_t xb = x - parent->radius;
 	int32_t yb = y - parent->radius;
 
@@ -50,8 +56,8 @@ uint32_t PlanetSurface::getTileColour(int32_t x, int32_t y) {
 	uint32_t g = 0;
 	uint32_t b = 0;
 	uint32_t total = 0;
-	for (int i = 0; i < parent->numColours; i++) {
-		if ((noiseGen.GetNoise(xb / parent->generationNoise[i], yb / parent->generationNoise[i], parent->generationZValues[i]) + 1) / 2 > parent->generationChances[i]) {
+	for (int i = 1; i < parent->numColours; i++) {
+		if ((noiseGen.GetNoise(xb / parent->generationNoise[i], yb / parent->generationNoise[i], (double)parent->generationZValues[i]) + 1) / 2 > parent->generationChances[i]) {
 			r += parent->generationColours[i].r;
 			g += parent->generationColours[i].g;
 			b += parent->generationColours[i].b;
@@ -126,7 +132,7 @@ void PlanetSurface::generate(Planet * p) {
 			//} else {
 			//	z = -1;
 			//}
-			z = getHeight(i, j);
+			z = getHeight(j, i);
 			tile->z = z;
             tiles[j * (rad * 2) + i] = tile;
         }

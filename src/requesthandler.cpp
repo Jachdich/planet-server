@@ -16,7 +16,7 @@ int lastID;
 int numConnectedClients;
 
 SectorMap map;
-FastNoise noiseGen;
+FastNoiseLite noiseGen;
 
 void sendTileErrorSetRequest(SurfaceLocator loc, uint32_t index, std::string err) {
     Json::Value root;

@@ -1,4 +1,5 @@
 #include "planet.h"
+#include "server.h"
 
 #include <jsoncpp/json/json.h>
 #include "generation.h"
@@ -12,30 +13,22 @@ Planet::Planet(SurfaceLocator loc, uint32_t sectorSeed) {
     this->theta = (rndInt(0, 360) / 180.0) * 3.14159265358979323;
     this->posFromStar = 0;
     this->radius = rndInt(genConf["p_radMin"].asInt(), genConf["p_radMax"].asInt());
-    this->numColours = rndInt(genConf["p_numColoursMin"].asInt(), genConf["p_numColoursMax"].asInt());
-
-	if (this->numColours == 0) {
-		this->generationChances = new double[1];
-	    this->generationColours = new Pixel[1];
-	    this->generationZValues = new int[1];
-	    this->generationNoise   = new double[1];
-		this->generationChances[0] = rndDouble(genConf["p_genChanceMin"].asDouble(), genConf["p_genChanceMax"].asDouble());
-        this->generationColours[0].rand();
-        this->generationZValues[0] = rndInt(0, 1000000);
-        this->generationNoise[0]   = rndDouble(genConf["p_genNoiseMin"].asDouble(), genConf["p_genNoiseMax"].asDouble());
-	} else {
-	    this->generationChances = new double[this->numColours];
-	    this->generationColours = new Pixel[this->numColours];
-	    this->generationZValues = new int[this->numColours];
-	    this->generationNoise   = new double[this->numColours];
-
-	    for (int i = 0; i < this->numColours; i++) {
-	        this->generationChances[i] = rndDouble(genConf["p_genChanceMin"].asDouble(), genConf["p_genChanceMax"].asDouble());
-	        this->generationColours[i].rand();
-	        this->generationZValues[i] = rndInt(0, 1000000);
-	        this->generationNoise[i]   = rndDouble(genConf["p_genNoiseMin"].asDouble(), genConf["p_genNoiseMax"].asDouble());
-	    }
-	}
+    this->numColours = rndInt(genConf["p_numColoursMin"].asInt(), genConf["p_numColoursMax"].asInt()) + 1;
+    this->seaLevel = rndInt(genConf["p_seaLevelMin"].asInt(), genConf["p_seaLevelMax"].asInt());
+    this->generationChances = new double[this->numColours];
+    this->generationColours = new Pixel[this->numColours];
+    this->generationZValues = new int[this->numColours];
+    this->generationNoise   = new double[this->numColours];
+    
+    for (int i = 0; i < this->numColours; i++) {
+        this->generationChances[i] = rndDouble(genConf["p_genChanceMin"].asDouble(), genConf["p_genChanceMax"].asDouble());
+        this->generationColours[i].rand();
+        this->generationZValues[i] = rndInt(0, 1000000);
+        this->generationNoise[i]   = rndDouble(genConf["p_genNoiseMin"].asDouble(), genConf["p_genNoiseMax"].asDouble());
+        if (i == 0) {
+            this->generationColours[0] = Pixel(0x202090); //b l u e
+        }
+    }
 
     this->baseColour.rand(genConf["p_baseColMin"].asInt() % 256, genConf["p_baseColMax"].asInt() % 256);
 
@@ -58,6 +51,7 @@ Planet::Planet(Json::Value res, SurfaceLocator loc, Planet *other_this) {
     angularVelocity = res["angularVelocity"].asDouble();
     owner = res["owner"].asUInt64();
     sectorSeed = res["sectorSeed"].asUInt();
+    seaLevel = res["seaLevel"].asInt();
 
     this->generationChances = new double[this->numColours]; //TODO WILL NOT UNLOAD! VERY BAD IDEA
     this->generationColours = new Pixel[this->numColours];  //TODO FUCK THIS IS A FUCKING MEMORY LEAK COS NO DESTRUCTOR
@@ -97,6 +91,7 @@ Json::Value Planet::asJson() {
     res["angularVelocity"] = angularVelocity;
     res["owner"] = (Json::UInt64)owner;
     res["sectorSeed"] = sectorSeed;
+    res["seaLevel"] = seaLevel;
 
     for (int i = 0; i < numColours; i++) {
         res["generationColours"].append(generationColours[i].asInt());

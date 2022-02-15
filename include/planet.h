@@ -12,6 +12,7 @@ public:
     double mass;
     int radius;
     int numColours;
+    int seaLevel;
 
     uint64_t owner = (uint64_t)-1;
     

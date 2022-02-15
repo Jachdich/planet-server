@@ -4,7 +4,7 @@
 #include <mutex>
 #include "logging.h"
 #include "serverinterface.h"
-#include "FastNoise.h"
+#include "FastNoiseLite.h"
 #include "common/surfacelocator.h"
 
 extern std::string saveName;
@@ -14,7 +14,7 @@ void save();
 extern std::mutex m;
 extern Json::Value generation_config;
 extern Logger logger;
-extern FastNoise noiseGen;
+extern FastNoiseLite noiseGen;
 extern ServerInterface iface;
 extern uint64_t ticks;
 #endif

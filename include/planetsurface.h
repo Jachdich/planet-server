@@ -19,9 +19,9 @@ public:
     bool generated = false;
     Resources resources;
     int rad = 0;
-    int noiseZ;
-    uint64_t lastTicks = -1;
     double noiseScl;
+    double noiseZ;
+    uint64_t lastTicks = -1;
     SurfaceLocator loc;
     Planet *parent;
     std::vector<Connection*> connectedClients;

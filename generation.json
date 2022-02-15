@@ -12,6 +12,8 @@
     "p_angularVelMultiplier": 6000.0,
     "p_numColoursMin": 1,
     "p_numColoursMax": 6,
+    "p_seaLevelMin": -30,
+    "p_seaLevelMax": 24,
 
     "c_numStarsMin": 0,
     "c_numStarsMax": 4,

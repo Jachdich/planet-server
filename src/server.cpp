@@ -22,8 +22,8 @@ void save() {
 }
 
 int main() {
-    noiseGen.SetNoiseType(FastNoise::SimplexFractal);
-    noiseGen.SetFractalType(FastNoise::FBM);
+    noiseGen.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noiseGen.SetFractalType(FastNoiseLite::FractalType_FBm);
     noiseGen.SetFractalOctaves(5);
     noiseGen.SetFractalLacunarity(2);
     noiseGen.SetFractalGain(0.5);
