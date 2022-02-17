@@ -28,6 +28,7 @@ void tick() {
 	    		std::chrono::system_clock::now().time_since_epoch()).count();
     if (ticks % 100 == 0) {
 	    save(); //TODO not a good idea!
+	    //TODO figure out why I thought that was a bad idea
 	}
 	ticks++;
 }

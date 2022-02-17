@@ -251,8 +251,8 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bo
 void CapsuleTile::onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     parent->resources["people"] += 1;
     parent->resources["peopleIdle"] += 1;
-    parent->resources["water"] += 0.1;
-    parent->resources["food"] += 0.1;
+    parent->resources["water"] += 10;
+    parent->resources["food"] += 10;
     isConnected = true;
 }
 
@@ -332,9 +332,9 @@ std::vector<Tile*> countTiles(olc::vi2d start, PlanetSurface *p, TileType type) 
     return countTilesRecursive(start, p, type, searched);
 }
 
-void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
+//void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
     //lol ironically, all the heavy lifting for the road shit is handled in the capsule tile
-}
+//}
 
 void PipeTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
 

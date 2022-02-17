@@ -111,8 +111,8 @@ void PlanetSurface::generate(Planet * p) {
         genChance = p->generationChances[0];
     }*/
     this->noiseZ = rand();//genZVal;
-    //this->noiseScl = rndDouble(genConf["p_genNoisePlantsMin"].asDouble(), genConf["p_genNoisePlantsMax"].asDouble());
-    this->noiseScl = rndDouble(genConf["p_genNoiseMin"].asDouble(), genConf["p_genNoiseMax"].asDouble());
+    this->noiseScl = rndDouble(genConf["p_genNoisePlantsMin"].asDouble(), genConf["p_genNoisePlantsMax"].asDouble());
+    //this->noiseScl = rndDouble(genConf["p_genNoiseMin"].asDouble(), genConf["p_genNoiseMax"].asDouble());
     
 
     this->rad = p->radius;
@@ -154,7 +154,7 @@ void PlanetSurface::tick(double elapsedTime) {
 	Resources originalResources = resources.clone();
 
 	//this bit is, ironically, the road tick function
-    std::vector<Tile*> foundTiles;
+    /*std::vector<Tile*> foundTiles;
     olc::vi2d pos = olc::vi2d{0, 0};
 
 
@@ -174,9 +174,11 @@ void PlanetSurface::tick(double elapsedTime) {
             std::vector<Tile*> newTiles = countTiles(pos + olc::vi2d{1, 0}, this, TileType::ROAD);
             foundTiles.insert(foundTiles.end(), newTiles.begin(), newTiles.end());
         }
-    }
+    }*/
 
-    for (uint64_t i = 0; i < deltaTicks; i++) {
+    //trolling the server into thinking it's doing all the ticks
+    //but actually it's only doing 1
+    for (uint64_t i = 0; i < /*deltaTicks*/ 1; i++) {
         uint64_t tileTicks = lastTicks + i;
     	resetPeopleIdle();
 
@@ -200,7 +202,7 @@ void PlanetSurface::tick(double elapsedTime) {
     	for (uint16_t y = 0; y < rad * 2; y++) {
     		for (uint16_t x = 0; x < rad * 2; x++) {
     	    	uint32_t index = (y * rad * 2) + x;
-    	        tiles[index]->tick(tileTicks, olc::vi2d(x, y), this, std::find(foundTiles.begin(), foundTiles.end(), tiles[index]) != foundTiles.end());
+    	        tiles[index]->tick(tileTicks, olc::vi2d(x, y), this, /*std::find(foundTiles.begin(), foundTiles.end(), tiles[index]) != foundTiles.end()*/true);
     	        std::string err = tiles[index]->getTileError();
     	        //if new error to send to client
     	        if (tiles[index]->edge) { 
@@ -212,7 +214,7 @@ void PlanetSurface::tick(double elapsedTime) {
     	if (resources["people"] < resources.getCapacity("people") && resources["food"] > 0 && resources["people"] > 0) {
     	    logger.debug("Possibility of reproduction");
     	    //r e p r o d u c e
-    	    if (rndDouble(0.0, 1.0) > 0.9) {
+    	    if (rndDouble(0.0, 1.0) > 0.98) {
     			resources["people"] += 1;
     			resources["peopleIdle"] += 1;
     		}

@@ -47,4 +47,7 @@ void SectorMap::saveAll(std::string name) {
 }
 
 void SectorMap::unloadAll() {
+    //cache.clear();
+    //TODO it can't be this easy...
+    //Something's wrong, I can feel it
 }

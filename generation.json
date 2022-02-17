@@ -13,7 +13,7 @@
     "p_numColoursMin": 1,
     "p_numColoursMax": 6,
     "p_seaLevelMin": -30,
-    "p_seaLevelMax": 24,
+    "p_seaLevelMax": 16,
 
     "c_numStarsMin": 0,
     "c_numStarsMax": 4,
