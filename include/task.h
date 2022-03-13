@@ -46,5 +46,5 @@ struct TaskTypeInfo {
 };
 ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, PlanetSurface * surf);
 void taskFinished(Task &t, PlanetSurface *surf);
-extern std::unordered_map<TaskType, TaskTypeInfo> taskTypeInfos;
+extern TaskTypeInfo taskTypeInfos[TASK_INVALID + 1];
 #endif
