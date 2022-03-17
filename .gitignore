@@ -6,7 +6,8 @@ server
 testsave*
 save.zip
 common
-common.a
+libcommon.a
+libcommon-dbg.a
 log.txt
 universe
 
