@@ -250,7 +250,7 @@ void PlanetSurface::tick(double elapsedTime) {
     	    std::to_string(tileTicks));
         for (uint32_t i = 0; i < NUM_RESOURCES; i++) {
             if (resources.values[i].value > resources.values[i].capacity) {
-                logger.debug("Too much " + std::string(resources.names[i]));
+                logger.debug("Too much " + std::string(res_names[i]));
                 resources.values[i].value = resources.values[i].capacity;
             }
         }

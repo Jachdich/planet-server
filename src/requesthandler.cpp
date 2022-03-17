@@ -131,8 +131,9 @@ void Connection::handleRequest(Json::Value& root) {
                 ErrorCode code = dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf);
             	result["status"] = code.type;
             	if (code.type != ERR_OK) {
-                    result["error_message"] = code.message;
+                    result["error_message"] = std::string(code.message);
             	}
+            	err_free(&code);
             } else {
                 result["status"] = ERR_NOT_AUTHENTICATED;
             }
