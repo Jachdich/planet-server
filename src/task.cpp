@@ -114,6 +114,8 @@ ErrorCode dispachTask(TaskType type, uint32_t target, SurfaceLocator loc, Planet
 }
 
 void taskFinished(Task &t, PlanetSurface *surf) {
+    DEBUG("Task finished");
+    printf("Task finished\n");
     res_add(&surf->resources, &taskTypeInfos[t.type].gains);
     sendTileChangeRequest(t.target, taskTypeInfos[t.type].tileType, &t.surface);
     sendResourcesChangeRequest(&surf->resources, &t.surface);

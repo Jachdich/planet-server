@@ -6,6 +6,7 @@
 
 #include <jsoncpp/json/json.h>
 #include <iostream>
+#include <stdio.h>
 
 PlanetSurface::PlanetSurface(SurfaceLocator loc) {
     generated = false;
@@ -210,7 +211,7 @@ void PlanetSurface::tick(double elapsedTime) {
     	}
         //enough places for people to live?
     	if (resources.values[RES_PEOPLE].value < resources.values[RES_PEOPLE].capacity && resources.values[RES_FOOD].value > 0 && resources.values[RES_PEOPLE].value > 0) {
-    	    logger.debug("Possibility of reproduction");
+    	    DEBUG("Possibility of reproduction");
     	    //r e p r o d u c e
     	    if (rndDouble(0.0, 1.0) > 0.9) {
     			resources.values[RES_PEOPLE].value += 1;
@@ -220,7 +221,7 @@ void PlanetSurface::tick(double elapsedTime) {
 
         //not enough places to live?
     	if (resources.values[RES_PEOPLE].value > resources.values[RES_PEOPLE].capacity) {
-    	    logger.debug("Not enough houses");
+    	    DEBUG("Not enough houses");
     	    //d i e
             uint32_t delta = resources.values[RES_PEOPLE].value - resources.values[RES_PEOPLE].capacity;
     	    resources.values[RES_PEOPLE].value = resources.values[RES_PEOPLE].capacity;
@@ -231,7 +232,7 @@ void PlanetSurface::tick(double elapsedTime) {
 
         //not enough food or water?
     	if (resources.values[RES_FOOD].value <= 0 || resources.values[RES_WATER].value <= 0) {
-    	    logger.debug("Not enough food or water");
+    	    DEBUG("Not enough food or water");
             //d i e
             if (resources.values[RES_FOOD].value < 0) resources.values[RES_FOOD].value = 0;
             if (resources.values[RES_WATER].value < 0) resources.values[RES_WATER].value = 0;
@@ -242,7 +243,7 @@ void PlanetSurface::tick(double elapsedTime) {
 
     	resources.values[RES_FOOD].value  -= 0.1 * resources.values[RES_PEOPLE].value;
     	resources.values[RES_WATER].value -= 0.1 * resources.values[RES_PEOPLE].value;
-    	logger.debug("People slots, people, food, water tick: " + 
+    	DEBUG("People slots, people, food, water tick: " + 
     	    std::to_string(resources.values[RES_PEOPLE].capacity) + ", " +
     	    std::to_string(resources.values[RES_PEOPLE].value) + ", " +
     	    std::to_string(resources.values[RES_FOOD].value) + ", " +
@@ -250,7 +251,8 @@ void PlanetSurface::tick(double elapsedTime) {
     	    std::to_string(tileTicks));
         for (uint32_t i = 0; i < NUM_RESOURCES; i++) {
             if (resources.values[i].value > resources.values[i].capacity) {
-                logger.debug("Too much " + std::string(res_names[i]));
+                if (i == RES_PEOPLE_IDLE) continue; //I think, probably best not to do that?
+                DEBUG("Too much " + std::string(res_names[i]));
                 resources.values[i].value = resources.values[i].capacity;
             }
         }

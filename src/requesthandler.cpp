@@ -53,6 +53,7 @@ void sendTileChangeRequest(uint32_t pos, TileType type, const SurfaceLocator *lo
     olc::vi2d vpos;
     vpos.x = pos % (s->rad * 2);
     vpos.y = pos / (s->rad * 2);
+    DEBUG("Calling onPlace");
     s->tiles[pos]->onPlace(ticks, vpos, s);
     root["tilePos"] = pos;
     root["type"] = type;

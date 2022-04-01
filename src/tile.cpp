@@ -259,9 +259,11 @@ void ForestryTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bo
 
 void CapsuleTile::onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) {
     parent->resources.values[RES_PEOPLE].value += 1;
+    parent->resources.values[RES_PEOPLE].capacity += 1;
     parent->resources.values[RES_PEOPLE_IDLE].value += 1;
-    parent->resources.values[RES_WATER].value += 0.5;
-    parent->resources.values[RES_FOOD].value += 0.5;
+    parent->resources.values[RES_WATER].value += 5;
+    parent->resources.values[RES_FOOD].value += 5;
+    DEBUG("onPlace actually called");
     isConnected = true;
 }
 
