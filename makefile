@@ -8,9 +8,9 @@ RUST_SOURCES := $(shell find src -type f -name *.rs)
 HEADERS := $(shell find include -type f -name *.h)
 OBJECTS := $(patsubst src/%,obj/%,$(SOURCES:.cpp=.o))
 
-LIBS := -lplanet_server -ldl -lpthread -ljsoncpp -lssl -lcrypto -lncurses -largon2 -lcommon
+LIBS := -lplanet_server -ldl -lpthread -ljsoncpp -lssl -lcrypto -lncurses -largon2 -lcommon-dbg
 
-server: $(OBJECTS) target/debug/libplanet_server.a
+server: $(OBJECTS) target/debug/libplanet_server.a libcommon-dbg.a
 	g++ $(OBJECTS) -o $@ -Ltarget/debug -L. $(LIBS)
 
 obj/%.o: src/%.cpp $(HEADERS)
