@@ -263,7 +263,6 @@ void CapsuleTile::onPlace(uint64_t ticks, olc::vi2d pos, PlanetSurface* parent) 
     parent->resources.values[RES_PEOPLE_IDLE].value += 1;
     parent->resources.values[RES_WATER].value += 5;
     parent->resources.values[RES_FOOD].value += 5;
-    DEBUG("onPlace actually called");
     isConnected = true;
 }
 
@@ -344,9 +343,9 @@ std::vector<Tile*> countTiles(olc::vi2d start, PlanetSurface *p, TileType type) 
     return countTilesRecursive(start, p, type, searched);
 }
 
-void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
+//void RoadTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
     //lol ironically, all the heavy lifting for the road shit is handled in the capsule tile
-}
+//}
 
 void PipeTile::tick(uint64_t ticks, olc::vi2d pos, PlanetSurface *parent, bool inRoadNet) {
 
