@@ -1,25 +1,34 @@
+
+#SOURCES := src/FastNoise.cpp src/generation.cpp src/planet.cpp src/requesthandler.cpp src/sectormap.cpp src/serverinterface.cpp src/tile.cpp src/connection.cpp src/logging.cpp src/planetsurface.cpp src/sector.cpp src/server.cpp src/star.cpp src/task.cpp
+#HEADERS := include/FastNoise.h include/logging.h include/planet.h include/random_helper.h include/sectormap.h include/star.h include/generation.h include/network.h include/planetsurface.h include/server.h include/tile.h include/task.h include/config.h
+#OBJECTS := $(patsubst src/%,obj/%,$(SOURCES:.cpp=.o))
+
 SOURCES := $(shell find src -type f -name *.cpp)
+RUST_SOURCES := $(shell find src -type f -name *.rs)
 HEADERS := $(shell find include -type f -name *.h)
 OBJECTS := $(patsubst src/%,obj/%,$(SOURCES:.cpp=.o))
 
-server: $(OBJECTS)
-	g++ $(OBJECTS) -o $@ -lpthread -ljsoncpp -lssl -lcrypto
+LIBS := -lplanet_server -ldl -lpthread -ljsoncpp -lssl -lcrypto -lncurses -largon2 -lcommon-dbg
+
+server: $(OBJECTS) target/debug/libplanet_server.a libcommon-dbg.a
+	g++ $(OBJECTS) -o $@ -Ltarget/debug -L. $(LIBS)
 
 obj/%.o: src/%.cpp $(HEADERS)
 	@mkdir -p obj
-	g++ -std=c++20 -c -o $@ $< -Wall -Werror -g -Iinclude
+	g++ -std=c++17 -c -o $@ $< -Wall -g -Iinclude
 
-obj/FastNoise.o: src/FastNoise.cpp
-	g++ -c -o $@ $< -Wall -g -O3 -std=c++11 -Iinclude
+target/debug/libplanet_server.a: $(RUST_SOURCES)
+	cargo build
 
 debug: server
-	gdb server
+	gdb server -ex run
 
 run: server
 	./server
 
 clean:
-	rm obj/*.o
-	rm server
+	rm -rf obj/*.o
+	rm -rf server
+	rm -rf obj/optimised/*.o
 
 .PHONY: clean

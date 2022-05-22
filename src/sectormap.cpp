@@ -25,7 +25,7 @@ Sector * SectorMap::getSectorAt(int x, int y) {
         cache[y].resize(x + 1);
         needToGenerate = true;
     }*/
-    if (!this->cache.contains(index)) {
+    if (!(this->cache.count(index) > 0)) {
         Sector a(x, y, 256);
 
 		if (a.existsInSave(saveName)) {
@@ -41,9 +41,13 @@ Sector * SectorMap::getSectorAt(int x, int y) {
 }
 
 void SectorMap::saveAll(std::string name) {
-    //for (int y = 0; y < )
+    for (auto &pair : this->cache) {
+        pair.second.save(name);
+    }
 }
 
 void SectorMap::unloadAll() {
-
+    //cache.clear();
+    //TODO it can't be this easy...
+    //Something's wrong, I can feel it
 }

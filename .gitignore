@@ -6,6 +6,13 @@ server
 testsave*
 save.zip
 common
-common.a
+libcommon.a
+libcommon-dbg.a
 log.txt
+universe
 
+
+# Added by cargo
+
+/target
+Cargo.lock

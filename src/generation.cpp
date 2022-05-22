@@ -12,6 +12,13 @@ void setDefault(std::string value) {
     }
 }
 
+uint32_t hash(uint32_t x) {
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+    return x;
+}
+
 void loadConfig() {
     std::ifstream generation_config_file("generation.json", std::ifstream::binary);
     generation_config_file >> genConf;
@@ -37,6 +44,12 @@ Pixel::Pixel(int r, int g, int b) {
     this->r = r;
     this->g = g;
     this->b = b;
+}
+
+Pixel::Pixel(uint32_t n) {
+    r = (n >> 16) & 0xFF;
+    g = (n >>  8) & 0xFF;
+    b = (n >>  0) & 0xFF;
 }
 
 void Pixel::rand() {

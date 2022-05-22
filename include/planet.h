@@ -12,11 +12,16 @@ public:
     double mass;
     int radius;
     int numColours;
+    int seaLevel;
+
+    uint64_t owner = (uint64_t)-1;
     
     double * generationChances;
     Pixel * generationColours;
     int * generationZValues;
     double * generationNoise;
+
+    uint32_t sectorSeed;
     
     PlanetSurface * surface;
     
@@ -26,9 +31,11 @@ public:
     double angularVelocity;
 
     Planet();
-    Planet(int posFromStar, SurfaceLocator loc);
-	Planet(Json::Value res, SurfaceLocator loc);
+    Planet(SurfaceLocator loc, uint32_t sectorSeed);
+	Planet(Json::Value res, SurfaceLocator loc, Planet *other_this);
     Json::Value asJson();
     PlanetSurface * getSurface();
+
+    void setPosFromStar(uint32_t pos);
 };
 #endif

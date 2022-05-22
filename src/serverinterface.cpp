@@ -1,7 +1,37 @@
-#include "network.h"
+#include "serverinterface.h"
+#include "logging.h"
+#include "server.h"
+#include "tick.h"
+#include <fstream>
 
 ServerInterface::ServerInterface(uint16_t port) : sslCtx(asio::ssl::context::tls),
                                                   acceptor(ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)) {
+    Json::Value root;
+    std::ifstream ifs;
+    ifs.open(saveName + "/users.json");
+
+    Json::CharReaderBuilder builder;
+    builder["collectComments"] = true;
+    JSONCPP_STRING errs;
+    if (!parseFromStream(builder, ifs, &root, &errs)) {
+        logger.error("Could not read " + saveName + "/users.json!");
+    }
+
+    for (Json::Value val : root["users"]) {
+        UserMetadata x;
+        x.fromJson(val);
+        accounts[val["uuid"].asUInt64()] = x;
+        nameToUUID[val["name"].asString()] = val["uuid"].asUInt64();
+    }
+}
+
+void ServerInterface::saveUsers() {
+    /*std::ofstream afile;
+	afile.open(saveName + "/users.json");
+	Json::StreamWriterBuilder writeBuilder;
+	writeBuilder["indentation"] = "";
+	afile << Json::writeString(writeBuilder, this->asJson()) << "\n";
+	afile.close();*/ //fuck it
 }
 
 void ServerInterface::startServer() {
@@ -9,13 +39,14 @@ void ServerInterface::startServer() {
     sslCtx.use_certificate_chain_file("server.crt");
     sslCtx.use_tmp_dh_file("dh2048.pem");
     //sslCtx.set_options(asio::ssl::context::default_workarounds);
+    
     try {
         waitForClientConnection();
         threadCtx = std::thread([this]() {ctx.run(); });
-        std::cout << "[SERVER] Started\n";
+        logger.info("Server Started");
         runServerLogic();
     } catch (std::exception& e) {
-        std::cerr << "[SERVER] Exception: " << e.what() << "\n";
+        logger.error("Starting server: " + std::string(e.what()));
     }
 }
 
@@ -28,22 +59,16 @@ void ServerInterface::waitForClientConnection() {
     acceptor.async_accept(
         [this](std::error_code ec, asio::ip::tcp::socket socket) {
             if (!ec) {
-                std::cout << "[SERVER] New connection: " << socket.remote_endpoint() << "\n";
+                std::stringstream ss;
+                ss << socket.remote_endpoint();
+                logger.info("New connection: " + ss.str());
                 
-                Conn newConn = std::make_shared<Connection>(sslCtx, std::move(socket), IDCounter++);
+                Conn newConn = std::make_shared<Connection>(sslCtx, std::move(socket), this);
                 connections.push_back(newConn);
             } else {
-                std::cerr << "[SERVER] New connection error: " << ec.message() << "\n";
+                logger.error("New connection error: " + ec.message());
             }
             waitForClientConnection();
         }
     );
-}
-
-void ServerInterface::messageClient(Conn con, const Json::Value& msg) {
-    
-}
-
-void ServerInterface::messageAll(const Json::Value& msg, Conn ignoreClient) {
-    
 }

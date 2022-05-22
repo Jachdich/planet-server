@@ -9,15 +9,21 @@
 class Planet;
 class Star {
 public:
-    int radius;
-    Pixel colour;
+    uint32_t radius;
+    uint32_t colour;
     Planet * planets;
-    int x = 0;
-    int y = 0;
+    uint32_t x = 0;
+    uint32_t y = 0;
 
-    int num = 0;
+    double noiseZ;
+    double noiseScl;
+    double noiseEffect;
+
+    uint64_t effective_owner = (uint64_t)-1;
+
+    uint32_t num = 0;
     Star();
-    Star(int x, int y, SurfaceLocator loc);
+    Star(uint32_t x, uint32_t y, SurfaceLocator loc, uint32_t sectorSeed);
 	Star(Json::Value root, SurfaceLocator loc);
     Json::Value asJson();
     
