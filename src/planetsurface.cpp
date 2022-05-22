@@ -6,6 +6,7 @@
 
 #include <jsoncpp/json/json.h>
 #include <iostream>
+#include <stdio.h>
 
 PlanetSurface::PlanetSurface(SurfaceLocator loc) {
     generated = false;
@@ -121,7 +122,7 @@ void PlanetSurface::generate(Planet * p) {
         for (int j = 0; j < p->radius * 2; j++) {
             int z;
             Tile* tile = getInitialTileType(j, i);
-			//if (tile->getType() != TileType::WATER) {
+			//if (tile->getType() != TILE_WATER) {
 				//int xb = i - p->radius;
 				//int yb = j - p->radius;
 				//float az = (1 - (noiseGen.GetNoise(xb / genNoise, yb / genNoise, genZVal) + 1) / 2) - (1 - genChance);
@@ -142,7 +143,7 @@ void PlanetSurface::generate(Planet * p) {
 }
 
 void PlanetSurface::resetPeopleIdle() {
-    resources["peopleIdle"] = resources["people"];
+    resources.values[RES_PEOPLE_IDLE].value = resources.values[RES_PEOPLE].value;
 }
 
 void PlanetSurface::tick(double elapsedTime) {
@@ -151,7 +152,7 @@ void PlanetSurface::tick(double elapsedTime) {
     }
 	uint64_t deltaTicks = ticks - lastTicks;
 
-	Resources originalResources = resources.clone();
+	Resources originalResources = res_clone(&resources);
 
 	//this bit is, ironically, the road tick function
     /*std::vector<Tile*> foundTiles;
@@ -162,7 +163,7 @@ void PlanetSurface::tick(double elapsedTime) {
     for (uint16_t y = 0; y < rad * 2; y++) {
         for (uint16_t x = 0; x < rad * 2; x++) {
             uint32_t index = (y * rad * 2) + x;
-            if (tiles[index]->getType() == TileType::CAPSULE) {
+            if (tiles[index]->getType() == TILE_CAPSULE) {
                 pos = olc::vi2d{x, y};
                 break;
             }
@@ -170,8 +171,8 @@ void PlanetSurface::tick(double elapsedTime) {
     }
 
     for (olc::vi2d offset : {olc::vi2d{1, 0}, olc::vi2d{-1, 0}, olc::vi2d{0, 1}, olc::vi2d{0, -1}}) {
-        if (typeAt(pos + offset, this) == TileType::ROAD) {
-            std::vector<Tile*> newTiles = countTiles(pos + olc::vi2d{1, 0}, this, TileType::ROAD);
+        if (typeAt(pos + offset, this) == TILE_ROAD) {
+            std::vector<Tile*> newTiles = countTiles(pos + olc::vi2d{1, 0}, this, TILE_ROAD);
             foundTiles.insert(foundTiles.end(), newTiles.begin(), newTiles.end());
         }
     }*/
@@ -185,7 +186,7 @@ void PlanetSurface::tick(double elapsedTime) {
     	for (Task &t : tasks) {
             t.timeLeft -= elapsedTime;
             if (taskTypeInfos[t.type].requiresPeople) {
-                resources["peopleIdle"]--;
+                resources.values[RES_PEOPLE_IDLE].value--;
             }
             if (t.timeLeft <= 0) {
                 taskFinished(t, this);
@@ -196,8 +197,8 @@ void PlanetSurface::tick(double elapsedTime) {
     	[](Task& t) {
     		return t.timeLeft <= 0;
     	}), tasks.end());
-    	for (auto &elem: resources.data) {
-            elem.second.capacity = 0;
+    	for (uint32_t i = 0; i < NUM_RESOURCES; i++) {
+            resources.values[i].capacity = 0;
     	}
     	for (uint16_t y = 0; y < rad * 2; y++) {
     		for (uint16_t x = 0; x < rad * 2; x++) {
@@ -206,63 +207,64 @@ void PlanetSurface::tick(double elapsedTime) {
     	        std::string err = tiles[index]->getTileError();
     	        //if new error to send to client
     	        if (tiles[index]->edge) { 
-                    sendTileErrorSetRequest(loc, index, err);
+                    sendTileErrorSetRequest(&loc, index, err);
     	        }
     	    }
     	}
         //enough places for people to live?
-    	if (resources["people"] < resources.getCapacity("people") && resources["food"] > 0 && resources["people"] > 0) {
-    	    logger.debug("Possibility of reproduction");
+    	if (resources.values[RES_PEOPLE].value < resources.values[RES_PEOPLE].capacity && resources.values[RES_FOOD].value > 0 && resources.values[RES_PEOPLE].value > 0) {
+    	    DEBUG("Possibility of reproduction");
     	    //r e p r o d u c e
     	    if (rndDouble(0.0, 1.0) > 0.98) {
-    			resources["people"] += 1;
-    			resources["peopleIdle"] += 1;
+    			resources.values[RES_PEOPLE].value += 1;
+    			resources.values[RES_PEOPLE_IDLE].value += 1;
     		}
     	}
 
         //not enough places to live?
-    	if (resources["people"] > resources.getCapacity("people")) {
-    	    logger.debug("Not enough houses");
+    	if (resources.values[RES_PEOPLE].value > resources.values[RES_PEOPLE].capacity) {
+    	    DEBUG("Not enough houses");
     	    //d i e
-            uint32_t delta = resources["people"] - resources.getCapacity("people");
-    	    resources["people"] = resources.getCapacity("people");
+            uint32_t delta = resources.values[RES_PEOPLE].value - resources.values[RES_PEOPLE].capacity;
+    	    resources.values[RES_PEOPLE].value = resources.values[RES_PEOPLE].capacity;
     	    
-    	    if (((int32_t)resources["peopleIdle"]) - delta < 0) resources.getCapacity("people") = 0;
-    	    else resources["peopleIdle"] -= delta;
+    	    if (((int32_t)resources.values[RES_PEOPLE_IDLE].value) - delta < 0) resources.values[RES_PEOPLE].capacity = 0;
+    	    else resources.values[RES_PEOPLE_IDLE].value -= delta;
     	}
 
         //not enough food or water?
-    	if (resources["food"] <= 0 || resources["water"] <= 0) {
-    	    logger.debug("Not enough food or water");
+    	if (resources.values[RES_FOOD].value <= 0 || resources.values[RES_WATER].value <= 0) {
+    	    DEBUG("Not enough food or water");
             //d i e
-            if (resources["food"] < 0) resources["food"] = 0;
-            if (resources["water"] < 0) resources["water"] = 0;
-            if (resources["people"] > 0) resources["people"] -= 1; //TODO this is based off of the tickrate!
-            if (resources["peopleIdle"] > 0) resources["peopleIdle"] -= 1;
+            if (resources.values[RES_FOOD].value < 0) resources.values[RES_FOOD].value = 0;
+            if (resources.values[RES_WATER].value < 0) resources.values[RES_WATER].value = 0;
+            if (resources.values[RES_PEOPLE].value > 0) resources.values[RES_PEOPLE].value -= 1;
+            if (resources.values[RES_PEOPLE_IDLE].value > 0) resources.values[RES_PEOPLE_IDLE].value -= 1;
     	}
 
 
-    	resources["food"]  -= 0.1 * resources["people"];
-    	resources["water"] -= 0.1 * resources["people"];
-    	logger.debug("People slots, people, food, water tick: " + 
-    	    std::to_string(resources.getCapacity("people")) + ", " +
-    	    std::to_string(resources["people"]) + ", " +
-    	    std::to_string(resources["food"]) + ", " +
-    	    std::to_string(resources["water"]) + ", " +
+    	resources.values[RES_FOOD].value  -= 0.1 * resources.values[RES_PEOPLE].value;
+    	resources.values[RES_WATER].value -= 0.1 * resources.values[RES_PEOPLE].value;
+    	DEBUG("People slots, people, food, water tick: " + 
+    	    std::to_string(resources.values[RES_PEOPLE].capacity) + ", " +
+    	    std::to_string(resources.values[RES_PEOPLE].value) + ", " +
+    	    std::to_string(resources.values[RES_FOOD].value) + ", " +
+    	    std::to_string(resources.values[RES_WATER].value) + ", " +
     	    std::to_string(tileTicks));
-        for (auto &elem: resources.data) {
-            if (elem.second.value > elem.second.capacity) {
-                logger.debug("Too much " + elem.first);
-                elem.second.value = elem.second.capacity;
+        for (uint32_t i = 0; i < NUM_RESOURCES; i++) {
+            if (resources.values[i].value > resources.values[i].capacity) {
+                if (i == RES_PEOPLE_IDLE) continue; //I think, probably best not to do that?
+                DEBUG("Too much " + std::string(res_names[i]));
+                resources.values[i].value = resources.values[i].capacity;
             }
         }
         //std::cout << "\n";
 	}
 
- 	if (resources != originalResources || ticks % 100 == 0) {
+ 	if (res_ne(&resources, &originalResources) || ticks % 100 == 0) {
  	    //ticks % 100 is to just make sure it is updated every now and then
  	    //in case it gets out of sync for any godforsaken reason
-		sendResourcesChangeRequest(resources, loc);
+		sendResourcesChangeRequest(&resources, &loc);
 	}
 	lastTicks = ticks;
 }
@@ -270,7 +272,7 @@ void PlanetSurface::tick(double elapsedTime) {
 PlanetSurface::PlanetSurface(Json::Value root, SurfaceLocator loc, Planet *parent) {
     rad = root["rad"].asInt();
     tiles.resize((rad * 2) * (rad * 2));
-    resources = getResourcesFromJson(root["resources"]);
+    resources = res_from_json(root["resources"]);
     this->parent = parent;
     for (uint32_t i = 0; i < (rad * 2) * (rad * 2); i++) {
         uint64_t tile = root["tiles"][i].asUInt64();
@@ -312,7 +314,7 @@ Json::Value PlanetSurface::asJson(bool addErrors) {
         res["tasks"].append(value);
     }
     res["rad"] = rad;
-    res["resources"] = getJsonFromResources(resources);
+    res["resources"] = res_to_json(&resources);
     res["generated"] = true;
     
     return res;

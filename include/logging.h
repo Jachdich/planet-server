@@ -2,6 +2,8 @@
 #define __LOGGING_H
 #include <string>
 
+#define DEBUG(expr) logger.debug(std::string(__FILE__) + ":" + std::to_string(__LINE__) + " " + expr)
+
 class Logger {
 public:
     Logger();

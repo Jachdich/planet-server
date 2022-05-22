@@ -8,10 +8,10 @@ RUST_SOURCES := $(shell find src -type f -name *.rs)
 HEADERS := $(shell find include -type f -name *.h)
 OBJECTS := $(patsubst src/%,obj/%,$(SOURCES:.cpp=.o))
 
-LIBS := -lplanet_server -ldl -lpthread -ljsoncpp -lssl -lcrypto -lncurses -largon2
+LIBS := -lplanet_server -ldl -lpthread -ljsoncpp -lssl -lcrypto -lncurses -largon2 -lcommon-dbg
 
-server: $(OBJECTS) target/debug/libplanet_server.a
-	g++ $(OBJECTS) -o $@ -Ltarget/debug $(LIBS)
+server: $(OBJECTS) target/debug/libplanet_server.a libcommon-dbg.a
+	g++ $(OBJECTS) -o $@ -Ltarget/debug -L. $(LIBS)
 
 obj/%.o: src/%.cpp $(HEADERS)
 	@mkdir -p obj
@@ -27,7 +27,8 @@ run: server
 	./server
 
 clean:
-	rm obj/*.o
-	rm server
+	rm -rf obj/*.o
+	rm -rf server
+	rm -rf obj/optimised/*.o
 
 .PHONY: clean

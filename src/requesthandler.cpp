@@ -18,7 +18,7 @@ int numConnectedClients;
 SectorMap map;
 FastNoiseLite noiseGen;
 
-void sendTileErrorSetRequest(SurfaceLocator loc, uint32_t index, std::string err) {
+void sendTileErrorSetRequest(const SurfaceLocator *loc, uint32_t index, std::string err) {
     Json::Value root;
     Json::Value tileError;
 	getJsonFromSurfaceLocator(loc, root);
@@ -32,10 +32,10 @@ void sendTileErrorSetRequest(SurfaceLocator loc, uint32_t index, std::string err
     }
 }
 
-void sendResourcesChangeRequest(Resources resources, SurfaceLocator loc) {
+void sendResourcesChangeRequest(const Resources *resources, const SurfaceLocator *loc) {
 	Json::Value root;
 	getJsonFromSurfaceLocator(loc, root);
-	root["resources"] = getJsonFromResources(resources);
+	root["resources"] = res_to_json(resources);
 	PlanetSurface * s = getSurfaceFromLocator(loc);
 	root["serverRequest"] = "statsChange";
     for (Connection *conn: s->connectedClients) {
@@ -43,7 +43,7 @@ void sendResourcesChangeRequest(Resources resources, SurfaceLocator loc) {
     }
 }
 
-void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc) {
+void sendTileChangeRequest(uint32_t pos, TileType type, const SurfaceLocator *loc) {
     Json::Value root;
     PlanetSurface * s = getSurfaceFromLocator(loc);
     uint32_t z = s->tiles[pos]->z;
@@ -53,9 +53,10 @@ void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc) {
     olc::vi2d vpos;
     vpos.x = pos % (s->rad * 2);
     vpos.y = pos / (s->rad * 2);
+    DEBUG("Calling onPlace");
     s->tiles[pos]->onPlace(ticks, vpos, s);
     root["tilePos"] = pos;
-    root["type"] = (int)type;
+    root["type"] = type;
     root["serverRequest"] = "changeTile";
     getJsonFromSurfaceLocator(loc, root);
     for (Connection *conn: s->connectedClients) {
@@ -63,7 +64,7 @@ void sendTileChangeRequest(uint32_t pos, TileType type, SurfaceLocator loc) {
     }
 }
 
-void sendSetTimerRequest(double time, uint32_t target, SurfaceLocator loc) {
+void sendSetTimerRequest(double time, uint32_t target, const SurfaceLocator *loc) {
     Json::Value root;
     root["serverRequest"] = "setTimer";
     root["time"] = time;
@@ -89,7 +90,7 @@ void Connection::handleRequest(Json::Value& root) {
             Json::Value sec = sector->asJson();
 
             Json::Value result;
-            result["status"] = (int)ErrorCode::OK;
+            result["status"] = ERR_OK;
             result["result"] = sec;
             totalJson["results"].append(result);
 
@@ -102,15 +103,15 @@ void Connection::handleRequest(Json::Value& root) {
                 totalJson["serverRequest"] = "setTimer";
                 totalJson["time"] = t.timeLeft;
                 totalJson["tile"] = t.target;
-                getJsonFromSurfaceLocator(t.surface, totalJson);
+                getJsonFromSurfaceLocator(&t.surface, totalJson);
             }
             if (surf != bade) {
 	            result["result"] = surf->asJson(true);
-	            result["status"] = (int)ErrorCode::OK;
+	            result["status"] = ERR_OK;
 	            Sector * sec = map.getSectorAt(requestJson["secX"].asInt(), requestJson["secT"].asInt());
 	            sec->save(saveName);
             } else {
-	            result["status"] = (int)ErrorCode::OUT_OF_BOUNDS;
+	            result["status"] = ERR_OUT_OF_BOUNDS;
             }
 
             totalJson["results"].append(result);
@@ -129,12 +130,13 @@ void Connection::handleRequest(Json::Value& root) {
                 uint32_t target = requestJson["y"].asInt() * surf->rad * 2 + requestJson["x"].asInt();
     
                 ErrorCode code = dispachTask((TaskType)requestJson["action"].asInt(), target, loc, surf);
-            	result["status"] = (int)code.type;
-            	if (code.type != ErrorCode::OK) {
-                    result["error_message"] = code.message;
+            	result["status"] = code.type;
+            	if (code.type != ERR_OK) {
+                    result["error_message"] = std::string(code.message);
             	}
+            	err_free(&code);
             } else {
-                result["status"] = (int)ErrorCode::NOT_AUTHENTICATED;
+                result["status"] = ERR_NOT_AUTHENTICATED;
             }
 
             totalJson["results"].append(result);
@@ -162,16 +164,16 @@ void Connection::handleRequest(Json::Value& root) {
             if (!meta.isPasswordCorrect(password)) {
                 //Make it clear that we're not logged in
                 uuid = 0;
-                res["status"] = (int)ErrorCode::INVALID_CREDENTIALS;
+                res["status"] = ERR_INVALID_CREDENTIALS;
             } else {
-                res["status"] = (int)ErrorCode::OK;
+                res["status"] = ERR_OK;
             }
             totalJson["results"].append(res);
 
         } else {
             logger.warn("Client sent invalid request: " + root.get("request", "NULL").asString());
             Json::Value result;
-            result["status"] = (int)ErrorCode::INVALID_REQUEST;
+            result["status"] = ERR_INVALID_REQUEST;
             totalJson["results"].append(result);
         }
     }

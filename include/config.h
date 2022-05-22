@@ -7,7 +7,7 @@
 #undef QT_GUI
 
 //Enable the logging of debug information
-#define LOGGING_DEBUG false
+#define LOGGING_DEBUG true
 //#define LOGGING_DEBUG true
 
 //Enable the RAW mode of the TUI: Uses escape sequences manually instead of ncurses.
