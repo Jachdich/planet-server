@@ -61,7 +61,7 @@ bool UserMetadata::isPasswordCorrect(std::string pword) {
     return true; //DEBUG
     return (hashed_test_password == hashed_password);
 } 
-void UserMetadata::toJson(Json::Value &root) {
+void UserMetadata::toJson(Json::Value &root) const {
     root["name"] = username;
     root["hashed_password"] = hashed_password;
     root["password_salt"] = password_salt;
@@ -69,7 +69,7 @@ void UserMetadata::toJson(Json::Value &root) {
     root["colour"] = colour.asInt();
 }
 
-void UserMetadata::toNetworkSafeJson(Json::Value &root) {
+void UserMetadata::toNetworkSafeJson(Json::Value &root) const {
     root["name"] = username;
     root["uuid"] = (Json::UInt64)uuid;
     root["colour"] = colour.asInt();

@@ -20,6 +20,6 @@ public:
     Pixel(uint32_t n);
     void rand();
     void rand(int min, int max);
-    int asInt();
+    int asInt() const;
 };
 #endif

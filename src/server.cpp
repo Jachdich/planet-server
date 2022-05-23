@@ -9,9 +9,9 @@
 #include <fstream>
 //TODO possible race condition with tasks
 
+std::string saveName = "universe";
 Logger logger;
 ServerInterface iface(5555);
-std::string saveName = "universe";
 uint64_t ticks = 0;
 
 void save() {
@@ -19,6 +19,7 @@ void save() {
     map.unloadAll();
     iface.saveUsers();
     //TODO save ticks
+    //TODO really? idk
 }
 
 int main() {

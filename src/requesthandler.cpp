@@ -156,6 +156,7 @@ void Connection::handleRequest(Json::Value& root) {
                 uuid = user.uuid;
                 iface->accounts[uuid] = user;
                 iface->nameToUUID[username] = uuid;
+                logger.info("Creating user meta for " + username);
             }
 
             Json::Value res;
@@ -165,8 +166,10 @@ void Connection::handleRequest(Json::Value& root) {
                 //Make it clear that we're not logged in
                 uuid = 0;
                 res["status"] = ERR_INVALID_CREDENTIALS;
+                logger.info("User " + username + " tried to log in with invalid credentials");
             } else {
                 res["status"] = ERR_OK;
+                logger.info("User " + username + " successfully logged in");
             }
             totalJson["results"].append(res);
 

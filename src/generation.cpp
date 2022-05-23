@@ -64,6 +64,6 @@ void Pixel::rand(int min, int max) {
     b = rndInt(min, max);
 }
 
-int Pixel::asInt() {
+int Pixel::asInt() const {
     return (r << 16) | (g << 8) | b;
 }

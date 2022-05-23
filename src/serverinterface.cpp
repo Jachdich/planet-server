@@ -26,12 +26,21 @@ ServerInterface::ServerInterface(uint16_t port) : sslCtx(asio::ssl::context::tls
 }
 
 void ServerInterface::saveUsers() {
-    /*std::ofstream afile;
+    Json::Value root;
+    root["users"] = Json::arrayValue;
+
+    for (const auto &[uuid, meta]: accounts) {
+        Json::Value value;
+        meta.toJson(value);
+        root["users"].append(value);
+    }
+
+    std::ofstream afile;
 	afile.open(saveName + "/users.json");
 	Json::StreamWriterBuilder writeBuilder;
 	writeBuilder["indentation"] = "";
-	afile << Json::writeString(writeBuilder, this->asJson()) << "\n";
-	afile.close();*/ //fuck it
+	afile << Json::writeString(writeBuilder, root) << "\n";
+	afile.close();
 }
 
 void ServerInterface::startServer() {

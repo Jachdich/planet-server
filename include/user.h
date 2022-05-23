@@ -11,8 +11,8 @@ struct UserMetadata {
     std::string password_salt;
     uint64_t uuid;
     Pixel colour;
-    void toJson(Json::Value &val);
-    void toNetworkSafeJson(Json::Value &val);
+    void toJson(Json::Value &val) const;
+    void toNetworkSafeJson(Json::Value &val) const;
     void fromJson(Json::Value &val);
     bool isPasswordCorrect(std::string pword);
 };
