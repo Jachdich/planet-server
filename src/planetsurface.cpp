@@ -3,6 +3,7 @@
 #include "server.h"
 #include "network.h"
 #include "generation.h"
+#include "common/resources.h"
 
 #include <jsoncpp/json/json.h>
 #include <iostream>
@@ -11,6 +12,7 @@
 PlanetSurface::PlanetSurface(SurfaceLocator loc) {
     generated = false;
     this->loc = loc;
+    this->resources = res_init();
 }
 
 Tile* PlanetSurface::getType(uint8_t r, uint8_t g, uint8_t b, int32_t x, int32_t y) {
