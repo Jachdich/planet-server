@@ -7,6 +7,7 @@
 #include <mutex>
 #include "user.h"
 #include "connection.h"
+#include <unordered_map>
 
 class ServerInterface {
 private:

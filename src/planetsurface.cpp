@@ -205,7 +205,8 @@ void PlanetSurface::tick(double elapsedTime) {
     	for (uint16_t y = 0; y < rad * 2; y++) {
     		for (uint16_t x = 0; x < rad * 2; x++) {
     	    	uint32_t index = (y * rad * 2) + x;
-    	        tiles[index]->tick(tileTicks, olc::vi2d(x, y), this, /*std::find(foundTiles.begin(), foundTiles.end(), tiles[index]) != foundTiles.end()*/true);
+    	        tiles[index]->updatePeople(this);
+    	        tiles[index]->tick(tileTicks, olc::vi2d(x, y), this, /*std::find(foundTiles.begin(), foundTiles.end(), tiles[index]) != foundTiles.end()*/);
     	        std::string err = tiles[index]->getTileError();
     	        //if new error to send to client
     	        if (tiles[index]->edge) { 
