@@ -1,6 +1,7 @@
 #ifndef __LOGGING_H
 #define __LOGGING_H
 #include <string>
+#include <cstdint>
 
 #define DEBUG(expr) logger.debug(std::string(__FILE__) + ":" + std::to_string(__LINE__) + " " + expr)
 
